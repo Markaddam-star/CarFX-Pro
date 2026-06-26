@@ -1,7 +1,6 @@
-
 /* ==========================================
    CarFX Pro v0.1
-   Base Overlay & UI
+   Base Overlay & UI (UPDATED GTA STRIP VERSION)
 ========================================== */
 
 #carfx-overlay{
@@ -12,19 +11,64 @@
     overflow:hidden;
 }
 
-/* Animation Area */
+/* =========================
+   ANIMATION STRIP (BOTTOM)
+========================= */
 
 #carfx-animation{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    height:160px;
-    overflow:hidden;
-    pointer-events:none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 120px; /* GTA-style thin strip */
+    overflow: hidden;
+
+    pointer-events: none;
+    z-index: 2147483000;
+
+    /* cinematic dark gradient like games */
+    background: linear-gradient(
+        to top,
+        rgba(0,0,0,0.45),
+        rgba(0,0,0,0)
+    );
 }
 
-/* Floating Toggle */
+/* =========================
+   CAR ELEMENT (IMPORTANT FIX)
+========================= */
+
+.car-animation-element{
+    position: absolute;
+    bottom: 10px;
+
+    left: -250px;
+
+    width: 180px;
+    height: auto;
+
+    pointer-events: none;
+
+    animation: carDrive 5s linear forwards;
+}
+
+/* =========================
+   SMOOTH DRIVE ANIMATION
+========================= */
+
+@keyframes carDrive {
+    from {
+        left: -250px;
+    }
+    to {
+        left: 110vw;
+    }
+}
+
+/* =========================
+   FLOATING TOGGLE BUTTON
+========================= */
 
 #carfx-toggle{
     position:fixed;
@@ -37,7 +81,6 @@
     border-radius:50%;
 
     background:#111;
-
     color:#fff;
 
     display:flex;
@@ -49,13 +92,11 @@
     cursor:pointer;
 
     opacity:.70;
-
     transition:.25s;
 
     z-index:2147483647;
 
     pointer-events:auto;
-
     user-select:none;
 }
 
@@ -64,20 +105,18 @@
     transform:scale(1.08);
 }
 
-/* Settings Panel */
+/* =========================
+   SETTINGS PANEL
+========================= */
 
 #carfx-panel{
-
     position:fixed;
-
     right:20px;
-
     bottom:75px;
 
     width:280px;
 
     background:#202020;
-
     color:#fff;
 
     border-radius:12px;
@@ -112,30 +151,22 @@
 
 #carfx-panel input,
 #carfx-panel select{
-
     width:100%;
-
     margin-top:5px;
-
     padding:8px;
 
     border-radius:8px;
-
     border:none;
-
     outline:none;
 }
 
 #carfx-panel button{
-
     width:100%;
-
     margin-top:15px;
 
     padding:10px;
 
     border:none;
-
     border-radius:8px;
 
     cursor:pointer;
