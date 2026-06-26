@@ -1,1 +1,42 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarFX Pro</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>🚗 CarFX Pro</h2>
+
+    <label>
+        <input type="checkbox" id="enabled" checked>
+        Enable Animation
+    </label>
+
+    <br><br>
+
+    <label>Animation Interval (Seconds)</label>
+
+    <input
+        type="number"
+        id="interval"
+        min="10"
+        max="300"
+        value="40">
+
+    <br><br>
+
+    <button id="save">
+        Save Settings
+    </button>
+
+</div>
+
+<script src="popup.js"></script>
+
+</body>
+</html>
