@@ -1,52 +1,114 @@
 /**
+ * ============================================================
  * CarFX Pro Ultimate
- * Traffic Car System v0.1
+ * Traffic Car v1.0
+ * ============================================================
  */
 
-export default class TrafficCar {
+class TrafficCar {
 
-    constructor(lane, y, speed, img, scene) {
-        this.scene = scene;
-        this.img = img;
+    constructor(canvas) {
 
-        this.lane = lane;
-        this.y = y;
-        this.speed = speed;
+        this.canvas = canvas;
 
-        this.w = 50;
-        this.h = 100;
+        this.width = 58;
+        this.height = 110;
 
-        this.laneX = this.getLaneX(lane);
+        this.colors = [
+            "#1e88e5",
+            "#43a047",
+            "#fb8c00",
+            "#8e24aa",
+            "#757575",
+            "#fdd835"
+        ];
+
+        this.reset();
+
     }
 
-    getLaneX(lane) {
-        const roadWidth = this.scene.width * 0.6;
-        const startX = this.scene.width * 0.2;
+    reset() {
 
+        const roadWidth = Math.min(500, this.canvas.width * 0.5);
+        const roadX = (this.canvas.width - roadWidth) / 2;
         const laneWidth = roadWidth / 3;
 
-        return startX + lane * laneWidth + laneWidth / 2 - this.w / 2;
+        this.lane = Math.floor(Math.random() * 3);
+
+        this.x =
+            roadX +
+            this.lane * laneWidth +
+            (laneWidth - this.width) / 2;
+
+        this.y = -Math.random() * 800 - this.height;
+
+        this.speed = 180 + Math.random() * 220;
+
+        this.color =
+            this.colors[
+                Math.floor(Math.random() * this.colors.length)
+            ];
+
     }
 
-    update(delta) {
-        this.y += this.speed * delta;
+    update(dt) {
 
-        if (this.y > this.scene.height + 150) {
-            this.y = -200;
-            this.lane = Math.floor(Math.random() * 3);
-            this.speed = 100 + Math.random() * 200;
+        this.y += this.speed * dt;
+
+        if (this.y > this.canvas.height + 150) {
+            this.reset();
         }
 
-        this.laneX = this.getLaneX(this.lane);
     }
 
     render(ctx) {
 
-        if (this.img) {
-            ctx.drawImage(this.img, this.laneX, this.y, this.w, this.h);
-        } else {
-            ctx.fillStyle = "gray";
-            ctx.fillRect(this.laneX, this.y, this.w, this.h);
-        }
+        // Shadow
+        ctx.fillStyle = "rgba(0,0,0,.3)";
+        ctx.fillRect(
+            this.x + 5,
+            this.y + this.height - 10,
+            this.width - 10,
+            10
+        );
+
+        // Wheels
+        ctx.fillStyle = "#111";
+
+        ctx.fillRect(this.x - 4, this.y + 18, 8, 20);
+        ctx.fillRect(this.x + this.width - 4, this.y + 18, 8, 20);
+
+        ctx.fillRect(this.x - 4, this.y + 75, 8, 20);
+        ctx.fillRect(this.x + this.width - 4, this.y + 75, 8, 20);
+
+        // Body
+        ctx.fillStyle = this.color;
+        ctx.fillRect(
+            this.x,
+            this.y,
+            this.width,
+            this.height
+        );
+
+        // Glass
+        ctx.fillStyle = "#8fd3ff";
+
+        ctx.fillRect(
+            this.x + 10,
+            this.y + 12,
+            this.width - 20,
+            25
+        );
+
+        ctx.fillRect(
+            this.x + 10,
+            this.y + 78,
+            this.width - 20,
+            18
+        );
+
     }
+
 }
+
+window.TrafficCar = TrafficCar;
