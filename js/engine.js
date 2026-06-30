@@ -1,106 +1,95 @@
 class CarFXEngine {
 
     constructor() {
-        this.running = false;
-        this.lastFrame = 0;
-        this.objects = [];
-        this.ctx = null;
+
         this.canvas = null;
+        this.ctx = null;
+
+        this.running = false;
+
+        this.lastTime = 0;
+
+        this.road = null;
+        this.player = null;
 
         this.loop = this.loop.bind(this);
+
     }
 
     init() {
 
-        console.log("🚗 Engine Started");
+        this.createCanvas();
+
+        this.road = new Road(this.canvas);
+        this.player = new PlayerCar(this.canvas);
+
+        this.running = true;
+
+        requestAnimationFrame(this.loop);
+
+    }
+
+    createCanvas() {
 
         this.canvas = document.createElement("canvas");
-        document.body.appendChild(this.canvas);
+
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
 
         this.canvas.style.position = "fixed";
         this.canvas.style.top = "0";
         this.canvas.style.left = "0";
-        this.canvas.style.zIndex = "999999";
+        this.canvas.style.width = "100vw";
+        this.canvas.style.height = "100vh";
+        this.canvas.style.pointerEvents = "none";
+        this.canvas.style.zIndex = "999990";
 
-        this.resize();
+        document.body.appendChild(this.canvas);
 
         this.ctx = this.canvas.getContext("2d");
 
-        window.addEventListener("resize", () => this.resize());
+        window.addEventListener("resize", () => {
 
-        this.start();
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
 
-        this.spawnTraffic();
-    }
+            this.road?.resize();
+            this.player?.resize();
 
-    resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-    }
+        });
 
-    start() {
-        this.running = true;
-        this.lastFrame = performance.now();
-        requestAnimationFrame(this.loop);
     }
 
     loop(time) {
 
         if (!this.running) return;
 
-        const delta = (time - this.lastFrame) / 1000;
-        this.lastFrame = time;
+        const delta = (time - this.lastTime) / 1000;
+        this.lastTime = time;
 
         this.update(delta);
         this.render();
 
         requestAnimationFrame(this.loop);
+
     }
 
-    update(delta) {
+    update(dt) {
 
-        for (const o of this.objects) {
-            o.update && o.update(delta);
-        }
+        this.road.update(dt);
+        this.player.update(dt);
+
     }
 
     render() {
 
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
 
-        // road
-        this.ctx.fillStyle = "#222";
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.road.render(this.ctx);
+        this.player.render(this.ctx);
 
-        for (const o of this.objects) {
-            o.render && o.render(this.ctx);
-        }
     }
 
-    spawnTraffic() {
-
-        for (let i = 0; i < 6; i++) {
-
-            this.objects.push({
-                x: Math.random() * this.canvas.width,
-                y: Math.random() * -500,
-                speed: 100 + Math.random() * 200,
-
-                update: function (dt) {
-                    this.y += this.speed * dt;
-                    if (this.y > window.innerHeight) {
-                        this.y = -200;
-                        this.x = Math.random() * window.innerWidth;
-                    }
-                },
-
-                render: function (ctx) {
-                    ctx.fillStyle = "red";
-                    ctx.fillRect(this.x, this.y, 40, 80);
-                }
-            });
-        }
-    }
 }
 
 window.CarFXEngine = CarFXEngine;
