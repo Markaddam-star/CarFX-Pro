@@ -1,6 +1,9 @@
 (() => {
+
     if (window.__carfx_loaded__) return;
     window.__carfx_loaded__ = true;
+
+    console.log("🚗 CarFX Content Script Loaded");
 
     const DEFAULTS = {
         enabled: true,
@@ -9,7 +12,10 @@
 
     let settings = { ...DEFAULTS };
 
-    // ---------- Overlay ----------
+    // ============================================================
+    // UI CREATE
+    // ============================================================
+
     const overlay = document.createElement("div");
     overlay.id = "carfx-overlay";
 
@@ -18,12 +24,10 @@
 
     overlay.appendChild(animation);
 
-    // ---------- Floating Button ----------
     const toggle = document.createElement("div");
     toggle.id = "carfx-toggle";
     toggle.textContent = "🚗";
 
-    // ---------- Settings Panel ----------
     const panel = document.createElement("div");
     panel.id = "carfx-panel";
 
@@ -35,72 +39,113 @@
             Enable Animation
         </label>
 
-        <label>
-            Interval (10-300 sec)
-        </label>
+        <label>Interval (10-300 sec)</label>
 
-        <input
-            id="carfx-interval"
-            type="number"
-            min="10"
-            max="300">
+        <input id="carfx-interval" type="number" min="10" max="300">
 
-        <button id="carfx-save">
-            Save
-        </button>
+        <button id="carfx-save">Save</button>
     `;
 
     document.documentElement.appendChild(overlay);
     document.documentElement.appendChild(toggle);
     document.documentElement.appendChild(panel);
 
-    // ---------- Open / Close Panel ----------
+    // ============================================================
+    // PANEL TOGGLE
+    // ============================================================
+
     toggle.addEventListener("click", () => {
         panel.classList.toggle("open");
     });
 
-    // ---------- Load Settings ----------
-    chrome.storage.local.get("carfx", (data) => {
+    // ============================================================
+    // LOAD SETTINGS (SAFE)
+    // ============================================================
 
-        if (data.carfx) {
-            settings = {
-                ...DEFAULTS,
-                ...data.carfx
-            };
-        }
+    if (chrome?.storage?.local) {
+        chrome.storage.local.get("carfx", (data) => {
 
-        document.getElementById("carfx-enabled").checked =
-            settings.enabled;
+            if (data?.carfx) {
+                settings = { ...DEFAULTS, ...data.carfx };
+            }
 
-        document.getElementById("carfx-interval").value =
-            settings.interval;
+            const enabledEl = document.getElementById("carfx-enabled");
+            const intervalEl = document.getElementById("carfx-interval");
 
-    });
+            if (enabledEl) enabledEl.checked = settings.enabled;
+            if (intervalEl) intervalEl.value = settings.interval;
+        });
+    }
 
-    // ---------- Save Settings ----------
-    document
-        .getElementById("carfx-save")
-        .addEventListener("click", () => {
+    // ============================================================
+    // SAVE SETTINGS (CRASH SAFE FIXED LINE 99 ISSUE)
+    // ============================================================
 
-            settings.enabled =
-                document.getElementById("carfx-enabled").checked;
+    window.addEventListener("DOMContentLoaded", () => {
 
-            settings.interval =
-                Math.min(
-                    300,
-                    Math.max(
-                        10,
-                        Number(
-                            document.getElementById("carfx-interval").value
-                        ) || 40
-                    )
-                );
+        const saveBtn = document.getElementById("carfx-save");
 
-            chrome.storage.local.set({
-                carfx: settings
-            });
+        if (!saveBtn) return;
+
+        saveBtn.addEventListener("click", () => {
+
+            const enabledEl = document.getElementById("carfx-enabled");
+            const intervalEl = document.getElementById("carfx-interval");
+
+            settings.enabled = enabledEl ? enabledEl.checked : true;
+
+            settings.interval = Math.min(
+                300,
+                Math.max(
+                    10,
+                    Number(intervalEl?.value) || 40
+                )
+            );
+
+            // SAFE STORAGE (NO CRASH)
+            try {
+                chrome.storage?.local?.set?.({
+                    carfx: settings
+                }, () => {
+                    console.log("💾 CarFX settings saved");
+                });
+            } catch (e) {
+                console.warn("Storage failed:", e);
+            }
 
             alert("CarFX settings saved.");
         });
+
+    });
+
+    // ============================================================
+    // ENGINE LOADER (SAFE)
+    // ============================================================
+
+    function loadEngine() {
+
+        if (window.__carfx_engine_loaded__) return;
+        window.__carfx_engine_loaded__ = true;
+
+        const script = document.createElement("script");
+        script.src = chrome.runtime.getURL("js/engine.js");
+
+        script.onload = () => {
+            console.log("🚗 Engine Loaded");
+
+            if (window.CarFXEngine) {
+                const engine = new window.CarFXEngine();
+                engine.init?.();
+            }
+        };
+
+        script.onerror = () => {
+            console.error("❌ Engine failed to load");
+        };
+
+        document.body.appendChild(script);
+    }
+
+    setTimeout(loadEngine, 500);
 
 })();
