@@ -3,70 +3,139 @@
     if (window.__carfx_loaded__) return;
     window.__carfx_loaded__ = true;
 
-    console.log("🚗 CarFX Content Loaded");
+    console.log("🚗 CarFX Loaded");
+
+    // =========================
+    // ENGINE
+    // =========================
+
+    window.carfxEngine = new CarFXEngine();
+    window.carfxEngine.init();
+
+    let running = true;
 
     // =========================
     // TOGGLE BUTTON
     // =========================
+
     const toggle = document.createElement("div");
-    toggle.innerText = "🚗";
-    toggle.style.position = "fixed";
-    toggle.style.top = "20px";
-    toggle.style.right = "20px";
-    toggle.style.zIndex = "999999";
-    toggle.style.width = "50px";
-    toggle.style.height = "50px";
-    toggle.style.background = "red";
-    toggle.style.color = "white";
-    toggle.style.display = "flex";
-    toggle.style.alignItems = "center";
-    toggle.style.justifyContent = "center";
-    toggle.style.borderRadius = "50%";
-    toggle.style.cursor = "pointer";
+
+    toggle.innerHTML = "⏸";
+
+    Object.assign(toggle.style, {
+        position: "fixed",
+        top: "20px",
+        right: "20px",
+        width: "56px",
+        height: "56px",
+        borderRadius: "50%",
+        background: "#ff0000",
+        color: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "24px",
+        fontWeight: "bold",
+        cursor: "pointer",
+        zIndex: "1000001",
+        boxShadow: "0 0 18px rgba(255,0,0,.6)",
+        userSelect: "none"
+    });
+
     document.body.appendChild(toggle);
 
     // =========================
-    // PANEL
+    // CONTROL PANEL
     // =========================
+
     const panel = document.createElement("div");
-    panel.style.position = "fixed";
-    panel.style.top = "80px";
-    panel.style.right = "20px";
-    panel.style.zIndex = "999999";
-    panel.style.width = "200px";
-    panel.style.padding = "10px";
-    panel.style.background = "#111";
-    panel.style.color = "white";
-    panel.style.display = "none";
+
+    Object.assign(panel.style, {
+        position: "fixed",
+        top: "90px",
+        right: "20px",
+        width: "220px",
+        background: "#111",
+        color: "#fff",
+        padding: "15px",
+        borderRadius: "12px",
+        display: "none",
+        zIndex: "1000000",
+        boxShadow: "0 0 20px rgba(0,0,0,.5)"
+    });
 
     panel.innerHTML = `
-        <h3>CarFX Pro</h3>
-        <button id="carfx-close">Close</button>
+        <h3 style="margin-top:0;">🚗 CarFX Pro</h3>
+
+        <button id="carfx-playpause"
+        style="width:100%;padding:10px;margin-bottom:10px;">
+        Pause Animation
+        </button>
+
+        <button id="carfx-close"
+        style="width:100%;padding:10px;">
+        Close
+        </button>
     `;
 
     document.body.appendChild(panel);
 
-    toggle.onclick = () => {
-        panel.style.display = panel.style.display === "none" ? "block" : "none";
-    };
+    // =========================
+    // OPEN PANEL
+    // =========================
 
-    // close button
+    toggle.addEventListener("click", () => {
+
+        panel.style.display =
+            panel.style.display === "none"
+            ? "block"
+            : "none";
+
+    });
+
+    // =========================
+    // WAIT DOM
+    // =========================
+
     setTimeout(() => {
+
+        const playBtn = document.getElementById("carfx-playpause");
         const closeBtn = document.getElementById("carfx-close");
-        if (closeBtn) {
-            closeBtn.onclick = () => panel.style.display = "none";
-        }
-    }, 500);
 
-    // =========================
-    // ENGINE START
-    // =========================
-    if (typeof CarFXEngine === "undefined") {
-        console.error("❌ CarFXEngine not found");
-        return;
-    }
+        playBtn.onclick = () => {
 
-    const engine = new CarFXEngine();
-    engine.init();
+            if (running) {
+
+                window.carfxEngine.stop();
+
+                playBtn.innerText = "Play Animation";
+
+                toggle.innerHTML = "▶";
+
+                toggle.style.background = "#16a34a";
+
+            } else {
+
+                window.carfxEngine.start();
+
+                playBtn.innerText = "Pause Animation";
+
+                toggle.innerHTML = "⏸";
+
+                toggle.style.background = "#ff0000";
+
+            }
+
+            running = !running;
+
+        };
+
+        closeBtn.onclick = () => {
+
+            panel.style.display = "none";
+
+        };
+
+    }, 100);
 
 })();
