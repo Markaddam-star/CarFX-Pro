@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * Engine v1.0
+ * Engine v1.1
  * ============================================================
  */
 
@@ -32,7 +32,20 @@ class CarFXEngine {
         this.road = new Road(this.canvas);
         this.player = new PlayerCar(this.canvas);
 
+        // Spawn AI Traffic
+        for (let i = 0; i < 8; i++) {
+
+            const car = new TrafficCar(this.canvas);
+
+            // Different starting positions
+            car.y = -(i * 180);
+
+            this.traffic.push(car);
+
+        }
+
         this.running = true;
+        this.lastTime = performance.now();
 
         requestAnimationFrame(this.loop);
 
@@ -45,13 +58,15 @@ class CarFXEngine {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
 
-        this.canvas.style.position = "fixed";
-        this.canvas.style.top = "0";
-        this.canvas.style.left = "0";
-        this.canvas.style.width = "100vw";
-        this.canvas.style.height = "100vh";
-        this.canvas.style.pointerEvents = "none";
-        this.canvas.style.zIndex = "999990";
+        Object.assign(this.canvas.style, {
+            position: "fixed",
+            top: "0",
+            left: "0",
+            width: "100vw",
+            height: "100vh",
+            pointerEvents: "none",
+            zIndex: "999990"
+        });
 
         document.body.appendChild(this.canvas);
 
@@ -106,7 +121,7 @@ class CarFXEngine {
         this.player?.update(dt);
 
         for (const car of this.traffic) {
-            car.update?.(dt);
+            car.update(dt);
         }
 
     }
@@ -120,12 +135,15 @@ class CarFXEngine {
             this.canvas.height
         );
 
+        // Road
         this.road?.render(this.ctx);
 
+        // Traffic
         for (const car of this.traffic) {
-            car.render?.(this.ctx);
+            car.render(this.ctx);
         }
 
+        // Player always on top
         this.player?.render(this.ctx);
 
     }
