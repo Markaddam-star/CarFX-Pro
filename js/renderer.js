@@ -1,4 +1,3 @@
-
 /**
  * ============================================================
  * CarFX Pro Ultimate
@@ -11,7 +10,6 @@ class Renderer {
     constructor(scene) {
 
         this.scene = scene;
-
         this.frame = 0;
 
     }
@@ -22,6 +20,8 @@ class Renderer {
 
         this.frame++;
 
+        this.clear();
+
         objectManager.render(this);
 
     }
@@ -29,7 +29,15 @@ class Renderer {
     clear() {
 
         // Future:
-        // Canvas rendering آئے گی تو یہاں screen clear ہوگی.
+        // Canvas/WebGL rendering آئے گی تو
+        // screen یہاں clear ہوگی.
+
+    }
+
+    getFrameCount() {
+
+        return this.frame;
+
     }
 
 }
