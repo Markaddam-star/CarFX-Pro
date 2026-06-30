@@ -22,6 +22,8 @@
         "<all_urls>"
       ],
       "js": [
+        "js/road.js",
+        "js/car.js",
         "js/engine.js",
         "content.js"
       ],
