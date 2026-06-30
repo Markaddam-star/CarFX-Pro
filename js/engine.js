@@ -1,3 +1,10 @@
+/**
+ * ============================================================
+ * CarFX Pro Ultimate
+ * Engine v1.0
+ * ============================================================
+ */
+
 class CarFXEngine {
 
     constructor() {
@@ -6,17 +13,19 @@ class CarFXEngine {
         this.ctx = null;
 
         this.running = false;
-
         this.lastTime = 0;
 
         this.road = null;
         this.player = null;
+        this.traffic = [];
 
         this.loop = this.loop.bind(this);
 
     }
 
     init() {
+
+        console.log("🚗 CarFX Engine Started");
 
         this.createCanvas();
 
@@ -60,14 +69,31 @@ class CarFXEngine {
 
     }
 
+    start() {
+
+        if (this.running) return;
+
+        this.running = true;
+        this.lastTime = performance.now();
+
+        requestAnimationFrame(this.loop);
+
+    }
+
+    stop() {
+
+        this.running = false;
+
+    }
+
     loop(time) {
 
         if (!this.running) return;
 
-        const delta = (time - this.lastTime) / 1000;
+        const dt = (time - this.lastTime) / 1000;
         this.lastTime = time;
 
-        this.update(delta);
+        this.update(dt);
         this.render();
 
         requestAnimationFrame(this.loop);
@@ -76,17 +102,31 @@ class CarFXEngine {
 
     update(dt) {
 
-        this.road.update(dt);
-        this.player.update(dt);
+        this.road?.update(dt);
+        this.player?.update(dt);
+
+        for (const car of this.traffic) {
+            car.update?.(dt);
+        }
 
     }
 
     render() {
 
-        this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+        this.ctx.clearRect(
+            0,
+            0,
+            this.canvas.width,
+            this.canvas.height
+        );
 
-        this.road.render(this.ctx);
-        this.player.render(this.ctx);
+        this.road?.render(this.ctx);
+
+        for (const car of this.traffic) {
+            car.render?.(this.ctx);
+        }
+
+        this.player?.render(this.ctx);
 
     }
 
