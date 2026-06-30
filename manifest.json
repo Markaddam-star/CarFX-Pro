@@ -1,17 +1,12 @@
-
 {
   "manifest_version": 3,
   "name": "CarFX Pro",
-  "version": "0.1.0",
-  "description": "Bring your browser to life with cinematic background animations.",
+  "version": "1.0.0",
+  "description": "Cinematic car animation engine",
 
-  "permissions": [
-    "storage"
-  ],
+  "permissions": ["storage"],
 
-  "host_permissions": [
-    "<all_urls>"
-  ],
+  "host_permissions": ["<all_urls>"],
 
   "action": {
     "default_popup": "popup.html"
@@ -19,27 +14,16 @@
 
   "content_scripts": [
     {
-      "matches": [
-        "<all_urls>"
-      ],
-      "css": [
-        "content.css"
-      ],
-      "js": [
-        "content.js"
-      ],
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
       "run_at": "document_idle"
     }
   ],
 
   "web_accessible_resources": [
     {
-      "resources": [
-        "assets/*"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
+      "resources": ["assets/*"],
+      "matches": ["<all_urls>"]
     }
   ]
 }
