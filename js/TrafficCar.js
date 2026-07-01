@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * Traffic Car v1.0
+ * Traffic Car v1.1
  * ============================================================
  */
 
@@ -33,6 +33,7 @@ class TrafficCar {
         const roadX = (this.canvas.width - roadWidth) / 2;
         const laneWidth = roadWidth / 3;
 
+        // Random lane
         this.lane = Math.floor(Math.random() * 3);
 
         this.x =
@@ -40,10 +41,13 @@ class TrafficCar {
             this.lane * laneWidth +
             (laneWidth - this.width) / 2;
 
-        this.y = -Math.random() * 800 - this.height;
+        // Large random spawn distance
+        this.y = -this.height - Math.random() * 1200;
 
+        // Random traffic speed
         this.speed = 180 + Math.random() * 220;
 
+        // Random body color
         this.color =
             this.colors[
                 Math.floor(Math.random() * this.colors.length)
@@ -55,6 +59,7 @@ class TrafficCar {
 
         this.y += this.speed * dt;
 
+        // Respawn after leaving screen
         if (this.y > this.canvas.height + 150) {
             this.reset();
         }
@@ -64,7 +69,7 @@ class TrafficCar {
     render(ctx) {
 
         // Shadow
-        ctx.fillStyle = "rgba(0,0,0,.3)";
+        ctx.fillStyle = "rgba(0,0,0,.30)";
         ctx.fillRect(
             this.x + 5,
             this.y + this.height - 10,
@@ -90,7 +95,7 @@ class TrafficCar {
             this.height
         );
 
-        // Glass
+        // Windshields
         ctx.fillStyle = "#8fd3ff";
 
         ctx.fillRect(
@@ -106,6 +111,16 @@ class TrafficCar {
             this.width - 20,
             18
         );
+
+        // Headlights
+        ctx.fillStyle = "#fff8c4";
+        ctx.fillRect(this.x + 8, this.y + 4, 8, 4);
+        ctx.fillRect(this.x + this.width - 16, this.y + 4, 8, 4);
+
+        // Tail lights
+        ctx.fillStyle = "#ff3b30";
+        ctx.fillRect(this.x + 8, this.y + this.height - 8, 8, 4);
+        ctx.fillRect(this.x + this.width - 16, this.y + this.height - 8, 8, 4);
 
     }
 
