@@ -38,6 +38,7 @@
         "js/car.js",
         "js/TrafficCar.js",
         "js/TrafficManager.js",
+        "js/Background.js",
         "js/engine.js",
         "content.js"
       ],
