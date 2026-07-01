@@ -1,4 +1,3 @@
-
 class Road {
 
     constructor(canvas) {
@@ -19,6 +18,8 @@ class Road {
     }
 
     update(dt) {
+
+        // 🚗 moving lane lines (GTA motion feel)
         this.laneOffset += this.speed * dt;
 
         if (this.laneOffset >= 80) {
@@ -28,23 +29,57 @@ class Road {
 
     render(ctx) {
 
-        // Grass / Background
-        ctx.fillStyle = "#111";
-        ctx.fillRect(0, 0, this.width, this.height);
+        const w = this.canvas.width;
+        const h = this.canvas.height;
 
-        // Road
+        // 🌆 SKY GRADIENT (GTA FEEL IMPROVEMENT)
+        const sky = ctx.createLinearGradient(0, 0, 0, h);
+        sky.addColorStop(0, "#6ec6ff");
+        sky.addColorStop(1, "#b3e5fc");
+
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, w, h);
+
+        // 🌫️ distant fog (depth illusion)
+        ctx.fillStyle = "rgba(255,255,255,0.08)";
+        ctx.fillRect(0, 0, w, h);
+
+        // 🛣️ ROAD
+        const roadW = Math.min(500, w * 0.5);
+        const roadX = (w - roadW) / 2;
+
         ctx.fillStyle = "#2b2b2b";
-        ctx.fillRect(this.x, 0, this.roadWidth, this.height);
+        ctx.fillRect(roadX, 0, roadW, h);
 
-        // Lane Lines
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 6;
+        // 🟡 road edges (GTA style border)
+        ctx.fillStyle = "#111";
+        ctx.fillRect(roadX - 8, 0, 8, h);
+        ctx.fillRect(roadX + roadW, 0, 8, h);
 
-        const lane1 = this.x + this.roadWidth / 3;
-        const lane2 = this.x + (this.roadWidth / 3) * 2;
+        // 🚧 LANE LINES (animated)
+        ctx.strokeStyle = "#ffffff40";
+        ctx.lineWidth = 3;
 
-        this.drawLane(ctx, lane1);
-        this.drawLane(ctx, lane2);
+        for (let i = 0; i < 20; i++) {
+
+            const y = i * 80 + this.laneOffset;
+
+            ctx.beginPath();
+            ctx.moveTo(w / 2, y);
+            ctx.lineTo(w / 2, y + 40);
+            ctx.stroke();
+        }
+
+        // 🌫️ road fade (top + bottom depth)
+        const fade = ctx.createLinearGradient(0, 0, 0, h);
+
+        fade.addColorStop(0, "rgba(0,0,0,0.25)");
+        fade.addColorStop(0.2, "transparent");
+        fade.addColorStop(0.8, "transparent");
+        fade.addColorStop(1, "rgba(0,0,0,0.25)");
+
+        ctx.fillStyle = fade;
+        ctx.fillRect(0, 0, w, h);
     }
 
     drawLane(ctx, x) {
@@ -55,9 +90,8 @@ class Road {
             ctx.moveTo(x, y);
             ctx.lineTo(x, y + 40);
             ctx.stroke();
-
         }
-
     }
-
 }
+
+window.Road = Road;
