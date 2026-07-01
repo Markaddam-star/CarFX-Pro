@@ -1,10 +1,3 @@
-/**
- * ============================================================
- * CarFX Pro Ultimate
- * Renderer v0.2
- * ============================================================
- */
-
 class Renderer {
 
     constructor(scene) {
@@ -12,32 +5,36 @@ class Renderer {
         this.scene = scene;
         this.frame = 0;
 
+        this.ctx = null;
+    }
+
+    attach(ctx) {
+        this.ctx = ctx;
     }
 
     render(objectManager) {
 
-        if (!objectManager) return;
+        if (!objectManager || !this.ctx) return;
 
         this.frame++;
 
         this.clear();
 
         objectManager.render(this);
-
     }
 
     clear() {
 
-        // Future:
-        // Canvas/WebGL rendering آئے گی تو
-        // screen یہاں clear ہوگی.
+        const ctx = this.ctx;
+        const canvas = ctx.canvas;
 
+        // 🧼 clean frame every render
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
     getFrameCount() {
-
         return this.frame;
-
     }
-
 }
+
+window.Renderer = Renderer;
