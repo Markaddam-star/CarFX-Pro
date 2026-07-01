@@ -19,7 +19,6 @@ class Road {
 
     update(dt) {
 
-        // 🚗 moving lane lines (GTA motion feel)
         this.laneOffset += this.speed * dt;
 
         if (this.laneOffset >= 80) {
@@ -32,7 +31,7 @@ class Road {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // 🌆 SKY GRADIENT (GTA FEEL IMPROVEMENT)
+        // 🌤 SKY GRADIENT (clean GTA sky)
         const sky = ctx.createLinearGradient(0, 0, 0, h);
         sky.addColorStop(0, "#6ec6ff");
         sky.addColorStop(1, "#b3e5fc");
@@ -40,21 +39,21 @@ class Road {
         ctx.fillStyle = sky;
         ctx.fillRect(0, 0, w, h);
 
-        // 🌫️ distant fog (depth illusion)
-        ctx.fillStyle = "rgba(255,255,255,0.08)";
+        // 🌫 GLOBAL FOG LAYER (soft depth)
+        ctx.fillStyle = "rgba(255,255,255,0.06)";
         ctx.fillRect(0, 0, w, h);
 
-        // 🛣️ ROAD
+        // 🛣 ROAD
         const roadW = Math.min(500, w * 0.5);
         const roadX = (w - roadW) / 2;
 
         ctx.fillStyle = "#2b2b2b";
         ctx.fillRect(roadX, 0, roadW, h);
 
-        // 🟡 road edges (GTA style border)
-        ctx.fillStyle = "#111";
-        ctx.fillRect(roadX - 8, 0, 8, h);
-        ctx.fillRect(roadX + roadW, 0, 8, h);
+        // 🧱 ROAD EDGES (better contrast)
+        ctx.fillStyle = "#0f0f0f";
+        ctx.fillRect(roadX - 6, 0, 6, h);
+        ctx.fillRect(roadX + roadW, 0, 6, h);
 
         // 🚧 LANE LINES (animated)
         ctx.strokeStyle = "#ffffff40";
@@ -62,7 +61,7 @@ class Road {
 
         for (let i = 0; i < 20; i++) {
 
-            const y = i * 80 + this.laneOffset;
+            const y = (i * 80 + this.laneOffset) % (h + 100);
 
             ctx.beginPath();
             ctx.moveTo(w / 2, y);
@@ -70,13 +69,13 @@ class Road {
             ctx.stroke();
         }
 
-        // 🌫️ road fade (top + bottom depth)
+        // 🌫 DEPTH VIGNETTE (GTA cinematic feel)
         const fade = ctx.createLinearGradient(0, 0, 0, h);
 
-        fade.addColorStop(0, "rgba(0,0,0,0.25)");
+        fade.addColorStop(0, "rgba(0,0,0,0.35)");
         fade.addColorStop(0.2, "transparent");
         fade.addColorStop(0.8, "transparent");
-        fade.addColorStop(1, "rgba(0,0,0,0.25)");
+        fade.addColorStop(1, "rgba(0,0,0,0.35)");
 
         ctx.fillStyle = fade;
         ctx.fillRect(0, 0, w, h);
