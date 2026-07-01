@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * Engine v1.2
+ * Engine v2.0
  * ============================================================
  */
 
@@ -17,7 +17,7 @@ class CarFXEngine {
 
         this.road = null;
         this.player = null;
-        this.traffic = [];
+        this.trafficManager = null;
 
         this.loop = this.loop.bind(this);
 
@@ -32,14 +32,8 @@ class CarFXEngine {
         this.road = new Road(this.canvas);
         this.player = new PlayerCar(this.canvas);
 
-        for (let i = 0; i < 8; i++) {
-
-            const car = new TrafficCar(this.canvas);
-            car.y = -(i * 180);
-
-            this.traffic.push(car);
-
-        }
+        // Traffic Manager
+        this.trafficManager = new TrafficManager(this.canvas);
 
         this.running = true;
         this.lastTime = performance.now();
@@ -74,8 +68,8 @@ class CarFXEngine {
             this.canvas.width = window.innerWidth;
             this.canvas.height = window.innerHeight;
 
-            this.road?.resize();
-            this.player?.resize();
+            if (this.road) this.road.resize();
+            if (this.player) this.player.resize();
 
         });
 
@@ -114,44 +108,9 @@ class CarFXEngine {
 
     update(dt) {
 
-        this.road?.update(dt);
-        this.player?.update(dt);
-
-        const SAFE_GAP = 140;
-
-        const lanes = [[], [], []];
-
-        for (const car of this.traffic) {
-            lanes[car.lane].push(car);
-        }
-
-        for (const laneCars of lanes) {
-
-            laneCars.sort((a, b) => a.y - b.y);
-
-            for (let i = 0; i < laneCars.length; i++) {
-
-                const car = laneCars[i];
-                const front = laneCars[i + 1];
-
-                car.update(dt);
-
-                if (front) {
-
-                    const gap = front.y - (car.y + car.height);
-
-                    if (gap < SAFE_GAP) {
-
-                        car.y = front.y - car.height - SAFE_GAP;
-                        car.speed = Math.min(car.speed, front.speed);
-
-                    }
-
-                }
-
-            }
-
-        }
+        if (this.road) this.road.update(dt);
+        if (this.player) this.player.update(dt);
+        if (this.trafficManager) this.trafficManager.update(dt);
 
     }
 
@@ -164,13 +123,13 @@ class CarFXEngine {
             this.canvas.height
         );
 
-        this.road?.render(this.ctx);
+        if (this.road) this.road.render(this.ctx);
 
-        for (const car of this.traffic) {
-            car.render(this.ctx);
-        }
+        if (this.trafficManager)
+            this.trafficManager.render(this.ctx);
 
-        this.player?.render(this.ctx);
+        if (this.player)
+            this.player.render(this.ctx);
 
     }
 
