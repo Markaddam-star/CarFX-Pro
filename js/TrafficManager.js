@@ -1,16 +1,17 @@
-
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * Traffic Manager v1.0
+ * Traffic Manager v2.0
  * ============================================================
  */
 
 class TrafficManager {
 
-    constructor(canvas) {
+    constructor(canvas, player) {
 
         this.canvas = canvas;
+        this.player = player;
+
         this.cars = [];
 
         this.maxCars = 8;
@@ -28,6 +29,14 @@ class TrafficManager {
 
             car.y = -(i * this.minGap);
 
+            // Don't spawn in player's lane too close
+            if (
+                this.player &&
+                car.lane === this.player.lane
+            ) {
+                car.y -= this.minGap;
+            }
+
             this.cars.push(car);
 
         }
@@ -36,7 +45,6 @@ class TrafficManager {
 
     update(dt) {
 
-        // Sort cars lane-wise
         const lanes = [[], [], []];
 
         for (const car of this.cars) {
@@ -54,14 +62,49 @@ class TrafficManager {
 
                 car.update(dt);
 
-                if (!front) continue;
+                // Prevent overlap with front traffic
+                if (front) {
 
-                const gap = front.y - (car.y + car.height);
+                    const gap =
+                        front.y - (car.y + car.height);
 
-                if (gap < this.minGap) {
+                    if (gap < this.minGap) {
 
-                    car.y = front.y - car.height - this.minGap;
-                    car.speed = Math.min(car.speed, front.speed);
+                        car.y =
+                            front.y -
+                            car.height -
+                            this.minGap;
+
+                        car.speed = Math.min(
+                            car.speed,
+                            front.speed
+                        );
+
+                    }
+
+                }
+
+                // Prevent overlap with player
+                if (
+                    this.player &&
+                    car.lane === this.player.lane
+                ) {
+
+                    const gap =
+                        this.player.y -
+                        (car.y + car.height);
+
+                    if (
+                        gap > 0 &&
+                        gap < this.minGap
+                    ) {
+
+                        car.y =
+                            this.player.y -
+                            car.height -
+                            this.minGap;
+
+                    }
 
                 }
 
