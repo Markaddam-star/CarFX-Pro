@@ -1,8 +1,7 @@
-
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * Player Car v1.0
+ * Player Car v2.0
  * ============================================================
  */
 
@@ -15,28 +14,44 @@ class PlayerCar {
         this.width = 64;
         this.height = 120;
 
+        // Player starts in center lane
+        this.lane = 1;
+
         this.resize();
 
     }
 
     resize() {
 
-        this.x = (this.canvas.width / 2) - (this.width / 2);
-        this.y = this.canvas.height - this.height - 40;
+        const roadWidth = Math.min(500, this.canvas.width * 0.5);
+        const roadX = (this.canvas.width - roadWidth) / 2;
+        const laneWidth = roadWidth / 3;
+
+        this.x =
+            roadX +
+            this.lane * laneWidth +
+            (laneWidth - this.width) / 2;
+
+        this.y =
+            this.canvas.height -
+            this.height -
+            40;
 
     }
 
     update(dt) {
+
         // Future:
         // Steering
         // Nitro
         // Drift
+
     }
 
     render(ctx) {
 
         // Shadow
-        ctx.fillStyle = "rgba(0,0,0,0.35)";
+        ctx.fillStyle = "rgba(0,0,0,.35)";
         ctx.fillRect(
             this.x + 6,
             this.y + this.height - 10,
@@ -53,7 +68,7 @@ class PlayerCar {
         ctx.fillRect(this.x - 4, this.y + 80, 8, 22);
         ctx.fillRect(this.x + this.width - 4, this.y + 80, 8, 22);
 
-        // Car Body
+        // Body
         ctx.fillStyle = "#d40000";
         ctx.fillRect(
             this.x,
@@ -71,7 +86,7 @@ class PlayerCar {
             this.height - 36
         );
 
-        // Windshield
+        // Front Glass
         ctx.fillStyle = "#7fd8ff";
         ctx.fillRect(
             this.x + 12,
@@ -80,7 +95,7 @@ class PlayerCar {
             26
         );
 
-        // Rear Window
+        // Rear Glass
         ctx.fillRect(
             this.x + 12,
             this.y + 82,
@@ -93,7 +108,7 @@ class PlayerCar {
         ctx.fillRect(this.x + 8, this.y + 2, 12, 6);
         ctx.fillRect(this.x + this.width - 20, this.y + 2, 12, 6);
 
-        // Tail Lights
+        // Tail lights
         ctx.fillStyle = "#ff4040";
         ctx.fillRect(this.x + 8, this.y + this.height - 8, 12, 6);
         ctx.fillRect(this.x + this.width - 20, this.y + this.height - 8, 12, 6);
@@ -101,3 +116,5 @@ class PlayerCar {
     }
 
 }
+
+window.PlayerCar = PlayerCar;
