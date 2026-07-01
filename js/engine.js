@@ -1,3 +1,10 @@
+/**
+ * ============================================================
+ * CarFX Pro Ultimate
+ * Engine v1.0 (STABLE GTA VERSION)
+ * ============================================================
+ */
+
 class CarFXEngine {
 
     constructor() {
@@ -8,10 +15,10 @@ class CarFXEngine {
         this.running = false;
         this.lastTime = 0;
 
+        this.background = null;
         this.road = null;
         this.player = null;
         this.trafficManager = null;
-        this.background = null;
 
         // 🎥 CAMERA SYSTEM
         this.cameraY = 0;
@@ -26,13 +33,13 @@ class CarFXEngine {
 
         this.createCanvas();
 
-        // 🌆 LAYERS
-        this.background = new Background(this.canvas);
-        this.road = new Road(this.canvas);
-        this.player = new PlayerCar(this.canvas);
-        this.trafficManager = new TrafficManager(this.canvas, this.player);
-
-        this.canvas._trafficManager = this.trafficManager;
+        // 🌆 SAFE INIT (no crash if class missing)
+        this.background = window.Background ? new Background(this.canvas) : null;
+        this.road = window.Road ? new Road(this.canvas) : null;
+        this.player = window.PlayerCar ? new PlayerCar(this.canvas) : null;
+        this.trafficManager = window.TrafficManager
+            ? new TrafficManager(this.canvas, this.player)
+            : null;
 
         this.preloadAssets();
 
@@ -121,13 +128,15 @@ class CarFXEngine {
         if (this.player) this.player.update(dt);
         if (this.trafficManager) this.trafficManager.update(dt);
 
-        // 🎥 smooth camera follow
-        this.cameraTargetY =
-            this.player.y - this.canvas.height * 0.7;
+        // 🎥 CAMERA FOLLOW
+        if (this.player) {
+            this.cameraTargetY =
+                this.player.y - this.canvas.height * 0.7;
 
-        this.cameraY += (this.cameraTargetY - this.cameraY) * 0.12;
+            this.cameraY += (this.cameraTargetY - this.cameraY) * 0.12;
 
-        if (this.cameraY < 0) this.cameraY = 0;
+            if (this.cameraY < 0) this.cameraY = 0;
+        }
     }
 
     render() {
@@ -139,17 +148,21 @@ class CarFXEngine {
             this.canvas.height
         );
 
-        // 🌆 BACKGROUND (no camera)
-        if (this.background)
+        // 🌆 BACKGROUND (NO CAMERA)
+        if (this.background) {
             this.background.render(this.ctx);
+        }
 
         this.ctx.save();
 
-        // 🎥 WORLD (camera applied)
+        // 🎥 WORLD (CAMERA)
         this.ctx.translate(0, -this.cameraY);
 
-        if (this.road)
+        if (this.road) {
+            this.ctx.globalAlpha = 0.97;
             this.road.render(this.ctx);
+            this.ctx.globalAlpha = 1;
+        }
 
         if (this.trafficManager)
             this.trafficManager.render(this.ctx);
@@ -159,8 +172,18 @@ class CarFXEngine {
 
         this.ctx.restore();
 
-        // 🌫 FINAL FOG (GTA feel boost)
-        this.ctx.fillStyle = "rgba(255,255,255,0.04)";
+        // 🌫 FINAL FOG OVERLAY
+        const fog = this.ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            this.canvas.height
+        );
+
+        fog.addColorStop(0, "rgba(255,255,255,0.02)");
+        fog.addColorStop(1, "rgba(0,0,0,0.25)");
+
+        this.ctx.fillStyle = fog;
         this.ctx.fillRect(
             0,
             0,
