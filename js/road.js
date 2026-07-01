@@ -4,7 +4,19 @@ class Road {
         this.canvas = canvas;
 
         this.laneOffset = 0;
-        this.speed = 350;
+        this.speed = 420;
+
+this.asphaltNoise = [];
+
+for (let i = 0; i < 900; i++) {
+
+    this.asphaltNoise.push({
+        x: Math.random(),
+        y: Math.random(),
+        s: Math.random() * 2 + 1
+    });
+
+}
 
         this.resize();
     }
@@ -33,8 +45,9 @@ class Road {
 
         // 🌤 SKY GRADIENT (clean GTA sky)
         const sky = ctx.createLinearGradient(0, 0, 0, h);
-        sky.addColorStop(0, "#6ec6ff");
-        sky.addColorStop(1, "#b3e5fc");
+        sky.addColorStop(0, "#081321");
+sky.addColorStop(0.45, "#17304f");
+sky.addColorStop(1, "#2c2c2c");
 
         ctx.fillStyle = sky;
         ctx.fillRect(0, 0, w, h);
@@ -47,8 +60,33 @@ class Road {
         const roadW = Math.min(500, w * 0.5);
         const roadX = (w - roadW) / 2;
 
-        ctx.fillStyle = "#2b2b2b";
-        ctx.fillRect(roadX, 0, roadW, h);
+        const asphalt = ctx.createLinearGradient(
+    roadX,
+    0,
+    roadX + roadW,
+    0
+);
+
+asphalt.addColorStop(0, "#181818");
+asphalt.addColorStop(0.5, "#323232");
+asphalt.addColorStop(1, "#181818");
+
+ctx.fillStyle = asphalt;
+ctx.fillRect(roadX, 0, roadW, h);
+
+ctx.fillStyle = "rgba(255,255,255,0.025)";
+
+for (const dot of this.asphaltNoise) {
+
+    ctx.fillRect(
+        roadX + dot.x * roadW,
+        dot.y * h,
+        dot.s,
+        dot.s
+    );
+
+}
+
 
         // 🧱 ROAD EDGES (better contrast)
         ctx.fillStyle = "#0f0f0f";
@@ -56,8 +94,8 @@ class Road {
         ctx.fillRect(roadX + roadW, 0, 6, h);
 
         // 🚧 LANE LINES (animated)
-        ctx.strokeStyle = "#ffffff40";
-        ctx.lineWidth = 3;
+      ctx.strokeStyle = "#ffd94d";
+        ctx.lineWidth = 5;
 
         for (let i = 0; i < 20; i++) {
 
