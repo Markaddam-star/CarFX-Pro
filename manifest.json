@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CarFX Pro",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Cinematic car animation engine",
 
   "permissions": [
@@ -10,6 +10,18 @@
 
   "host_permissions": [
     "<all_urls>"
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/*",
+        "assets/cars/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
   ],
 
   "action": {
@@ -21,7 +33,6 @@
       "matches": [
         "<all_urls>"
       ],
-
       "js": [
         "js/road.js",
         "js/car.js",
@@ -30,7 +41,6 @@
         "js/engine.js",
         "content.js"
       ],
-
       "run_at": "document_idle"
     }
   ]
