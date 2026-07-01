@@ -19,11 +19,10 @@ class TrafficCar {
             "#fdd835"
         ];
 
-        // 🚗 SINGLE IMAGE LOAD ONLY
+        // 🚗 FIX: Chrome Extension safe path
         this.image = new Image();
-        this.image.src = "assets/cars/traffic.png";
+        this.image.src = chrome.runtime.getURL("assets/cars/traffic.png");
 
-        // debug (safe inside constructor)
         this.image.onload = () => {
             console.log("Traffic image loaded ✔");
         };
@@ -80,7 +79,12 @@ class TrafficCar {
             12
         );
 
-        if (this.image && this.image.complete && this.image.naturalWidth > 0) {
+        // 🚗 SAFE SPRITE RENDER
+        if (
+            this.image &&
+            this.image.complete &&
+            this.image.naturalWidth > 0
+        ) {
 
             ctx.drawImage(
                 this.image,
@@ -93,6 +97,7 @@ class TrafficCar {
             return;
         }
 
+        // fallback
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
