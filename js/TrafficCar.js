@@ -10,10 +10,6 @@ class TrafficCar {
 
         this.lane = 1;
 
-        // 🎮 GTA STYLE SPRITE SUPPORT
-        this.image = new Image();
-        this.image.src = "assets/cars/traffic.png";
-
         this.colors = [
             "#1e88e5",
             "#43a047",
@@ -22,6 +18,19 @@ class TrafficCar {
             "#757575",
             "#fdd835"
         ];
+
+        // 🚗 SINGLE IMAGE LOAD ONLY
+        this.image = new Image();
+        this.image.src = "assets/cars/traffic.png";
+
+        // debug (safe inside constructor)
+        this.image.onload = () => {
+            console.log("Traffic image loaded ✔");
+        };
+
+        this.image.onerror = () => {
+            console.log("Traffic image FAILED ❌");
+        };
 
         this.reset();
     }
@@ -32,7 +41,6 @@ class TrafficCar {
         const roadX = (this.canvas.width - roadWidth) / 2;
         const laneWidth = roadWidth / 3;
 
-        // SAFE LANE LOGIC (unchanged)
         if (lane !== null) {
             this.lane = lane;
         } else if (this.manager) {
@@ -55,7 +63,6 @@ class TrafficCar {
     }
 
     update(dt) {
-
         this.y += this.speed * dt;
 
         if (this.y > this.canvas.height + 200) {
@@ -65,7 +72,6 @@ class TrafficCar {
 
     render(ctx) {
 
-        // 🌫️ shadow (GTA feel)
         ctx.fillStyle = "rgba(0,0,0,.25)";
         ctx.fillRect(
             this.x + 6,
@@ -74,8 +80,7 @@ class TrafficCar {
             12
         );
 
-        // 🚗 SPRITE MODE (if loaded)
-        if (this.image && this.image.complete) {
+        if (this.image && this.image.complete && this.image.naturalWidth > 0) {
 
             ctx.drawImage(
                 this.image,
@@ -88,11 +93,9 @@ class TrafficCar {
             return;
         }
 
-        // fallback rectangle (if image not loaded)
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
-        // wheels fallback
         ctx.fillStyle = "#111";
         ctx.fillRect(this.x - 4, this.y + 18, 8, 20);
         ctx.fillRect(this.x + this.width - 4, this.y + 18, 8, 20);
