@@ -1,10 +1,3 @@
-/**
- * ============================================================
- * CarFX Pro Ultimate
- * Traffic Manager v2.0
- * ============================================================
- */
-
 class TrafficManager {
 
     constructor(canvas, player) {
@@ -15,35 +8,55 @@ class TrafficManager {
         this.cars = [];
 
         this.maxCars = 8;
-        this.minGap = 220;
+        this.minGap = 240;
 
         this.spawnInitialCars();
 
+        this.canvas._trafficManager = this;
     }
 
     spawnInitialCars() {
 
         for (let i = 0; i < this.maxCars; i++) {
 
-            const car = new TrafficCar(this.canvas);
+            const lane = this.getSafeLane();
+            const car = new TrafficCar(this.canvas, this);
 
-            car.y = -(i * this.minGap);
-
-            // Don't spawn in player's lane too close
-            if (
-                this.player &&
-                car.lane === this.player.lane
-            ) {
-                car.y -= this.minGap;
-            }
+            car.reset(lane, -(i * this.minGap));
 
             this.cars.push(car);
+        }
+    }
 
+    getSafeLane() {
+
+        const count = [0, 0, 0];
+
+        for (const c of this.cars) {
+            count[c.lane]++;
         }
 
+        // 🚫 REMOVE PLAYER LANE COMPLETELY
+        const available = [0, 1, 2].filter(l =>
+            !this.player || l !== this.player.lane
+        );
+
+        let best = available[0];
+
+        for (const l of available) {
+            if (count[l] < count[best]) {
+                best = l;
+            }
+        }
+
+        return best;
     }
 
     update(dt) {
+
+        for (const car of this.cars) {
+            car.update(dt);
+        }
 
         const lanes = [[], [], []];
 
@@ -55,63 +68,35 @@ class TrafficManager {
 
             laneCars.sort((a, b) => a.y - b.y);
 
-            for (let i = 0; i < laneCars.length; i++) {
+            for (let i = 1; i < laneCars.length; i++) {
 
-                const car = laneCars[i];
-                const front = laneCars[i + 1];
+                const front = laneCars[i - 1];
+                const back = laneCars[i];
 
-                car.update(dt);
+                const gap = back.y - (front.y + front.height);
 
-                // Prevent overlap with front traffic
-                if (front) {
+                if (gap < this.minGap) {
 
-                    const gap =
-                        front.y - (car.y + car.height);
+                    back.y = front.y + front.height + this.minGap;
 
-                    if (gap < this.minGap) {
-
-                        car.y =
-                            front.y -
-                            car.height -
-                            this.minGap;
-
-                        car.speed = Math.min(
-                            car.speed,
-                            front.speed
-                        );
-
+                    if (back.speed < front.speed) {
+                        back.speed = front.speed;
                     }
-
                 }
-
-                // Prevent overlap with player
-                if (
-                    this.player &&
-                    car.lane === this.player.lane
-                ) {
-
-                    const gap =
-                        this.player.y -
-                        (car.y + car.height);
-
-                    if (
-                        gap > 0 &&
-                        gap < this.minGap
-                    ) {
-
-                        car.y =
-                            this.player.y -
-                            car.height -
-                            this.minGap;
-
-                    }
-
-                }
-
             }
-
         }
 
+        // extra safety: player lane clear
+        for (const car of this.cars) {
+
+            if (this.player && car.lane === this.player.lane) {
+                const gap = this.player.y - (car.y + car.height);
+
+                if (gap > 0 && gap < this.minGap) {
+                    car.y = this.player.y - car.height - this.minGap;
+                }
+            }
+        }
     }
 
     render(ctx) {
@@ -119,9 +104,7 @@ class TrafficManager {
         for (const car of this.cars) {
             car.render(ctx);
         }
-
     }
-
 }
 
 window.TrafficManager = TrafficManager;
