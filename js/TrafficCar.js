@@ -8,6 +8,12 @@ class TrafficCar {
         this.width = 58;
         this.height = 110;
 
+        this.lane = 1;
+
+        // 🎮 GTA STYLE SPRITE SUPPORT
+        this.image = new Image();
+        this.image.src = "assets/cars/traffic.png";
+
         this.colors = [
             "#1e88e5",
             "#43a047",
@@ -16,8 +22,6 @@ class TrafficCar {
             "#757575",
             "#fdd835"
         ];
-
-        this.lane = 1;
 
         this.reset();
     }
@@ -28,7 +32,7 @@ class TrafficCar {
         const roadX = (this.canvas.width - roadWidth) / 2;
         const laneWidth = roadWidth / 3;
 
-        // FORCE SAFE LANE
+        // SAFE LANE LOGIC (unchanged)
         if (lane !== null) {
             this.lane = lane;
         } else if (this.manager) {
@@ -61,17 +65,39 @@ class TrafficCar {
 
     render(ctx) {
 
-        ctx.fillStyle = "rgba(0,0,0,.30)";
-        ctx.fillRect(this.x + 5, this.y + this.height - 10, this.width - 10, 10);
+        // 🌫️ shadow (GTA feel)
+        ctx.fillStyle = "rgba(0,0,0,.25)";
+        ctx.fillRect(
+            this.x + 6,
+            this.y + this.height - 12,
+            this.width - 12,
+            12
+        );
 
+        // 🚗 SPRITE MODE (if loaded)
+        if (this.image && this.image.complete) {
+
+            ctx.drawImage(
+                this.image,
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
+
+            return;
+        }
+
+        // fallback rectangle (if image not loaded)
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        // wheels fallback
         ctx.fillStyle = "#111";
         ctx.fillRect(this.x - 4, this.y + 18, 8, 20);
         ctx.fillRect(this.x + this.width - 4, this.y + 18, 8, 20);
         ctx.fillRect(this.x - 4, this.y + 75, 8, 20);
         ctx.fillRect(this.x + this.width - 4, this.y + 75, 8, 20);
-
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 }
 
