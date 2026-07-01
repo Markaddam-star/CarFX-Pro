@@ -9,9 +9,17 @@ class PlayerCar {
 
         this.lane = 1;
 
-        // 🎮 GTA STYLE SPRITE
+        // 🚗 SPRITE
         this.image = new Image();
         this.image.src = "assets/cars/player.png";
+
+        this.image.onload = () => {
+            console.log("Player image loaded ✔");
+        };
+
+        this.image.onerror = () => {
+            console.log("Player image FAILED ❌");
+        };
 
         this.resize();
     }
@@ -48,8 +56,12 @@ class PlayerCar {
             12
         );
 
-        // 🚗 SPRITE MODE
-        if (this.image && this.image.complete) {
+        // 🚗 SAFE SPRITE CHECK
+        if (
+            this.image &&
+            this.image.complete &&
+            this.image.naturalWidth > 0
+        ) {
 
             ctx.drawImage(
                 this.image,
@@ -62,7 +74,7 @@ class PlayerCar {
             return;
         }
 
-        // fallback (if image not loaded)
+        // fallback (no crash)
         ctx.fillStyle = "#d40000";
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
