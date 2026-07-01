@@ -12,7 +12,7 @@ class CarFXEngine {
         this.player = null;
         this.trafficManager = null;
 
-        // 🎥 GTA CAMERA SYSTEM
+        // 🎥 CAMERA SYSTEM
         this.cameraY = 0;
         this.cameraTargetY = 0;
 
@@ -32,10 +32,24 @@ class CarFXEngine {
 
         this.canvas._trafficManager = this.trafficManager;
 
+        // 🚀 SAFE: preload assets (fix missing images issue)
+        this.preloadAssets();
+
         this.running = true;
         this.lastTime = performance.now();
 
         requestAnimationFrame(this.loop);
+    }
+
+    preloadAssets() {
+
+        const img1 = new Image();
+        const img2 = new Image();
+
+        img1.src = chrome.runtime.getURL("assets/cars/player.png");
+        img2.src = chrome.runtime.getURL("assets/cars/traffic.png");
+
+        console.log("🧩 Assets preloading...");
     }
 
     createCanvas() {
@@ -58,6 +72,10 @@ class CarFXEngine {
         document.body.appendChild(this.canvas);
 
         this.ctx = this.canvas.getContext("2d");
+
+        // 🎨 better visuals
+        this.ctx.imageSmoothingEnabled = true;
+        this.ctx.imageSmoothingQuality = "high";
 
         window.addEventListener("resize", () => {
 
@@ -102,9 +120,12 @@ class CarFXEngine {
         if (this.player) this.player.update(dt);
         if (this.trafficManager) this.trafficManager.update(dt);
 
-        // 🎥 CAMERA FOLLOW PLAYER (GTA STYLE)
+        // 🎥 smooth GTA camera
         this.cameraTargetY = this.player.y - this.canvas.height * 0.7;
-        this.cameraY += (this.cameraTargetY - this.cameraY) * 0.08;
+
+        this.cameraY += (this.cameraTargetY - this.cameraY) * 0.12;
+
+        if (this.cameraY < 0) this.cameraY = 0;
     }
 
     render() {
@@ -113,7 +134,7 @@ class CarFXEngine {
 
         this.ctx.save();
 
-        // 🎥 WORLD MOVEMENT
+        // 🎥 world transform
         this.ctx.translate(0, -this.cameraY);
 
         if (this.road) this.road.render(this.ctx);
