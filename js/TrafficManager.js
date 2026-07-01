@@ -8,7 +8,7 @@ class TrafficManager {
         this.cars = [];
 
         this.maxCars = 8;
-        this.minGap = 240;
+        this.minGap = 260;
 
         this.spawnInitialCars();
 
@@ -19,8 +19,9 @@ class TrafficManager {
 
         for (let i = 0; i < this.maxCars; i++) {
 
-            const lane = this.getSafeLane();
             const car = new TrafficCar(this.canvas, this);
+
+            const lane = this.getSafeLane();
 
             car.reset(lane, -(i * this.minGap));
 
@@ -36,7 +37,6 @@ class TrafficManager {
             count[c.lane]++;
         }
 
-        // 🚫 REMOVE PLAYER LANE COMPLETELY
         const available = [0, 1, 2].filter(l =>
             !this.player || l !== this.player.lane
         );
@@ -82,18 +82,6 @@ class TrafficManager {
                     if (back.speed < front.speed) {
                         back.speed = front.speed;
                     }
-                }
-            }
-        }
-
-        // extra safety: player lane clear
-        for (const car of this.cars) {
-
-            if (this.player && car.lane === this.player.lane) {
-                const gap = this.player.y - (car.y + car.height);
-
-                if (gap > 0 && gap < this.minGap) {
-                    car.y = this.player.y - car.height - this.minGap;
                 }
             }
         }
