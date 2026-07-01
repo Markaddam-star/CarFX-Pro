@@ -12,25 +12,24 @@ class CarFXEngine {
         this.player = null;
         this.trafficManager = null;
 
+        // 🎥 GTA CAMERA SYSTEM
+        this.cameraY = 0;
+        this.cameraTargetY = 0;
+
         this.loop = this.loop.bind(this);
     }
 
     init() {
 
-        console.log("🚗 CarFX Engine Started");
+        console.log("🚗 CarFX GTA Engine Started");
 
         this.createCanvas();
 
-        // Road
         this.road = new Road(this.canvas);
-
-        // Player
         this.player = new PlayerCar(this.canvas);
 
-        // Traffic Manager (IMPORTANT ORDER FIX)
         this.trafficManager = new TrafficManager(this.canvas, this.player);
 
-        // Safe global reference (used for lane control)
         this.canvas._trafficManager = this.trafficManager;
 
         this.running = true;
@@ -67,13 +66,6 @@ class CarFXEngine {
 
             if (this.road) this.road.resize();
             if (this.player) this.player.resize();
-
-            // 🔥 IMPORTANT: traffic recalibration on resize
-            if (this.trafficManager) {
-                this.trafficManager.cars.forEach(car => {
-                    car.reset(car.lane, car.y);
-                });
-            }
         });
     }
 
@@ -109,15 +101,26 @@ class CarFXEngine {
         if (this.road) this.road.update(dt);
         if (this.player) this.player.update(dt);
         if (this.trafficManager) this.trafficManager.update(dt);
+
+        // 🎥 CAMERA FOLLOW PLAYER (GTA STYLE)
+        this.cameraTargetY = this.player.y - this.canvas.height * 0.7;
+        this.cameraY += (this.cameraTargetY - this.cameraY) * 0.08;
     }
 
     render() {
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+        this.ctx.save();
+
+        // 🎥 WORLD MOVEMENT
+        this.ctx.translate(0, -this.cameraY);
+
         if (this.road) this.road.render(this.ctx);
         if (this.trafficManager) this.trafficManager.render(this.ctx);
         if (this.player) this.player.render(this.ctx);
+
+        this.ctx.restore();
     }
 }
 
