@@ -1,40 +1,83 @@
+/**
+ * ============================================================
+ * CarFX Pro Ultimate
+ * Renderer v2.0.0
+ * Cinematic Layer Pipeline
+ * ============================================================
+ */
+
 class Renderer {
 
     constructor(scene) {
 
         this.scene = scene;
-        this.frame = 0;
 
+        this.frame = 0;
         this.ctx = null;
+
+        this.layers = [
+            "background",
+            "road",
+            "traffic",
+            "player",
+            "effects",
+            "lighting",
+            "hud"
+        ];
+
     }
 
     attach(ctx) {
         this.ctx = ctx;
     }
 
-    render(objectManager) {
+    beginFrame() {
 
-        if (!objectManager || !this.ctx) return;
+        if (!this.ctx) return;
+
+        const canvas = this.ctx.canvas;
+
+        this.ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
 
         this.frame++;
-
-        this.clear();
-
-        objectManager.render(this);
     }
 
-    clear() {
+    render(objectManager) {
 
-        const ctx = this.ctx;
-        const canvas = ctx.canvas;
+        if (!this.ctx || !objectManager) return;
 
-        // 🧼 clean frame every render
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        this.beginFrame();
+
+        for (const layer of this.layers) {
+
+            if (typeof objectManager.renderLayer === "function") {
+
+                objectManager.renderLayer(layer, this);
+
+            } else {
+
+                objectManager.render(this);
+
+                break;
+            }
+
+        }
+
+    }
+
+    getContext() {
+        return this.ctx;
     }
 
     getFrameCount() {
         return this.frame;
     }
+
 }
 
 window.Renderer = Renderer;
