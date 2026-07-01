@@ -1,10 +1,3 @@
-/**
- * ============================================================
- * CarFX Pro Ultimate
- * Engine v2.0
- * ============================================================
- */
-
 class CarFXEngine {
 
     constructor() {
@@ -20,7 +13,6 @@ class CarFXEngine {
         this.trafficManager = null;
 
         this.loop = this.loop.bind(this);
-
     }
 
     init() {
@@ -29,17 +21,22 @@ class CarFXEngine {
 
         this.createCanvas();
 
+        // Road
         this.road = new Road(this.canvas);
+
+        // Player
         this.player = new PlayerCar(this.canvas);
 
-        // Traffic Manager
-        this.trafficManager = new TrafficManager(this.canvas);
+        // Traffic Manager (IMPORTANT ORDER FIX)
+        this.trafficManager = new TrafficManager(this.canvas, this.player);
+
+        // Safe global reference (used for lane control)
+        this.canvas._trafficManager = this.trafficManager;
 
         this.running = true;
         this.lastTime = performance.now();
 
         requestAnimationFrame(this.loop);
-
     }
 
     createCanvas() {
@@ -71,8 +68,13 @@ class CarFXEngine {
             if (this.road) this.road.resize();
             if (this.player) this.player.resize();
 
+            // 🔥 IMPORTANT: traffic recalibration on resize
+            if (this.trafficManager) {
+                this.trafficManager.cars.forEach(car => {
+                    car.reset(car.lane, car.y);
+                });
+            }
         });
-
     }
 
     start() {
@@ -83,13 +85,10 @@ class CarFXEngine {
         this.lastTime = performance.now();
 
         requestAnimationFrame(this.loop);
-
     }
 
     stop() {
-
         this.running = false;
-
     }
 
     loop(time) {
@@ -103,7 +102,6 @@ class CarFXEngine {
         this.render();
 
         requestAnimationFrame(this.loop);
-
     }
 
     update(dt) {
@@ -111,28 +109,16 @@ class CarFXEngine {
         if (this.road) this.road.update(dt);
         if (this.player) this.player.update(dt);
         if (this.trafficManager) this.trafficManager.update(dt);
-
     }
 
     render() {
 
-        this.ctx.clearRect(
-            0,
-            0,
-            this.canvas.width,
-            this.canvas.height
-        );
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         if (this.road) this.road.render(this.ctx);
-
-        if (this.trafficManager)
-            this.trafficManager.render(this.ctx);
-
-        if (this.player)
-            this.player.render(this.ctx);
-
+        if (this.trafficManager) this.trafficManager.render(this.ctx);
+        if (this.player) this.player.render(this.ctx);
     }
-
 }
 
 window.CarFXEngine = CarFXEngine;
