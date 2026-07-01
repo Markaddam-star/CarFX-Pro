@@ -9,9 +9,9 @@ class PlayerCar {
 
         this.lane = 1;
 
-        // 🚗 SPRITE
+        // 🚗 FIX: Chrome Extension safe path
         this.image = new Image();
-        this.image.src = "assets/cars/player.png";
+        this.image.src = chrome.runtime.getURL("assets/cars/player.png");
 
         this.image.onload = () => {
             console.log("Player image loaded ✔");
@@ -47,7 +47,6 @@ class PlayerCar {
 
     render(ctx) {
 
-        // 🌫️ shadow (GTA depth)
         ctx.fillStyle = "rgba(0,0,0,.25)";
         ctx.fillRect(
             this.x + 6,
@@ -56,7 +55,6 @@ class PlayerCar {
             12
         );
 
-        // 🚗 SAFE SPRITE CHECK
         if (
             this.image &&
             this.image.complete &&
@@ -74,7 +72,7 @@ class PlayerCar {
             return;
         }
 
-        // fallback (no crash)
+        // fallback (safe)
         ctx.fillStyle = "#d40000";
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
