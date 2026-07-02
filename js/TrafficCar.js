@@ -1,15 +1,6 @@
-/**
- * ============================================================
- * CarFX Pro Ultimate
- * Traffic Car v2.3
- * Procedural Traffic Vehicle
- * ============================================================
- */
-
 class TrafficCar {
 
     constructor(canvas, manager = null) {
-
         this.canvas = canvas;
         this.manager = manager;
 
@@ -29,20 +20,11 @@ class TrafficCar {
         const roadX = (this.canvas.width - roadWidth) / 2;
         const laneWidth = roadWidth / 3;
 
-        if (lane !== null) {
+        this.lane =
+            lane !== null
+                ? lane
+                : Math.floor(Math.random() * 3);
 
-            this.lane = lane;
-
-        } else if (this.manager) {
-
-            this.lane = this.manager.getSafeLane();
-
-        } else {
-
-            this.lane = Math.floor(Math.random() * 3);
-        }
-
-        // Generate a new random vehicle
         this.vehicle = VehicleFactory.random();
 
         this.width = this.vehicle.width;
@@ -56,39 +38,28 @@ class TrafficCar {
         this.y =
             y !== null
                 ? y
-                : (-this.height - Math.random() * 900);
+                : -Math.random() * 800 - this.height;
 
         this.speed = 180 + Math.random() * 220;
     }
 
     update(dt) {
-
         this.y += this.speed * dt;
 
         if (this.y > this.canvas.height + 200) {
-
             this.reset();
-
         }
-
     }
 
     render(ctx) {
-
         CarRenderer.draw(ctx, {
-
             x: this.x,
             y: this.y,
-
             width: this.width,
             height: this.height,
-
             color: this.vehicle.color
-
         });
-
     }
-
 }
 
 window.TrafficCar = TrafficCar;
