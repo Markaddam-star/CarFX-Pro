@@ -19,27 +19,6 @@ class Road {
         this.resize();
     }
 
-    getLaneWidth() {
-        return this.roadWidth / 3;
-    }
-
-    getLaneCenter(lane) {
-        const laneWidth = this.getLaneWidth();
-
-        return (
-            this.x +
-            lane * laneWidth +
-            laneWidth / 2
-        );
-    }
-
-    getLaneX(lane, vehicleWidth) {
-        return (
-            this.getLaneCenter(lane) -
-            vehicleWidth / 2
-        );
-    }
-
     resize() {
         this.width = this.canvas.width;
         this.height = this.canvas.height;
@@ -61,30 +40,10 @@ class Road {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // 🌤 SKY
-        const sky = ctx.createLinearGradient(0, 0, 0, h);
-        sky.addColorStop(0, "#081321");
-        sky.addColorStop(0.45, "#17304f");
-        sky.addColorStop(1, "#2c2c2c");
-
-        ctx.fillStyle = sky;
-        ctx.fillRect(0, 0, w, h);
-
-        // 🌫 Fog
-        ctx.fillStyle = "rgba(255,255,255,0.06)";
-        ctx.fillRect(0, 0, w, h);
-
         const roadW = this.roadWidth;
         const roadX = this.x;
 
-        // Asphalt
-        const asphalt = ctx.createLinearGradient(
-            roadX,
-            0,
-            roadX + roadW,
-            0
-        );
-
+        const asphalt = ctx.createLinearGradient(roadX, 0, roadX + roadW, 0);
         asphalt.addColorStop(0, "#181818");
         asphalt.addColorStop(0.5, "#323232");
         asphalt.addColorStop(1, "#181818");
@@ -92,9 +51,7 @@ class Road {
         ctx.fillStyle = asphalt;
         ctx.fillRect(roadX, 0, roadW, h);
 
-        // Asphalt Noise
         ctx.fillStyle = "rgba(255,255,255,0.025)";
-
         for (const dot of this.asphaltNoise) {
             ctx.fillRect(
                 roadX + dot.x * roadW,
@@ -104,38 +61,28 @@ class Road {
             );
         }
 
-        // Road edges
         ctx.fillStyle = "#0f0f0f";
         ctx.fillRect(roadX - 6, 0, 6, h);
         ctx.fillRect(roadX + roadW, 0, 6, h);
 
-        // Lane lines
         ctx.strokeStyle = "#ffd94d";
         ctx.lineWidth = 5;
 
-        this.drawLane(ctx, roadX + roadW / 3);
-        this.drawLane(ctx, roadX + roadW * 2 / 3);
+        const laneWidth = roadW / 3;
 
-        // Vignette
-        const fade = ctx.createLinearGradient(0, 0, 0, h);
+        for (let lane = 1; lane <= 2; lane++) {
 
-        fade.addColorStop(0, "rgba(0,0,0,0.35)");
-        fade.addColorStop(0.2, "transparent");
-        fade.addColorStop(0.8, "transparent");
-        fade.addColorStop(1, "rgba(0,0,0,0.35)");
+            const x = roadX + laneWidth * lane;
 
-        ctx.fillStyle = fade;
-        ctx.fillRect(0, 0, w, h);
-    }
+            for (let i = 0; i < 20; i++) {
 
-    drawLane(ctx, x) {
+                const y = (i * 80 + this.laneOffset) % (h + 100);
 
-        for (let y = -80 + this.laneOffset; y < this.height; y += 80) {
-
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x, y + 40);
-            ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x, y + 40);
+                ctx.stroke();
+            }
         }
     }
 }
