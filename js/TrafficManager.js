@@ -1,6 +1,6 @@
 class TrafficManager {
 
-    constructor(canvas, player) {
+    constructor(canvas, player = null) {
 
         this.canvas = canvas;
         this.player = player;
@@ -11,59 +11,38 @@ class TrafficManager {
         this.minGap = 260;
 
         this.spawnInitialCars();
-
-        this.canvas._trafficManager = this;
     }
 
     spawnInitialCars() {
 
         for (let i = 0; i < this.maxCars; i++) {
 
-            const car = new TrafficCar(this.canvas, this);
+            const car = new TrafficCar(this.canvas);
 
-            const lane = this.getSafeLane();
+            const lane = Math.floor(Math.random() * 3);
 
+            // stagger spawn positions
             car.reset(lane, -(i * this.minGap));
 
             this.cars.push(car);
         }
     }
 
-    getSafeLane() {
-
-        const count = [0, 0, 0];
-
-        for (const c of this.cars) {
-            count[c.lane]++;
-        }
-
-        const available = [0, 1, 2].filter(l =>
-            !this.player || l !== this.player.lane
-        );
-
-        let best = available[0];
-
-        for (const l of available) {
-            if (count[l] < count[best]) {
-                best = l;
-            }
-        }
-
-        return best;
-    }
-
     update(dt) {
 
+        // update all cars
         for (const car of this.cars) {
             car.update(dt);
         }
 
+        // lane grouping for safe spacing
         const lanes = [[], [], []];
 
         for (const car of this.cars) {
             lanes[car.lane].push(car);
         }
 
+        // enforce safe distance per lane
         for (const laneCars of lanes) {
 
             laneCars.sort((a, b) => a.y - b.y);
@@ -79,9 +58,7 @@ class TrafficManager {
 
                     back.y = front.y + front.height + this.minGap;
 
-                    if (back.speed < front.speed) {
-                        back.speed = front.speed;
-                    }
+                    back.speed = Math.max(back.speed, front.speed);
                 }
             }
         }
@@ -89,9 +66,10 @@ class TrafficManager {
 
     render(ctx) {
 
-        for (const car of this.cars) {
-            car.render(ctx);
-        }
+        // 🔥 CRITICAL FIX: draw from back to front
+        this.cars
+            .sort((a, b) => a.y - b.y)
+            .forEach(car => car.render(ctx));
     }
 }
 
