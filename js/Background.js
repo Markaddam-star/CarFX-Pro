@@ -64,6 +64,28 @@ class Background {
             120,
             "rgba(10,10,20,0.45)"
         );
+       // Demo Player Vehicle
+const car = this.playerVehicle;
+
+const carWidth = car.width;
+const carHeight = car.height;
+
+const x = (w - carWidth) / 2;
+const y = h - 180;
+
+ctx.fillStyle = car.color;
+ctx.fillRect(x, y, carWidth, carHeight);
+
+ctx.fillStyle = "#202020";
+ctx.fillRect(x + 6, y + 12, carWidth - 12, 28);
+
+ctx.fillStyle = "#000";
+ctx.beginPath();
+ctx.arc(x + 12, y + 20, car.wheelSize, 0, Math.PI * 2);
+ctx.arc(x + carWidth - 12, y + 20, car.wheelSize, 0, Math.PI * 2);
+ctx.arc(x + 12, y + carHeight - 20, car.wheelSize, 0, Math.PI * 2);
+ctx.arc(x + carWidth - 12, y + carHeight - 20, car.wheelSize, 0, Math.PI * 2);
+ctx.fill();
     }
 
     drawCityLayer(ctx, w, h, offset, baseHeight, color) {
