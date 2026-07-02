@@ -34,14 +34,21 @@
         "<all_urls>"
       ],
       "js": [
-        "js/road.js",
-        "js/car.js",
-        "js/TrafficCar.js",
-        "js/TrafficManager.js",
-        "js/Background.js",
-        "js/engine.js",
-        "content.js"
-      ],
+  "js/VehicleFactory.js",
+  "js/CarRenderer.js",
+
+  "js/Background.js",
+  "js/road.js",
+
+  "js/car.js",
+
+  "js/TrafficCar.js",
+  "js/TrafficManager.js",
+
+  "js/engine.js",
+
+  "content.js"
+],
       "run_at": "document_idle"
     }
   ]
