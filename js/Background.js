@@ -7,23 +7,24 @@
 
 class Background {
 
-   constructor(canvas) {
+    constructor(canvas) {
 
-    this.canvas = canvas;
+        this.canvas = canvas;
 
-    this.farOffset = 0;
-    this.nearOffset = 0;
+        this.farOffset = 0;
+        this.nearOffset = 0;
 
-    this.farSpeed = 15;
-    this.nearSpeed = 40;
+        this.farSpeed = 15;
+        this.nearSpeed = 40;
 
-    // Vehicle Factory
-    this.vehicleFactory = window.VehicleFactory;
-    this.playerVehicle = this.vehicleFactory.player();
-}
+        // Vehicle Factory
+        this.vehicleFactory = window.VehicleFactory;
+        this.playerVehicle = this.vehicleFactory.player();
+    }
+
     update(dt) {
 
-        // 🌆 parallax movement
+        // 🌆 Parallax movement
         this.farOffset += this.farSpeed * dt;
         this.nearOffset += this.nearSpeed * dt;
     }
@@ -45,7 +46,7 @@ class Background {
         ctx.fillStyle = "rgba(255,255,255,0.06)";
         ctx.fillRect(0, 0, w, h);
 
-        // 🌆 FAR BUILDINGS (slow layer)
+        // 🌆 FAR BUILDINGS
         this.drawCityLayer(
             ctx,
             w,
@@ -55,7 +56,7 @@ class Background {
             "rgba(20,20,30,0.25)"
         );
 
-        // 🌆 NEAR BUILDINGS (fast layer)
+        // 🌆 NEAR BUILDINGS
         this.drawCityLayer(
             ctx,
             w,
@@ -64,28 +65,16 @@ class Background {
             120,
             "rgba(10,10,20,0.45)"
         );
-       // Demo Player Vehicle
-const car = this.playerVehicle;
 
-const carWidth = car.width;
-const carHeight = car.height;
+        // 🚗 Player Vehicle
+        CarRenderer.draw(ctx, {
+            x: (w - this.playerVehicle.width) / 2,
+            y: h - 180,
+            width: this.playerVehicle.width,
+            height: this.playerVehicle.height,
+            color: this.playerVehicle.color
+        });
 
-const x = (w - carWidth) / 2;
-const y = h - 180;
-
-ctx.fillStyle = car.color;
-ctx.fillRect(x, y, carWidth, carHeight);
-
-ctx.fillStyle = "#202020";
-ctx.fillRect(x + 6, y + 12, carWidth - 12, 28);
-
-ctx.fillStyle = "#000";
-ctx.beginPath();
-ctx.arc(x + 12, y + 20, car.wheelSize, 0, Math.PI * 2);
-ctx.arc(x + carWidth - 12, y + 20, car.wheelSize, 0, Math.PI * 2);
-ctx.arc(x + 12, y + carHeight - 20, car.wheelSize, 0, Math.PI * 2);
-ctx.arc(x + carWidth - 12, y + carHeight - 20, car.wheelSize, 0, Math.PI * 2);
-ctx.fill();
     }
 
     drawCityLayer(ctx, w, h, offset, baseHeight, color) {
@@ -96,7 +85,9 @@ ctx.fill();
 
             let x = (i * 160 - offset) % (w + 300);
 
-            if (x < -200) x += w + 300;
+            if (x < -200) {
+                x += w + 300;
+            }
 
             const height = baseHeight + (i % 4) * 50;
 
@@ -108,6 +99,7 @@ ctx.fill();
             );
         }
     }
+
 }
 
 window.Background = Background;
