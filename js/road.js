@@ -24,7 +24,7 @@ class Road {
         this.height = this.canvas.height;
 
         this.roadWidth = Math.min(500, this.width * 0.5);
-        this.x = (this.width - this.roadWidth) / 2;
+        this.x = (this.canvas.width - this.roadWidth) / 2;
     }
 
     update(dt) {
@@ -42,18 +42,14 @@ class Road {
 
     render(ctx) {
 
-        const w = this.width;
         const h = this.height;
-
         const roadX = this.x;
         const roadW = this.roadWidth;
 
         ctx.save();
 
-        // clip road area
-        ctx.beginPath();
-        ctx.rect(roadX, 0, roadW, h);
-        ctx.clip();
+        // smooth blend
+        ctx.globalAlpha = 0.95;
 
         // asphalt
         const g = ctx.createLinearGradient(roadX, 0, roadX + roadW, 0);
@@ -62,7 +58,9 @@ class Road {
         g.addColorStop(1, "#181818");
 
         ctx.fillStyle = g;
-        ctx.fillRect(roadX, 0, roadW, h);
+        ctx.fillRect(roadX, -50, roadW, h + 100);
+
+        ctx.globalAlpha = 1;
 
         // noise
         ctx.fillStyle = "rgba(255,255,255,0.025)";
