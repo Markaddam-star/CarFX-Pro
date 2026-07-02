@@ -1,10 +1,3 @@
-/**
- * ============================================================
- * CarFX Pro Ultimate
- * Engine v1.0 (STABLE GTA VERSION)
- * ============================================================
- */
-
 class CarFXEngine {
 
     constructor() {
@@ -20,7 +13,7 @@ class CarFXEngine {
         this.player = null;
         this.trafficManager = null;
 
-        // 🎥 CAMERA SYSTEM
+        // 🎥 CAMERA
         this.cameraY = 0;
         this.cameraTargetY = 0;
 
@@ -33,7 +26,6 @@ class CarFXEngine {
 
         this.createCanvas();
 
-        // 🌆 SAFE INIT (no crash if class missing)
         this.background = window.Background ? new Background(this.canvas) : null;
         this.road = window.Road ? new Road(this.canvas) : null;
         this.player = window.PlayerCar ? new PlayerCar(this.canvas) : null;
@@ -41,23 +33,10 @@ class CarFXEngine {
             ? new TrafficManager(this.canvas, this.player)
             : null;
 
-        this.preloadAssets();
-
         this.running = true;
         this.lastTime = performance.now();
 
         requestAnimationFrame(this.loop);
-    }
-
-    preloadAssets() {
-
-        const p = new Image();
-        const t = new Image();
-
-        p.src = chrome.runtime.getURL("assets/cars/player.png");
-        t.src = chrome.runtime.getURL("assets/cars/traffic.png");
-
-        console.log("🧩 Assets preloading...");
     }
 
     createCanvas() {
@@ -81,26 +60,20 @@ class CarFXEngine {
 
         this.ctx = this.canvas.getContext("2d");
 
-        this.ctx.imageSmoothingEnabled = true;
-        this.ctx.imageSmoothingQuality = "high";
-
         window.addEventListener("resize", () => {
 
             this.canvas.width = window.innerWidth;
             this.canvas.height = window.innerHeight;
 
-            if (this.road) this.road.resize();
-            if (this.player) this.player.resize();
+            this.road?.resize();
+            this.player?.resize();
         });
     }
 
     start() {
-
         if (this.running) return;
-
         this.running = true;
         this.lastTime = performance.now();
-
         requestAnimationFrame(this.loop);
     }
 
@@ -123,17 +96,18 @@ class CarFXEngine {
 
     update(dt) {
 
-        if (this.background) this.background.update(dt);
-        if (this.road) this.road.update(dt);
-        if (this.player) this.player.update(dt);
-        if (this.trafficManager) this.trafficManager.update(dt);
+        this.background?.update(dt);
+        this.road?.update(dt);
+        this.player?.update(dt);
+        this.trafficManager?.update(dt);
 
-        // 🎥 CAMERA FOLLOW
+        // 🎥 SMOOTH CAMERA FOLLOW (FIXED)
         if (this.player) {
-            this.cameraTargetY =
-                this.player.y - this.canvas.height * 0.7;
 
-            this.cameraY += (this.cameraTargetY - this.cameraY) * 0.12;
+            this.cameraTargetY =
+                this.player.y - this.canvas.height * 0.65;
+
+            this.cameraY += (this.cameraTargetY - this.cameraY) * 0.10;
 
             if (this.cameraY < 0) this.cameraY = 0;
         }
@@ -141,38 +115,28 @@ class CarFXEngine {
 
     render() {
 
-        this.ctx.clearRect(
-            0,
-            0,
-            this.canvas.width,
-            this.canvas.height
-        );
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // 🌆 BACKGROUND (NO CAMERA)
-        if (this.background) {
-            this.background.render(this.ctx);
-        }
+        this.background?.render(this.ctx);
 
         this.ctx.save();
 
-        // 🎥 WORLD (CAMERA)
+        // 🎥 WORLD CAMERA
         this.ctx.translate(0, -this.cameraY);
 
-        if (this.road) {
-            this.ctx.globalAlpha = 0.97;
-            this.road.render(this.ctx);
-            this.ctx.globalAlpha = 1;
-        }
+        // 🛣 ROAD FIRST
+        this.road?.render(this.ctx);
 
-        if (this.trafficManager)
-            this.trafficManager.render(this.ctx);
+        // 🚗 TRAFFIC
+        this.trafficManager?.render(this.ctx);
 
-        if (this.player)
-            this.player.render(this.ctx);
+        // 🚘 PLAYER LAST (IMPORTANT FIX)
+        this.player?.render(this.ctx);
 
         this.ctx.restore();
 
-        // 🌫 FINAL FOG OVERLAY
+        // 🌫 LIGHT FOG (ONLY SCREEN SPACE)
         const fog = this.ctx.createLinearGradient(
             0,
             0,
@@ -180,16 +144,11 @@ class CarFXEngine {
             this.canvas.height
         );
 
-        fog.addColorStop(0, "rgba(255,255,255,0.02)");
-        fog.addColorStop(1, "rgba(0,0,0,0.25)");
+        fog.addColorStop(0, "rgba(255,255,255,0.015)");
+        fog.addColorStop(1, "rgba(0,0,0,0.22)");
 
         this.ctx.fillStyle = fog;
-        this.ctx.fillRect(
-            0,
-            0,
-            this.canvas.width,
-            this.canvas.height
-        );
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 }
 
