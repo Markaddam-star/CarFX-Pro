@@ -29,54 +29,68 @@ class Road {
 
     update(dt) {
         this.laneOffset += this.speed * dt;
+        if (this.laneOffset >= 80) this.laneOffset = 0;
+    }
 
-        if (this.laneOffset >= 80) {
-            this.laneOffset = 0;
-        }
+    getLaneWidth() {
+        return this.roadWidth / 3;
+    }
+
+    getLaneCenter(lane) {
+        return this.x + lane * this.getLaneWidth() + this.getLaneWidth() / 2;
     }
 
     render(ctx) {
 
-        const w = this.canvas.width;
-        const h = this.canvas.height;
+        const w = this.width;
+        const h = this.height;
 
-        const roadW = this.roadWidth;
         const roadX = this.x;
+        const roadW = this.roadWidth;
 
-        const asphalt = ctx.createLinearGradient(roadX, 0, roadX + roadW, 0);
-        asphalt.addColorStop(0, "#181818");
-        asphalt.addColorStop(0.5, "#323232");
-        asphalt.addColorStop(1, "#181818");
+        ctx.save();
 
-        ctx.fillStyle = asphalt;
+        // clip road area
+        ctx.beginPath();
+        ctx.rect(roadX, 0, roadW, h);
+        ctx.clip();
+
+        // asphalt
+        const g = ctx.createLinearGradient(roadX, 0, roadX + roadW, 0);
+        g.addColorStop(0, "#181818");
+        g.addColorStop(0.5, "#323232");
+        g.addColorStop(1, "#181818");
+
+        ctx.fillStyle = g;
         ctx.fillRect(roadX, 0, roadW, h);
 
+        // noise
         ctx.fillStyle = "rgba(255,255,255,0.025)";
-        for (const dot of this.asphaltNoise) {
+        for (const d of this.asphaltNoise) {
             ctx.fillRect(
-                roadX + dot.x * roadW,
-                dot.y * h,
-                dot.s,
-                dot.s
+                roadX + d.x * roadW,
+                d.y * h,
+                d.s,
+                d.s
             );
         }
 
+        // edges
         ctx.fillStyle = "#0f0f0f";
         ctx.fillRect(roadX - 6, 0, 6, h);
         ctx.fillRect(roadX + roadW, 0, 6, h);
 
+        // lane lines
         ctx.strokeStyle = "#ffd94d";
         ctx.lineWidth = 5;
 
-        const laneWidth = roadW / 3;
+        const laneW = roadW / 3;
 
-        for (let lane = 1; lane <= 2; lane++) {
+        for (let i = 1; i <= 2; i++) {
+            const x = roadX + laneW * i;
 
-            const x = roadX + laneWidth * lane;
-
-            for (let i = 0; i < 20; i++) {
-
-                const y = (i * 80 + this.laneOffset) % (h + 100);
+            for (let j = 0; j < 20; j++) {
+                const y = (j * 80 + this.laneOffset) % (h + 100);
 
                 ctx.beginPath();
                 ctx.moveTo(x, y);
@@ -84,6 +98,8 @@ class Road {
                 ctx.stroke();
             }
         }
+
+        ctx.restore();
     }
 }
 
