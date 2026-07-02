@@ -42,6 +42,7 @@ class TrafficCar {
     }
 
     render(ctx) {
+
         CarRenderer.draw(ctx, {
             x: this.x,
             y: this.y,
