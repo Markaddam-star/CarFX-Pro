@@ -48,21 +48,23 @@ class Road {
 
         ctx.save();
 
-        // smooth blend
-        ctx.globalAlpha = 0.95;
+        // 🔒 CLIP ROAD AREA (IMPORTANT FIX)
+        ctx.beginPath();
+        ctx.rect(roadX, -200, roadW, h + 400);
+        ctx.clip();
 
-        // asphalt
+        // 🌑 ROAD BASE
         const g = ctx.createLinearGradient(roadX, 0, roadX + roadW, 0);
         g.addColorStop(0, "#181818");
         g.addColorStop(0.5, "#323232");
         g.addColorStop(1, "#181818");
 
+        ctx.globalAlpha = 0.96;
         ctx.fillStyle = g;
-        ctx.fillRect(roadX, -50, roadW, h + 100);
-
+        ctx.fillRect(roadX, -200, roadW, h + 400);
         ctx.globalAlpha = 1;
 
-        // noise
+        // 🟤 NOISE
         ctx.fillStyle = "rgba(255,255,255,0.025)";
         for (const d of this.asphaltNoise) {
             ctx.fillRect(
@@ -73,12 +75,12 @@ class Road {
             );
         }
 
-        // edges
+        // 🧱 EDGES
         ctx.fillStyle = "#0f0f0f";
-        ctx.fillRect(roadX - 6, 0, 6, h);
-        ctx.fillRect(roadX + roadW, 0, 6, h);
+        ctx.fillRect(roadX - 6, -200, 6, h + 400);
+        ctx.fillRect(roadX + roadW, -200, 6, h + 400);
 
-        // lane lines
+        // 🚧 LANE MARKERS
         ctx.strokeStyle = "#ffd94d";
         ctx.lineWidth = 5;
 
