@@ -1,18 +1,9 @@
-/**
- * ============================================================
- * CarFX Pro Ultimate
- * Player Car v2.3
- * Procedural Vehicle System
- * ============================================================
- */
-
 class PlayerCar {
 
     constructor(canvas) {
 
         this.canvas = canvas;
 
-        // Player vehicle data
         this.vehicle = VehicleFactory.player();
 
         this.width = this.vehicle.width;
@@ -32,6 +23,7 @@ class PlayerCar {
         const roadX = (this.canvas.width - roadWidth) / 2;
         const laneWidth = roadWidth / 3;
 
+        // ✅ FIX: always recalc correct position on resize
         this.x =
             roadX +
             this.lane * laneWidth +
@@ -40,17 +32,11 @@ class PlayerCar {
         this.y =
             this.canvas.height -
             this.height -
-            40;
+            30;
     }
 
     update(dt) {
-
-        // Future:
-        // Steering
-        // Nitro
-        // Drift
-        // Collision
-        // Damage
+        // reserved for controls
     }
 
     render(ctx) {
@@ -62,9 +48,7 @@ class PlayerCar {
             height: this.height,
             color: this.vehicle.color
         });
-
     }
-
 }
 
 window.PlayerCar = PlayerCar;
