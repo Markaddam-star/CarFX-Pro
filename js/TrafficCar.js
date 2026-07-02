@@ -1,15 +1,14 @@
 class TrafficCar {
 
-    constructor(canvas, manager = null) {
+    constructor(canvas) {
         this.canvas = canvas;
-        this.manager = manager;
 
         this.vehicle = VehicleFactory.random();
 
         this.width = this.vehicle.width;
         this.height = this.vehicle.height;
 
-        this.lane = 1;
+        this.lane = Math.floor(Math.random() * 3);
 
         this.reset();
     }
@@ -18,27 +17,18 @@ class TrafficCar {
 
         const roadWidth = Math.min(500, this.canvas.width * 0.5);
         const roadX = (this.canvas.width - roadWidth) / 2;
-        const laneWidth = roadWidth / 3;
+        const laneW = roadWidth / 3;
 
-        this.lane =
-            lane !== null
-                ? lane
-                : Math.floor(Math.random() * 3);
+        this.lane = lane !== null ? lane : Math.floor(Math.random() * 3);
 
         this.vehicle = VehicleFactory.random();
 
         this.width = this.vehicle.width;
         this.height = this.vehicle.height;
 
-        this.x =
-            roadX +
-            this.lane * laneWidth +
-            (laneWidth - this.width) / 2;
+        this.x = roadX + this.lane * laneW + (laneW - this.width) / 2;
 
-        this.y =
-            y !== null
-                ? y
-                : -Math.random() * 800 - this.height;
+        this.y = y ?? (-Math.random() * 800 - this.height);
 
         this.speed = 180 + Math.random() * 220;
     }
