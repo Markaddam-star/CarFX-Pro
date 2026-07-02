@@ -7,17 +7,20 @@
 
 class Background {
 
-    constructor(canvas) {
+   constructor(canvas) {
 
-        this.canvas = canvas;
+    this.canvas = canvas;
 
-        this.farOffset = 0;
-        this.nearOffset = 0;
+    this.farOffset = 0;
+    this.nearOffset = 0;
 
-        this.farSpeed = 15;
-        this.nearSpeed = 40;
-    }
+    this.farSpeed = 15;
+    this.nearSpeed = 40;
 
+    // Vehicle Factory
+    this.vehicleFactory = window.VehicleFactory;
+    this.playerVehicle = this.vehicleFactory.player();
+}
     update(dt) {
 
         // 🌆 parallax movement
