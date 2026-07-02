@@ -18,8 +18,12 @@ class Background {
         this.nearSpeed = 40;
 
         // Vehicle Factory
-        this.vehicleFactory = window.VehicleFactory;
-        this.playerVehicle = this.vehicleFactory.player();
+       if (window.VehicleFactory) {
+    this.vehicleFactory = window.VehicleFactory;
+    this.playerVehicle = this.vehicleFactory.player();
+} else {
+    console.error("VehicleFactory not loaded!");
+}
     }
 
     update(dt) {
