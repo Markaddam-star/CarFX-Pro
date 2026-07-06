@@ -30,21 +30,36 @@ class TrafficManager {
 
     update(dt) {
 
-        // update all cars
+        // =========================
+        // 1. UPDATE ALL CARS (AI)
+        // =========================
         for (const car of this.cars) {
-        car.update(dt, this.cars);       
+            car.update(dt, this.cars);
         }
 
-        // lane grouping for safe spacing
+        // =========================
+        // 2. LANE GROUPING (FIXED)
+        // =========================
+
         const lanes = [[], [], []];
 
         for (const car of this.cars) {
-            lanes[car.lane].push(car);
+
+            // IMPORTANT FIX: always normalize lane index
+            const laneIndex = Math.round(car.lane);
+
+            if (laneIndex >= 0 && laneIndex < 3) {
+                lanes[laneIndex].push(car);
+            }
         }
 
-        // enforce safe distance per lane
+        // =========================
+        // 3. SAFE DISTANCE ENFORCEMENT
+        // =========================
+
         for (const laneCars of lanes) {
 
+            // sort front to back
             laneCars.sort((a, b) => a.y - b.y);
 
             for (let i = 1; i < laneCars.length; i++) {
@@ -56,8 +71,10 @@ class TrafficManager {
 
                 if (gap < this.minGap) {
 
+                    // push back car safely
                     back.y = front.y + front.height + this.minGap;
 
+                    // match speed smoothly
                     back.speed = Math.max(back.speed, front.speed);
                 }
             }
@@ -66,7 +83,9 @@ class TrafficManager {
 
     render(ctx) {
 
-        // 🔥 CRITICAL FIX: draw from back to front
+        // =========================
+        // 4. DRAW BACK TO FRONT
+        // =========================
         this.cars
             .sort((a, b) => a.y - b.y)
             .forEach(car => car.render(ctx));
