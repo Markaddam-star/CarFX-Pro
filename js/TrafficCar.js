@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * TrafficCar.js - AI Version
+ * TrafficCar.js - Lane Change AI Version
  * ============================================================
  */
 
@@ -11,7 +11,7 @@ class TrafficCar {
 
         this.canvas = canvas;
 
-        // 🚗 vehicle data
+        // 🚗 vehicle
         this.vehicle = VehicleFactory.random();
 
         this.width = this.vehicle.width;
@@ -20,14 +20,19 @@ class TrafficCar {
         // 🧠 AI STATE
         this.state = "cruise";
 
+        // lanes
         this.lane = 0;
+        this.targetLane = 0;
 
-        // speed control
+        // movement
         this.speed = 180 + Math.random() * 120;
         this.maxSpeed = 320;
         this.minSpeed = 100;
 
         this.safeDistance = 140;
+
+        // lane change control
+        this.laneChangeCooldown = 0;
 
         this.reset();
     }
@@ -38,18 +43,17 @@ class TrafficCar {
         const roadX = (this.canvas.width - roadWidth) / 2;
         const laneW = roadWidth / 3;
 
-        // lane select
         this.lane = lane !== null
             ? lane
             : Math.floor(Math.random() * 3);
 
-        // new vehicle each spawn
+        this.targetLane = this.lane;
+
         this.vehicle = VehicleFactory.random();
 
         this.width = this.vehicle.width;
         this.height = this.vehicle.height;
 
-        // position
         this.x =
             roadX +
             this.lane * laneW +
@@ -60,7 +64,6 @@ class TrafficCar {
                 ? y
                 : (-Math.random() * 800 - this.height);
 
-        // speed reset
         this.speed = 180 + Math.random() * 140;
     }
 
@@ -69,50 +72,69 @@ class TrafficCar {
      */
     update(dt, cars = []) {
 
+        this.laneChangeCooldown -= dt;
+
         const frontCar = this.getFrontCar(cars);
 
+        let needOvertake = false;
+
         // =========================
-        // AI DECISION SYSTEM
+        // 1. CHECK FRONT CAR
         // =========================
 
         if (frontCar) {
 
             const gap = frontCar.y - this.y;
 
-            // too close → brake
             if (gap < this.safeDistance) {
-
-                this.state = "brake";
-
-                this.speed -= 260 * dt;
-
-            } 
-            // safe distance → follow
-            else if (gap < this.safeDistance * 2) {
-
-                this.state = "follow";
-
-                this.speed += 40 * dt;
-
-            } 
-            // free road → cruise
-            else {
-
-                this.state = "cruise";
-
-                this.speed += 80 * dt;
+                needOvertake = true;
             }
+        }
+
+        // =========================
+        // 2. LANE CHANGE DECISION
+        // =========================
+
+        if (needOvertake && this.laneChangeCooldown <= 0) {
+
+            const leftSafe = this.isLaneSafe(this.lane - 1, cars);
+            const rightSafe = this.isLaneSafe(this.lane + 1, cars);
+
+            // choose lane
+            if (leftSafe && Math.random() > 0.5) {
+                this.targetLane = this.lane - 1;
+            }
+            else if (rightSafe) {
+                this.targetLane = this.lane + 1;
+            }
+
+            this.laneChangeCooldown = 2.0;
+        }
+
+        // =========================
+        // 3. SMOOTH LANE MOVEMENT
+        // =========================
+
+        this.lane += (this.targetLane - this.lane) * 6 * dt;
+
+        if (Math.abs(this.lane - this.targetLane) < 0.05) {
+            this.lane = this.targetLane;
+        }
+
+        // =========================
+        // 4. SPEED CONTROL
+        // =========================
+
+        if (frontCar && frontCar.y - this.y < this.safeDistance) {
+
+            this.state = "brake";
+            this.speed -= 240 * dt;
 
         } else {
 
             this.state = "cruise";
-
-            this.speed += 100 * dt;
+            this.speed += 80 * dt;
         }
-
-        // =========================
-        // SPEED CLAMP
-        // =========================
 
         this.speed = Math.max(
             this.minSpeed,
@@ -120,13 +142,13 @@ class TrafficCar {
         );
 
         // =========================
-        // MOVE
+        // 5. MOVE
         // =========================
 
         this.y += this.speed * dt;
 
         // =========================
-        // RESPAWN SYSTEM
+        // 6. RESPAWN
         // =========================
 
         if (this.y > this.canvas.height + 300) {
@@ -135,7 +157,7 @@ class TrafficCar {
     }
 
     /**
-     * 🚗 FIND FRONT CAR IN SAME LANE
+     * 🚗 FRONT CAR DETECTION
      */
     getFrontCar(cars) {
 
@@ -146,7 +168,7 @@ class TrafficCar {
 
             if (car === this) continue;
 
-            if (car.lane !== this.lane) continue;
+            if (Math.floor(car.lane) !== Math.floor(this.lane)) continue;
 
             const diff = car.y - this.y;
 
@@ -157,6 +179,29 @@ class TrafficCar {
         }
 
         return closest;
+    }
+
+    /**
+     * 🛣 LANE SAFETY CHECK
+     */
+    isLaneSafe(lane, cars) {
+
+        if (lane < 0 || lane > 2) return false;
+
+        for (const car of cars) {
+
+            if (car === this) continue;
+
+            if (Math.floor(car.lane) !== lane) continue;
+
+            const dist = Math.abs(car.y - this.y);
+
+            if (dist < this.safeDistance * 1.2) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
