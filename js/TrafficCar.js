@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * TrafficCar.js - Lane Change AI Version
+ * TrafficCar.js - FIXED Lane Change AI Version
  * ============================================================
  */
 
@@ -31,7 +31,7 @@ class TrafficCar {
 
         this.safeDistance = 140;
 
-        // lane change control
+        // lane change cooldown
         this.laneChangeCooldown = 0;
 
         this.reset();
@@ -74,12 +74,14 @@ class TrafficCar {
 
         this.laneChangeCooldown -= dt;
 
-        const frontCar = this.getFrontCar(cars);
+        const currentLane = Math.round(this.lane);
+
+        const frontCar = this.getFrontCar(cars, currentLane);
 
         let needOvertake = false;
 
         // =========================
-        // 1. CHECK FRONT CAR
+        // 1. FRONT CAR CHECK
         // =========================
 
         if (frontCar) {
@@ -97,15 +99,14 @@ class TrafficCar {
 
         if (needOvertake && this.laneChangeCooldown <= 0) {
 
-            const leftSafe = this.isLaneSafe(this.lane - 1, cars);
-            const rightSafe = this.isLaneSafe(this.lane + 1, cars);
+            const leftSafe = this.isLaneSafe(currentLane - 1, cars);
+            const rightSafe = this.isLaneSafe(currentLane + 1, cars);
 
-            // choose lane
             if (leftSafe && Math.random() > 0.5) {
-                this.targetLane = this.lane - 1;
+                this.targetLane = currentLane - 1;
             }
             else if (rightSafe) {
-                this.targetLane = this.lane + 1;
+                this.targetLane = currentLane + 1;
             }
 
             this.laneChangeCooldown = 2.0;
@@ -122,7 +123,20 @@ class TrafficCar {
         }
 
         // =========================
-        // 4. SPEED CONTROL
+        // 4. UPDATE POSITION (IMPORTANT FIX)
+        // =========================
+
+        const roadWidth = Math.min(500, this.canvas.width * 0.5);
+        const roadX = (this.canvas.width - roadWidth) / 2;
+        const laneW = roadWidth / 3;
+
+        this.x =
+            roadX +
+            this.lane * laneW +
+            (laneW - this.width) / 2;
+
+        // =========================
+        // 5. SPEED CONTROL
         // =========================
 
         if (frontCar && frontCar.y - this.y < this.safeDistance) {
@@ -142,13 +156,13 @@ class TrafficCar {
         );
 
         // =========================
-        // 5. MOVE
+        // 6. MOVE
         // =========================
 
         this.y += this.speed * dt;
 
         // =========================
-        // 6. RESPAWN
+        // 7. RESPAWN
         // =========================
 
         if (this.y > this.canvas.height + 300) {
@@ -157,9 +171,9 @@ class TrafficCar {
     }
 
     /**
-     * 🚗 FRONT CAR DETECTION
+     * 🚗 FRONT CAR DETECTION (FIXED)
      */
-    getFrontCar(cars) {
+    getFrontCar(cars, lane) {
 
         let closest = null;
         let minDist = Infinity;
@@ -168,7 +182,7 @@ class TrafficCar {
 
             if (car === this) continue;
 
-            if (Math.floor(car.lane) !== Math.floor(this.lane)) continue;
+            if (Math.round(car.lane) !== lane) continue;
 
             const diff = car.y - this.y;
 
@@ -182,7 +196,7 @@ class TrafficCar {
     }
 
     /**
-     * 🛣 LANE SAFETY CHECK
+     * 🛣 LANE SAFETY CHECK (FIXED)
      */
     isLaneSafe(lane, cars) {
 
@@ -192,7 +206,7 @@ class TrafficCar {
 
             if (car === this) continue;
 
-            if (Math.floor(car.lane) !== lane) continue;
+            if (Math.round(car.lane) !== lane) continue;
 
             const dist = Math.abs(car.y - this.y);
 
