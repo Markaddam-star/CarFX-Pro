@@ -3,7 +3,7 @@ console.log("🔥 TrafficCar START");
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * TrafficCar.js - SMART AI TRAFFIC SYSTEM v1.1
+ * TrafficCar.js - SMART AI TRAFFIC SYSTEM v1.2
  * ============================================================
  */
 
@@ -19,7 +19,7 @@ class TrafficCar {
         this.height = this.vehicle.height;
 
 
-        // 🧠 DRIVER PERSONALITY
+        // DRIVER TYPE
 
         this.personality = 0.2 + Math.random() * 0.8;
 
@@ -31,29 +31,26 @@ class TrafficCar {
             this.driverType = "cautious";
 
 
-        // AI
-
         this.state = "cruise";
 
 
-        // LANE
+        // LANES
 
         this.lane = 1;
         this.targetLane = 1;
 
 
-        // MOVEMENT
+        // SPEED
 
         this.speed = 180 + Math.random() * 120;
 
         this.maxSpeed = 340;
-        this.minSpeed = 90;
+        this.minSpeed = 40;
 
 
         // SAFETY
 
         this.safeDistance = 160;
-
 
         this.laneChangeCooldown = 0;
 
@@ -69,8 +66,8 @@ class TrafficCar {
 
         this.lane =
             lane !== null
-                ? lane
-                : Math.floor(Math.random() * 3);
+            ? lane
+            : Math.floor(Math.random() * 3);
 
 
         this.targetLane = this.lane;
@@ -87,11 +84,12 @@ class TrafficCar {
 
         this.y =
             y !== null
-                ? y
-                : -Math.random() * 900;
+            ? y
+            : -Math.random() * 900;
 
 
-        this.speed = 180 + Math.random() * 140;
+        this.speed =
+            180 + Math.random() * 140;
 
 
         this.state = "cruise";
@@ -108,7 +106,8 @@ class TrafficCar {
         this.laneChangeCooldown -= dt;
 
 
-        const currentLane = Math.round(this.lane);
+        const currentLane =
+            Math.round(this.lane);
 
 
         let danger = false;
@@ -120,8 +119,10 @@ class TrafficCar {
         // =========================
 
         const frontCar =
-            this.getFrontCar(cars, currentLane);
-
+            this.getFrontCar(
+                cars,
+                currentLane
+            );
 
 
         if (frontCar) {
@@ -141,8 +142,9 @@ class TrafficCar {
 
 
 
+
         // =========================
-        // PLAYER CHECK
+        // PLAYER AVOIDANCE FIX
         // =========================
 
         if (player) {
@@ -152,14 +154,16 @@ class TrafficCar {
                 Math.round(player.lane);
 
 
-            const distance =
-                Math.abs(player.y - this.y);
+            const playerDistance =
+                player.y - this.y;
 
 
 
             if (
                 playerLane === currentLane &&
-                distance < this.safeDistance * 1.5
+                playerDistance > 0 &&
+                playerDistance <
+                this.safeDistance * 2
             ) {
 
                 danger = true;
@@ -171,8 +175,10 @@ class TrafficCar {
 
 
 
+
+
         // =========================
-        // OVERTAKE DECISION
+        // OVERTAKE SYSTEM
         // =========================
 
 
@@ -185,6 +191,7 @@ class TrafficCar {
             let possible = [];
 
 
+
             if (
                 this.isLaneSafe(
                     currentLane - 1,
@@ -192,7 +199,9 @@ class TrafficCar {
                 )
             ) {
 
-                possible.push(currentLane - 1);
+                possible.push(
+                    currentLane - 1
+                );
 
             }
 
@@ -205,9 +214,13 @@ class TrafficCar {
                 )
             ) {
 
-                possible.push(currentLane + 1);
+                possible.push(
+                    currentLane + 1
+                );
 
             }
+
+
 
 
 
@@ -234,15 +247,25 @@ class TrafficCar {
 
 
                 this.speed -=
-                    220 * dt;
+                    400 * dt;
+
+
+
+                if (this.speed < 40) {
+
+                    this.speed = 40;
+
+                }
+
 
             }
 
 
 
-            this.laneChangeCooldown = 2.0;
+            this.laneChangeCooldown = 1.5;
 
         }
+
 
 
 
@@ -280,8 +303,9 @@ class TrafficCar {
 
 
 
+
         // =========================
-        // SPEED AI
+        // SPEED CONTROL
         // =========================
 
 
@@ -291,7 +315,7 @@ class TrafficCar {
             this.state = "cruise";
 
 
-            let accel =
+            const accel =
                 this.driverType === "aggressive"
                 ? 120
                 : 70;
@@ -301,6 +325,7 @@ class TrafficCar {
                 accel * dt;
 
         }
+
 
 
 
@@ -330,6 +355,7 @@ class TrafficCar {
 
         this.y +=
             this.speed * dt;
+
 
 
 
@@ -390,13 +416,11 @@ class TrafficCar {
                 diff < distance
             ) {
 
-
                 distance = diff;
 
                 closest = car;
 
             }
-
 
         }
 
@@ -404,6 +428,7 @@ class TrafficCar {
         return closest;
 
     }
+
 
 
 
@@ -444,8 +469,7 @@ class TrafficCar {
                 )
                 <
                 this.safeDistance * 1.3
-            )
-            {
+            ) {
 
                 return false;
 
@@ -458,7 +482,6 @@ class TrafficCar {
         return true;
 
     }
-
 
 
 
@@ -497,7 +520,6 @@ class TrafficCar {
         );
 
     }
-
 
 
 
