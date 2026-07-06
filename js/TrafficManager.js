@@ -1,3 +1,11 @@
+
+/**
+ * ============================================================
+ * CarFX Pro Ultimate
+ * TrafficManager.js - FIXED PLAYER-RELATIVE TRAFFIC SYSTEM
+ * ============================================================
+ */
+
 class TrafficManager {
 
     constructor(canvas, player = null) {
@@ -21,8 +29,13 @@ class TrafficManager {
 
             const lane = Math.floor(Math.random() * 3);
 
-            // stagger spawn positions
-            car.reset(lane, -(i * this.minGap));
+            // spawn relative spacing
+            const playerY = this.player?.y || 0;
+
+            car.reset(
+                lane,
+                playerY - 300 - (i * this.minGap)
+            );
 
             this.cars.push(car);
         }
@@ -30,23 +43,28 @@ class TrafficManager {
 
     update(dt) {
 
+        const player = this.player;
+        const playerY = player?.y || 0;
+
         // =========================
         // 1. UPDATE ALL CARS (AI)
         // =========================
-     for (const car of this.cars) {
-    car.update(dt, this.cars, this.player);
-}
+
+        for (const car of this.cars) {
+            car.update(dt, this.cars, player);
         }
 
         // =========================
-        // 2. LANE GROUPING (FIXED)
+        // 2. LANE GROUPING (SAFE)
         // =========================
 
         const lanes = [[], [], []];
 
         for (const car of this.cars) {
 
-            // IMPORTANT FIX: always normalize lane index
+            if (!car) continue;
+            if (car.lane === undefined || car.lane === null) continue;
+
             const laneIndex = Math.round(car.lane);
 
             if (laneIndex >= 0 && laneIndex < 3) {
@@ -55,12 +73,11 @@ class TrafficManager {
         }
 
         // =========================
-        // 3. SAFE DISTANCE ENFORCEMENT
+        // 3. SAFE DISTANCE FIX PER LANE
         // =========================
 
         for (const laneCars of lanes) {
 
-            // sort front to back
             laneCars.sort((a, b) => a.y - b.y);
 
             for (let i = 1; i < laneCars.length; i++) {
@@ -72,21 +89,35 @@ class TrafficManager {
 
                 if (gap < this.minGap) {
 
-                    // push back car safely
                     back.y = front.y + front.height + this.minGap;
 
-                    // match speed smoothly
                     back.speed = Math.max(back.speed, front.speed);
                 }
+            }
+        }
+
+        // =========================
+        // 4. WORLD ANCHORING (IMPORTANT FIX)
+        // =========================
+
+        const maxAhead = playerY + 900;
+        const maxBehind = playerY - 1200;
+
+        for (const car of this.cars) {
+
+            if (car.y < maxBehind) {
+                car.y = maxBehind;
+            }
+
+            if (car.y > maxAhead) {
+                car.y = maxAhead;
             }
         }
     }
 
     render(ctx) {
 
-        // =========================
-        // 4. DRAW BACK TO FRONT
-        // =========================
+        // draw back to front
         this.cars
             .sort((a, b) => a.y - b.y)
             .forEach(car => car.render(ctx));
