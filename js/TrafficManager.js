@@ -32,7 +32,7 @@ class TrafficManager {
 
         // update all cars
         for (const car of this.cars) {
-            car.update(dt);
+        car.update(dt, this.cars);       
         }
 
         // lane grouping for safe spacing
