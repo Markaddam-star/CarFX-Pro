@@ -2,7 +2,7 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * TrafficCar.js - FULL FIXED AI + PLAYER AWARE VERSION
+ * TrafficCar.js - FINAL STABLE AI VERSION
  * ============================================================
  */
 
@@ -18,6 +18,13 @@ class TrafficCar {
         this.width = this.vehicle.width;
         this.height = this.vehicle.height;
 
+        // 🧠 personality + type
+        this.personality = 0.2 + Math.random() * 0.8;
+
+        if (this.personality > 0.75) this.driverType = "aggressive";
+        else if (this.personality > 0.4) this.driverType = "normal";
+        else this.driverType = "cautious";
+
         // 🧠 AI STATE
         this.state = "cruise";
 
@@ -27,8 +34,8 @@ class TrafficCar {
 
         // movement
         this.speed = 180 + Math.random() * 120;
-        this.maxSpeed = 320;
-        this.minSpeed = 100;
+        this.maxSpeed = 340;
+        this.minSpeed = 90;
 
         this.safeDistance = 140;
 
@@ -55,10 +62,7 @@ class TrafficCar {
         this.width = this.vehicle.width;
         this.height = this.vehicle.height;
 
-        this.x =
-            roadX +
-            this.lane * laneW +
-            (laneW - this.width) / 2;
+        this.x = this.getLaneX(this.lane);
 
         this.y =
             y !== null
@@ -69,7 +73,7 @@ class TrafficCar {
     }
 
     /**
-     * 🧠 MAIN UPDATE (AI + PLAYER AWARE)
+     * 🧠 MAIN AI UPDATE
      */
     update(dt, cars = [], player = null) {
 
@@ -106,7 +110,6 @@ class TrafficCar {
             const sameLane = playerLane === currentLane;
 
             if (sameLane && verticalDist > 0 && verticalDist < this.safeDistance) {
-
                 needOvertake = true;
             }
         }
@@ -141,31 +144,27 @@ class TrafficCar {
         }
 
         // =========================
-        // 5. UPDATE X POSITION (IMPORTANT FIX)
-        // =========================
-
-        const roadWidth = Math.min(500, this.canvas.width * 0.5);
-        const roadX = (this.canvas.width - roadWidth) / 2;
-        const laneW = roadWidth / 3;
-
-        this.x =
-            roadX +
-            this.lane * laneW +
-            (laneW - this.width) / 2;
-
-        // =========================
-        // 6. SPEED CONTROL
+        // 5. SPEED CONTROL (PERSONALITY BASED)
         // =========================
 
         if (frontCar && frontCar.y - this.y < this.safeDistance) {
 
             this.state = "brake";
-            this.speed -= 240 * dt;
+
+            if (this.driverType === "aggressive") {
+                this.speed -= 300 * dt;
+            } else if (this.driverType === "normal") {
+                this.speed -= 240 * dt;
+            } else {
+                this.speed -= 180 * dt;
+            }
 
         } else {
 
             this.state = "cruise";
-            this.speed += 80 * dt;
+
+            const accel = this.driverType === "aggressive" ? 120 : 70;
+            this.speed += accel * dt;
         }
 
         this.speed = Math.max(
@@ -174,13 +173,14 @@ class TrafficCar {
         );
 
         // =========================
-        // 7. MOVE
+        // 6. UPDATE POSITION
         // =========================
 
+        this.x = this.getLaneX(this.lane);
         this.y += this.speed * dt;
 
         // =========================
-        // 8. RESPAWN
+        // 7. RESPAWN
         // =========================
 
         if (this.y > this.canvas.height + 300) {
@@ -189,7 +189,7 @@ class TrafficCar {
     }
 
     /**
-     * 🚗 FRONT CAR DETECTION (FIXED)
+     * 🚗 FRONT CAR DETECTION
      */
     getFrontCar(cars, lane) {
 
@@ -214,7 +214,7 @@ class TrafficCar {
     }
 
     /**
-     * 🛣 LANE SAFETY CHECK (FIXED)
+     * 🛣 LANE SAFETY CHECK
      */
     isLaneSafe(lane, cars) {
 
@@ -234,6 +234,18 @@ class TrafficCar {
         }
 
         return true;
+    }
+
+    /**
+     * 📍 GET LANE X POSITION
+     */
+    getLaneX(lane) {
+
+        const roadWidth = Math.min(500, this.canvas.width * 0.5);
+        const roadX = (this.canvas.width - roadWidth) / 2;
+        const laneW = roadWidth / 3;
+
+        return roadX + lane * laneW + (laneW - this.width) / 2;
     }
 
     /**
