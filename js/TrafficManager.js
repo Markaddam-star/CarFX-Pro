@@ -33,8 +33,9 @@ class TrafficManager {
         // =========================
         // 1. UPDATE ALL CARS (AI)
         // =========================
-        for (const car of this.cars) {
-            car.update(dt, this.cars);
+     for (const car of this.cars) {
+    car.update(dt, this.cars, this.player);
+}
         }
 
         // =========================
