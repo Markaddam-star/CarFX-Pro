@@ -1,4 +1,8 @@
-
+/**
+ * ============================================================
+ * PoliceManager.js - GTA POLICE CONTROL SYSTEM
+ * ============================================================
+ */
 
 class PoliceManager {
 
@@ -10,52 +14,50 @@ class PoliceManager {
 
         this.policeCars = [];
 
-        this.maxPolice = 5;
         this.spawnCooldown = 0;
-    }
-
-    update(dt) {
-
-        if (!this.player) return;
-
-        this.spawnCooldown -= dt;
-
-        // =========================
-        // 1. SPAWN LOGIC
-        // =========================
-
-        if (this.wanted.level > 0 && this.spawnCooldown <= 0) {
-
-            if (this.policeCars.length < this.wanted.level) {
-
-                this.spawnPolice();
-            }
-
-            this.spawnCooldown = 3.0;
-        }
-
-        // =========================
-        // 2. UPDATE POLICE CARS
-        // =========================
-
-        for (const police of this.policeCars) {
-            police.update(dt, this.player);
-        }
-
-        // =========================
-        // 3. CLEANUP (OPTIONAL)
-        // =========================
-
-        this.policeCars = this.policeCars.filter(p => !p.destroyed);
     }
 
     spawnPolice() {
 
-        const car = new PoliceCar(this.canvas);
+        const car = new PoliceCar(this.canvas, this);
 
         car.setTarget(this.player);
 
         this.policeCars.push(car);
+    }
+
+    update(dt) {
+
+        const player = this.player;
+        if (!player) return;
+
+        this.spawnCooldown -= dt;
+
+        // =========================
+        // SPAWN SYSTEM
+        // =========================
+
+        if (this.wanted.level > 0 && this.spawnCooldown <= 0) {
+
+            const maxPolice = this.wanted.level * 2;
+
+            if (this.policeCars.length < maxPolice) {
+                this.spawnPolice();
+            }
+
+            this.spawnCooldown = 2.5;
+        }
+
+        // =========================
+        // UPDATE POLICE
+        // =========================
+
+        for (const p of this.policeCars) {
+            p.update(dt, player, this.policeCars);
+        }
+
+        // remove dead cars
+        this.policeCars = this.policeCars.filter(p => !p.destroyed);
     }
 
     render(ctx) {
