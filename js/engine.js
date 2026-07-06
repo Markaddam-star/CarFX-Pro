@@ -12,6 +12,7 @@ class CarFXEngine {
         this.road = null;
         this.player = null;
         this.trafficManager = null;
+        this.input = null;
 
         // 🎥 CAMERA
         this.cameraY = 0;
@@ -25,6 +26,7 @@ class CarFXEngine {
         console.log("🚗 CarFX GTA Engine Started");
 
         this.createCanvas();
+        this.input = new InputManager();
 
         this.background = window.Background ? new Background(this.canvas) : null;
         this.road = window.Road ? new Road(this.canvas) : null;
@@ -95,7 +97,7 @@ class CarFXEngine {
     }
 
     update(dt) {
-
+        this.input?.update();
         this.background?.update(dt);
         this.road?.update(dt);
         this.player?.update(dt);
