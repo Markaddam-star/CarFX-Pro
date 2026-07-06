@@ -9,15 +9,21 @@ class InputManager {
 
     constructor() {
 
+
         this.keys = {};
 
         this.gameMode = false;
 
         this.pause = false;
 
-        window.addEventListener("keydown", (e) => {
+this._gPressed = false;
+this._escPressed = false;
 
-            this.keys[e.code] = true;
+       window.addEventListener("keydown", (e) => {
+
+    if (e.repeat) return;
+
+    this.keys[e.code] = true;
 
             // Prevent page scrolling while driving
             if (this.gameMode) {
