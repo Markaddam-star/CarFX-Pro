@@ -33,7 +33,7 @@
       "matches": [
         "<all_urls>"
       ],
-      "js": [
+     "js": [
   "js/VehicleFactory.js",
   "js/CarRenderer.js",
 
@@ -44,6 +44,8 @@
 
   "js/TrafficCar.js",
   "js/TrafficManager.js",
+
+  "js/InputManager.js",
 
   "js/engine.js",
 
