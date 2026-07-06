@@ -3,7 +3,7 @@ console.log("🔥 TrafficCar START");
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * TrafficCar.js - SMART AI TRAFFIC SYSTEM v1.2
+ * TrafficCar.js - SMART AI TRAFFIC SYSTEM v1.3
  * ============================================================
  */
 
@@ -45,7 +45,7 @@ class TrafficCar {
         this.speed = 180 + Math.random() * 120;
 
         this.maxSpeed = 340;
-        this.minSpeed = 40;
+        this.minSpeed = 0;
 
 
         // SAFETY
@@ -144,7 +144,7 @@ class TrafficCar {
 
 
         // =========================
-        // PLAYER AVOIDANCE FIX
+        // PLAYER CHECK
         // =========================
 
         if (player) {
@@ -166,7 +166,9 @@ class TrafficCar {
                 this.safeDistance * 2
             ) {
 
+
                 danger = true;
+
 
             }
 
@@ -178,9 +180,8 @@ class TrafficCar {
 
 
         // =========================
-        // OVERTAKE SYSTEM
+        // OVERTAKE DECISION
         // =========================
-
 
         if (
             danger &&
@@ -223,7 +224,6 @@ class TrafficCar {
 
 
 
-
             if (possible.length > 0) {
 
 
@@ -247,15 +247,7 @@ class TrafficCar {
 
 
                 this.speed -=
-                    400 * dt;
-
-
-
-                if (this.speed < 40) {
-
-                    this.speed = 40;
-
-                }
+                    900 * dt;
 
 
             }
@@ -305,7 +297,7 @@ class TrafficCar {
 
 
         // =========================
-        // SPEED CONTROL
+        // SPEED AI
         // =========================
 
 
@@ -329,9 +321,12 @@ class TrafficCar {
 
 
 
+
+        // SPEED LIMIT
+
         this.speed =
             Math.max(
-                this.minSpeed,
+                0,
                 Math.min(
                     this.speed,
                     this.maxSpeed
@@ -363,7 +358,6 @@ class TrafficCar {
         // =========================
         // RESPAWN
         // =========================
-
 
         if (
             this.y >
