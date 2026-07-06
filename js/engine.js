@@ -21,25 +21,44 @@ class CarFXEngine {
         this.loop = this.loop.bind(this);
     }
 
-    init() {
+   
+init() {
 
-        console.log("🚗 CarFX GTA Engine Started");
+    console.log("🚗 CarFX GTA Engine Started");
 
-        this.createCanvas();
-        this.input = new InputManager();
+    this.createCanvas();
+    this.input = new InputManager();
 
-        this.background = window.Background ? new Background(this.canvas) : null;
-        this.road = window.Road ? new Road(this.canvas) : null;
-        this.player = window.PlayerCar ? new PlayerCar(this.canvas) : null;
-        this.trafficManager = window.TrafficManager
-            ? new TrafficManager(this.canvas, this.player)
-            : null;
+    this.background = window.Background ? new Background(this.canvas) : null;
+    this.road = window.Road ? new Road(this.canvas) : null;
 
-        this.running = true;
-        this.lastTime = performance.now();
+    // 🚘 PLAYER (must be created BEFORE police)
+    this.player = window.PlayerCar ? new PlayerCar(this.canvas) : null;
 
-        requestAnimationFrame(this.loop);
-    }
+    // 🚨 WANTED SYSTEM (NEW)
+    this.wantedSystem = window.WantedSystem
+        ? new WantedSystem()
+        : null;
+
+    // 🚓 TRAFFIC
+    this.trafficManager = window.TrafficManager
+        ? new TrafficManager(this.canvas, this.player)
+        : null;
+
+    // 🚓 POLICE SYSTEM (IMPORTANT FIX)
+    this.policeManager = window.PoliceManager
+        ? new PoliceManager(
+            this.canvas,
+            this.player,
+            this.wantedSystem
+        )
+        : null;
+
+    this.running = true;
+    this.lastTime = performance.now();
+
+    requestAnimationFrame(this.loop);
+}
 
     createCanvas() {
 
@@ -96,24 +115,32 @@ class CarFXEngine {
         requestAnimationFrame(this.loop);
     }
 
-    update(dt) {
-        this.input?.update();
-        this.background?.update(dt);
-        this.road?.update(dt);
-        this.player?.update(dt);
-        this.trafficManager?.update(dt);
+   
+update(dt) {
 
-        // 🎥 SMOOTH CAMERA FOLLOW (FIXED)
-        if (this.player) {
+    this.input?.update();
+    this.background?.update(dt);
+    this.road?.update(dt);
+    this.player?.update(dt);
+    this.trafficManager?.update(dt);
 
-            this.cameraTargetY =
-                this.player.y - this.canvas.height * 0.65;
+    // 🚨 WANTED SYSTEM (ADD HERE)
+    this.wantedSystem?.update(dt, this.player?.speed || 0);
 
-            this.cameraY += (this.cameraTargetY - this.cameraY) * 0.10;
+    // 🚓 POLICE SYSTEM (ADD HERE)
+    this.policeManager?.update(dt);
 
-            if (this.cameraY < 0) this.cameraY = 0;
-        }
+    // 🎥 SMOOTH CAMERA FOLLOW (FIXED)
+    if (this.player) {
+
+        this.cameraTargetY =
+            this.player.y - this.canvas.height * 0.65;
+
+        this.cameraY += (this.cameraTargetY - this.cameraY) * 0.10;
+
+        if (this.cameraY < 0) this.cameraY = 0;
     }
+}
 
     render() {
 
