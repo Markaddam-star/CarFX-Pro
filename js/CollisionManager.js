@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * CollisionManager.js - PLAYER COLLISION SYSTEM v1.1
+ * CollisionManager.js - PLAYER + TRAFFIC COLLISION v2.0
  * ============================================================
  */
 
@@ -12,53 +12,120 @@ class CollisionManager {
         this.player = player;
         this.trafficManager = trafficManager;
 
-        this.safeGap = 170;
+        this.hitCooldown = 0;
 
     }
 
-    canEnterLane(targetLane) {
+
+    update(dt) {
 
         if (!this.player || !this.trafficManager)
-            return true;
+            return;
+
+
+        if (this.hitCooldown > 0) {
+
+            this.hitCooldown -= dt;
+            return;
+
+        }
+
 
         for (const car of this.trafficManager.cars) {
 
-            const lane =
-                Math.round(car.targetLane ?? car.lane);
 
-            if (lane !== targetLane)
-                continue;
+            if (this.checkCollision(
+                this.player,
+                car
+            )) {
 
-            const gap =
-                Math.abs(car.y - this.player.y);
 
-            console.log(
-                "Lane:", targetLane,
-                "PlayerY:", this.player.y,
-                "CarY:", car.y,
-                "Gap:", gap
-            );
+                console.log("💥 PLAYER HIT TRAFFIC");
 
-            const safeDistance =
-                (car.height + this.player.height) / 2 +
-                this.safeGap;
 
-            if (gap < safeDistance) {
+                // stop traffic car
 
-                console.log("❌ Lane Blocked");
+                car.speed = 0;
 
-                return false;
+
+                // push traffic backwards
+
+                car.y -= 40;
+
+
+                // slow player
+
+                if (this.player.speed !== undefined) {
+
+                    this.player.speed *= 0.3;
+
+                }
+
+
+                this.hitCooldown = 0.5;
+
+
+                break;
 
             }
 
         }
 
-        console.log("✅ Lane Free");
+    }
+
+
+
+    checkCollision(a,b) {
+
+
+        return (
+
+            a.x < b.x + b.width &&
+
+            a.x + a.width > b.x &&
+
+            a.y < b.y + b.height &&
+
+            a.y + a.height > b.y
+
+        );
+
+
+    }
+
+
+
+    canEnterLane(targetLane) {
+
+
+        for (const car of this.trafficManager.cars) {
+
+
+            if (
+                Math.round(car.lane) !== targetLane
+            )
+                continue;
+
+
+
+            const gap =
+                Math.abs(
+                    car.y - this.player.y
+                );
+
+
+            if (gap < 250)
+                return false;
+
+
+        }
+
 
         return true;
 
     }
 
 }
+
 
 window.CollisionManager = CollisionManager;
