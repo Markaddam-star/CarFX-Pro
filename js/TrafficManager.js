@@ -15,7 +15,7 @@ class TrafficManager {
         this.cars = [];
 
         this.maxCars = 8;
-        this.minGap = 260;
+        this.minGap = 360;
 
         this.spawnInitialCars();
     }
