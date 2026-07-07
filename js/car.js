@@ -151,55 +151,58 @@ class PlayerCar {
         // LANE CONTROL
         // =========================
 
+const collision =
+    window.carFXEngine?.collisionManager;
 
-        if (input.left()) {
+let nextLane = 1;
 
+if (input.left()) {
 
-            this.targetLane = 0;
+    nextLane = 0;
 
+}
+else if (input.right()) {
 
-        }
+    nextLane = 2;
 
+}
+else {
 
-        if (input.right()) {
+    nextLane = 1;
 
+}
 
-            this.targetLane = 2;
+// Allow lane change only if target lane is free
+if (
+    !collision ||
+    collision.canEnterLane(nextLane)
+) {
 
+    this.targetLane = nextLane;
 
-        }
+}
 
+// Smooth lane movement
+this.lane +=
+    (
+        this.targetLane -
+        this.lane
+    )
+    *
+    5
+    *
+    dt;
 
+if (
+    Math.abs(
+        this.lane -
+        this.targetLane
+    ) < 0.01
+) {
 
+    this.lane = this.targetLane;
 
-        if (
-            !input.left() &&
-            !input.right()
-        ) {
-
-
-            this.targetLane = 1;
-
-
-        }
-
-
-
-
-
-        this.lane +=
-            (
-                this.targetLane -
-                this.lane
-            )
-            *
-            5
-            *
-            dt;
-
-
-
-
+}
 
 
         // =========================
