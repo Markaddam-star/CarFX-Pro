@@ -23,7 +23,8 @@ class PlayerCar {
 
         this.lane = 1;
         this.targetLane = 1;
-
+        this.targetX = 0;
+        this.moveSpeed = 10;
 
         // =========================
         // MOVEMENT
@@ -44,44 +45,50 @@ class PlayerCar {
 
 
 
-    resize() {
+   resize() {
 
 
-        const roadWidth =
-            Math.min(
-                500,
-                this.canvas.width * 0.5
-            );
+    const roadWidth =
+        Math.min(
+            500,
+            this.canvas.width * 0.5
+        );
 
 
-        const roadX =
-            (
-                this.canvas.width -
-                roadWidth
-            ) / 2;
+    const roadX =
+        (
+            this.canvas.width -
+            roadWidth
+        ) / 2;
 
 
-        const laneW =
-            roadWidth / 3;
-
-
-
-        this.x =
-            roadX +
-            this.lane * laneW +
-            (laneW - this.width) / 2;
+    const laneW =
+        roadWidth / 3;
 
 
 
-        // PLAYER SCREEN POSITION
-
-        this.y =
-            this.canvas.height -
-            this.height -
-            40;
+    this.x =
+        roadX +
+        this.lane * laneW +
+        (laneW - this.width) / 2;
 
 
-    }
+    // smooth lane movement target
+
+    this.targetX =
+        this.x;
+
+
+
+    // PLAYER SCREEN POSITION
+
+    this.y =
+        this.canvas.height -
+        this.height -
+        40;
+
+
+}
 
 
 
@@ -233,38 +240,45 @@ else if (input.right()) {
 
 
 
-        // =========================
-        // X POSITION UPDATE
-        // =========================
+      // =========================
+// SMOOTH X POSITION
+// =========================
+
+const roadWidth =
+    Math.min(
+        500,
+        this.canvas.width * 0.5
+    );
 
 
-        const roadWidth =
-            Math.min(
-                500,
-                this.canvas.width * 0.5
-            );
+const roadX =
+    (
+        this.canvas.width -
+        roadWidth
+    ) / 2;
 
 
-        const roadX =
-            (
-                this.canvas.width -
-                roadWidth
-            ) / 2;
-
-
-        const laneW =
-            roadWidth / 3;
+const laneW =
+    roadWidth / 3;
 
 
 
-        this.x =
-            roadX +
-            this.lane *
-            laneW +
-            (laneW - this.width) / 2;
+this.targetX =
+    roadX +
+    this.lane * laneW +
+    (laneW - this.width) / 2;
 
 
-    }
+
+this.x +=
+    (
+        this.targetX -
+        this.x
+    )
+    *
+    this.moveSpeed
+    *
+    dt;
 
 
 
