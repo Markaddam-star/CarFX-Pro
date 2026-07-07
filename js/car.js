@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * PlayerCar.js - PLAYER CONTROL SYSTEM v1.0
+ * PlayerCar.js - PLAYER CONTROL SYSTEM v1.1
  * ============================================================
  */
 
@@ -9,25 +9,25 @@ class PlayerCar {
 
     constructor(canvas) {
 
+        this.canvas = canvas;
 
-    alert("NEW PlayerCar Loaded");
-
-    this.canvas = canvas;
-
-      this.vehicle = VehicleFactory.player();
+        this.vehicle = VehicleFactory.player();
 
         this.width = this.vehicle.width;
         this.height = this.vehicle.height;
 
 
-        // lane system
+        // =========================
+        // LANE SYSTEM
+        // =========================
 
         this.lane = 1;
-
         this.targetLane = 1;
 
 
-        // movement
+        // =========================
+        // MOVEMENT
+        // =========================
 
         this.speed = 0;
 
@@ -45,6 +45,7 @@ class PlayerCar {
 
 
     resize() {
+
 
         const roadWidth =
             Math.min(
@@ -72,8 +73,12 @@ class PlayerCar {
 
 
 
-       this.y =
-    600;
+        // PLAYER SCREEN POSITION
+
+        this.y =
+            this.canvas.height -
+            this.height -
+            40;
 
 
     }
@@ -85,7 +90,8 @@ class PlayerCar {
     update(dt) {
 
 
-        const input = window.carFXEngine?.input;
+        const input =
+            window.carFXEngine?.input;
 
 
         if (!input)
@@ -96,7 +102,6 @@ class PlayerCar {
         // =========================
         // ACCELERATION
         // =========================
-
 
         if (input.accelerate()) {
 
@@ -117,11 +122,9 @@ class PlayerCar {
 
 
 
-
         // =========================
         // BRAKE
         // =========================
-
 
         if (input.brake()) {
 
@@ -152,62 +155,78 @@ class PlayerCar {
         // LANE CONTROL
         // =========================
 
-const collision =
-    window.carFXEngine?.collisionManager;
 
-let nextLane = 1;
+        const collision =
+            window.carFXEngine?.collisionManager;
 
-if (input.left()) {
 
-    nextLane = 0;
 
-}
-else if (input.right()) {
+        let nextLane =
+            this.targetLane;
 
-    nextLane = 2;
 
-}
-else {
 
-    nextLane = 1;
+        if (input.left()) {
 
-}
+            nextLane = 0;
 
-// Allow lane change only if target lane is free
-if (
-    !collision ||
-    collision.canEnterLane(nextLane)
-) {
+        }
+        else if (input.right()) {
 
-    this.targetLane = nextLane;
+            nextLane = 2;
 
-}
+        }
 
-// Smooth lane movement
-this.lane +=
-    (
-        this.targetLane -
-        this.lane
-    )
-    *
-    5
-    *
-    dt;
 
-if (
-    Math.abs(
-        this.lane -
-        this.targetLane
-    ) < 0.01
-) {
 
-    this.lane = this.targetLane;
+        if (
+            !collision ||
+            collision.canEnterLane(nextLane)
+        ) {
 
-}
+            this.targetLane =
+                nextLane;
+
+        }
+
+
 
 
         // =========================
-        // POSITION UPDATE
+        // SMOOTH LANE CHANGE
+        // =========================
+
+
+        this.lane +=
+            (
+                this.targetLane -
+                this.lane
+            )
+            *
+            5
+            *
+            dt;
+
+
+
+        if (
+            Math.abs(
+                this.lane -
+                this.targetLane
+            )
+            < 0.01
+        ) {
+
+            this.lane =
+                this.targetLane;
+
+        }
+
+
+
+
+        // =========================
+        // X POSITION UPDATE
         // =========================
 
 
@@ -239,24 +258,34 @@ if (
 
     }
 
-draw(ctx) {
 
-    CarRenderer.draw(ctx, {
 
-        x: this.x,
-        y: this.y,
-        width: this.width,
-        height: this.height,
-        color: this.vehicle.color
 
-    });
+
+    draw(ctx) {
+
+
+        CarRenderer.draw(ctx, {
+
+
+            x: this.x,
+
+            y: this.y,
+
+            width: this.width,
+
+            height: this.height,
+
+            color: this.vehicle.color
+
+
+        });
+
+
+    }
 
 }
 
-}
+
 
 window.PlayerCar = PlayerCar;
-
-
-
-
