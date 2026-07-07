@@ -173,7 +173,7 @@ class PlayerCar {
 
 
 
-       if (input.left()) {
+   if (input.leftPressed()) {
 
     nextLane =
         Math.max(
@@ -182,7 +182,7 @@ class PlayerCar {
         );
 
 }
-else if (input.right()) {
+else if (input.rightPressed()) {
 
     nextLane =
         Math.min(
