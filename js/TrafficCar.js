@@ -83,9 +83,9 @@ class TrafficCar {
 
 
         this.y =
-            y !== null
-            ? y
-            : -Math.random() * 900;
+    y !== null
+    ? y
+    : -200 - Math.random() * 400;
 
 
         this.speed =
@@ -364,7 +364,7 @@ class TrafficCar {
             this.canvas.height + 400
         ) {
 
-            this.reset();
+           this.reset(this.lane, -300);
 
         }
 
