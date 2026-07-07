@@ -1,9 +1,9 @@
-console.log("🔥 TrafficCar START");
+console.log("🔥 TrafficCar v2.0 START");
 
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * TrafficCar.js - SMART AI TRAFFIC SYSTEM v1.3
+ * TrafficCar.js - GTA SMART AI TRAFFIC SYSTEM v2.0
  * ============================================================
  */
 
@@ -19,38 +19,67 @@ class TrafficCar {
         this.height = this.vehicle.height;
 
 
-        // DRIVER TYPE
+        // =========================
+        // DRIVER PERSONALITY
+        // =========================
 
-        this.personality = 0.2 + Math.random() * 0.8;
+        this.personality =
+            Math.random();
 
-        if (this.personality > 0.75)
+
+        if (this.personality > 0.7) {
+
             this.driverType = "aggressive";
-        else if (this.personality > 0.4)
+
+        }
+        else if (this.personality > 0.35) {
+
             this.driverType = "normal";
-        else
+
+        }
+        else {
+
             this.driverType = "cautious";
 
+        }
+
+
+
+        // =========================
+        // AI STATE
+        // =========================
 
         this.state = "cruise";
 
 
-        // LANES
-
         this.lane = 1;
+
         this.targetLane = 1;
 
 
+
+        // =========================
         // SPEED
+        // =========================
 
-        this.speed = 180 + Math.random() * 120;
+        this.speed = 200;
 
-        this.maxSpeed = 340;
-        this.minSpeed = 0;
+        this.targetSpeed = 200;
+
+        this.maxSpeed = 300;
+
+        this.acceleration = 80;
+
+        this.brakePower = 450;
 
 
+
+        // =========================
         // SAFETY
+        // =========================
 
         this.safeDistance = 240;
+
         this.laneChangeCooldown = 0;
 
 
@@ -60,7 +89,11 @@ class TrafficCar {
 
 
 
-    reset(lane = null, y = null) {
+
+    reset(
+        lane = null,
+        y = null
+    ) {
 
 
         this.lane =
@@ -69,26 +102,42 @@ class TrafficCar {
             : Math.floor(Math.random() * 3);
 
 
-        this.targetLane = this.lane;
+
+        this.targetLane =
+            this.lane;
 
 
-        this.vehicle = VehicleFactory.random();
 
-        this.width = this.vehicle.width;
-        this.height = this.vehicle.height;
+        this.vehicle =
+            VehicleFactory.random();
 
 
-        this.x = this.getLaneX(this.lane);
+
+        this.width =
+            this.vehicle.width;
+
+
+        this.height =
+            this.vehicle.height;
+
+
+
+
+        this.x =
+            this.getLaneX(
+                this.lane
+            );
+
 
 
         this.y =
-    y !== null
-    ? y
-    : -200 - Math.random() * 400;
+            y !== null
+            ? y
+            : -500;
 
 
-        this.speed =
-            180 + Math.random() * 140;
+
+        this.setupVehicleSpeed();
 
 
         this.state = "cruise";
@@ -99,14 +148,79 @@ class TrafficCar {
 
 
 
-    update(dt, cars = [], player = null) {
+
+    setupVehicleSpeed() {
+
+
+        if (
+            this.vehicle.speedClass === "fast"
+        ) {
+
+
+            this.speed =
+                280;
+
+
+            this.maxSpeed =
+                380;
+
+
+        }
+        else if (
+            this.vehicle.speedClass === "slow"
+        ) {
+
+
+            this.speed =
+                120;
+
+
+            this.maxSpeed =
+                220;
+
+
+        }
+        else {
+
+
+            this.speed =
+                190;
+
+
+            this.maxSpeed =
+                300;
+
+
+        }
+
+
+        this.targetSpeed =
+            this.speed;
+
+    }
+
+
+
+
+
+
+
+    update(
+        dt,
+        cars = [],
+        player = null
+    ) {
 
 
         this.laneChangeCooldown -= dt;
 
 
-        const currentLane =
-            Math.round(this.lane);
+
+        const front =
+            this.getFrontCar(
+                cars
+            );
+
 
 
         let danger = false;
@@ -114,61 +228,36 @@ class TrafficCar {
 
 
         // =========================
-        // FRONT CAR CHECK
+        // FOLLOW SYSTEM
         // =========================
 
-        const frontCar =
-            this.getFrontCar(
-                cars,
-                currentLane
-            );
 
+        if (front) {
 
-        if (frontCar) {
 
             const gap =
-                frontCar.y - this.y;
-
-
-            if (gap < this.safeDistance) {
-
-                danger = true;
-
-            }
-
-        }
-
-
-
-
-
-        // =========================
-        // PLAYER CHECK
-        // =========================
-
-        if (player) {
-
-
-            const playerLane =
-                Math.round(player.lane);
-
-
-            const playerDistance =
-                player.y - this.y;
+                front.y -
+                this.y;
 
 
 
             if (
-                playerLane === currentLane &&
-                playerDistance > 0 &&
-                playerDistance <
-                this.safeDistance * 2
+                gap < this.safeDistance
             ) {
 
 
                 danger = true;
 
 
+                this.state =
+                    "follow";
+
+
+                this.targetSpeed =
+                    front.speed;
+
+
+
             }
 
         }
@@ -179,8 +268,57 @@ class TrafficCar {
 
 
         // =========================
-        // OVERTAKE DECISION
+        // PLAYER AWARENESS
         // =========================
+
+
+        if (player) {
+
+
+            const sameLane =
+                Math.round(player.lane)
+                ===
+                Math.round(this.lane);
+
+
+
+            const distance =
+                player.y -
+                this.y;
+
+
+
+            if (
+                sameLane &&
+                distance > 0 &&
+                distance < this.safeDistance * 2
+            ) {
+
+
+                danger = true;
+
+
+                this.state =
+                    "yield";
+
+
+                this.targetSpeed =
+                    player.speed * 0.7;
+
+
+            }
+
+        }
+
+
+
+
+
+
+        // =========================
+        // OVERTAKE
+        // =========================
+
 
         if (
             danger &&
@@ -188,105 +326,44 @@ class TrafficCar {
         ) {
 
 
-            let possible = [];
+            const lane =
+                this.findSafeLane(
+                    cars,
+                    player
+                );
 
 
 
-         const playerLane =
-    player
-    ? Math.round(player.lane)
-    : -1;
-
-
-
-if (
-    this.isLaneSafe(currentLane - 1, cars) &&
-    currentLane - 1 !== playerLane
-) {
-
-    possible.push(currentLane - 1);
-
-}
-
-
-
-if (
-    this.isLaneSafe(currentLane + 1, cars) &&
-    currentLane + 1 !== playerLane
-) {
-
-    possible.push(currentLane + 1);
-
-}
-
-
-
-
-            if (possible.length > 0) {
+            if (
+                lane !== this.lane
+            ) {
 
 
                 this.targetLane =
-                    possible[
-                        Math.floor(
-                            Math.random() *
-                            possible.length
-                        )
-                    ];
+                    lane;
 
 
-                this.state = "overtake";
+                this.state =
+                    "overtake";
 
 
             }
             else {
 
 
-                this.state = "brake";
+                this.state =
+                    "brake";
 
 
-                this.speed -=
-                    900 * dt;
+                this.targetSpeed =
+                    0;
 
 
             }
 
 
-
-            this.laneChangeCooldown = 1.5;
-
-        }
-
-
-
-
-
-        // =========================
-        // SMOOTH LANE CHANGE
-        // =========================
-
-
-        this.lane +=
-            (
-                this.targetLane -
-                this.lane
-            )
-            *
-            3
-            *
-            dt;
-
-
-
-        if (
-            Math.abs(
-                this.lane -
-                this.targetLane
-            )
-            < 0.05
-        ) {
-
-            this.lane =
-                this.targetLane;
+            this.laneChangeCooldown =
+                1.5;
 
         }
 
@@ -294,25 +371,27 @@ if (
 
 
 
+
+
         // =========================
-        // SPEED AI
+        // RECOVER
         // =========================
 
 
         if (!danger) {
 
 
-            this.state = "cruise";
+            this.state =
+                "recover";
 
 
-            const accel =
-                this.driverType === "aggressive"
-                ? 120
-                : 70;
-
-
-            this.speed +=
-                accel * dt;
+            this.targetSpeed =
+                this.maxSpeed *
+                (
+                    0.7 +
+                    this.personality *
+                    0.3
+                );
 
         }
 
@@ -320,7 +399,32 @@ if (
 
 
 
-        // SPEED LIMIT
+        // =========================
+        // SPEED SMOOTHING
+        // =========================
+
+
+        if (
+            this.speed <
+            this.targetSpeed
+        ) {
+
+
+            this.speed +=
+                this.acceleration *
+                dt;
+
+        }
+        else {
+
+
+            this.speed -=
+                this.brakePower *
+                dt;
+
+        }
+
+
 
         this.speed =
             Math.max(
@@ -335,9 +439,21 @@ if (
 
 
 
+
         // =========================
-        // MOVE
+        // LANE MOVE
         // =========================
+
+
+        this.lane +=
+            (
+                this.targetLane -
+                this.lane
+            )
+            *
+            4 *
+            dt;
+
 
 
         this.x =
@@ -346,27 +462,19 @@ if (
             );
 
 
+
+
+
+
+        // =========================
+        // DRIVE
+        // =========================
+
+
         this.y +=
-            this.speed * dt;
+            this.speed *
+            dt;
 
-
-
-
-
-        // =========================
-        // RESPAWN
-        // =========================
-
-        if (
-            this.y >
-            this.canvas.height + 400
-        ) {
-
-this.reset(
-    Math.floor(Math.random() * 3),
-    -800 - Math.random() * 500
-);
-        }
 
 
     }
@@ -375,48 +483,58 @@ this.reset(
 
 
 
-    getFrontCar(cars, lane) {
+
+    getFrontCar(cars) {
 
 
         let closest = null;
 
-        let distance = Infinity;
+        let distance =
+            Infinity;
 
 
 
-        for (const car of cars) {
+        for (
+            const car of cars
+        ) {
 
 
-            if (car === this)
+            if (
+                car === this
+            )
                 continue;
 
 
 
             if (
                 Math.round(car.lane)
-                !== lane
+                !==
+                Math.round(this.lane)
             )
                 continue;
 
 
 
-            const diff =
-                car.y - this.y;
+            const d =
+                car.y -
+                this.y;
 
 
 
             if (
-                diff > 0 &&
-                diff < distance
+                d > 0 &&
+                d < distance
             ) {
 
-                distance = diff;
+
+                distance = d;
 
                 closest = car;
 
             }
 
         }
+
 
 
         return closest;
@@ -428,22 +546,95 @@ this.reset(
 
 
 
+    findSafeLane(
+        cars,
+        player
+    ) {
 
-    isLaneSafe(lane, cars) {
+
+        const possible = [];
+
+
+
+        for (
+            let lane = 0;
+            lane < 3;
+            lane++
+        ) {
+
+
+
+            if (
+                lane ===
+                Math.round(this.lane)
+            )
+                continue;
+
+
+
+
+            if (
+                player &&
+                lane ===
+                Math.round(player.lane)
+            )
+                continue;
+
+
+
+            if (
+                this.isLaneSafe(
+                    lane,
+                    cars
+                )
+            ) {
+
+                possible.push(
+                    lane
+                );
+
+            }
+
+        }
+
 
 
         if (
-            lane < 0 ||
-            lane > 2
+            possible.length === 0
         )
-            return false;
+            return this.lane;
 
 
 
-        for (const car of cars) {
+        return possible[
+            Math.floor(
+                Math.random() *
+                possible.length
+            )
+        ];
+
+    }
 
 
-            if (car === this)
+
+
+
+
+
+    isLaneSafe(
+        lane,
+        cars
+    ) {
+
+
+        for (
+            const car of cars
+        ) {
+
+
+            if (
+                car === this
+            )
                 continue;
 
 
@@ -462,13 +653,12 @@ this.reset(
                     this.y
                 )
                 <
-                this.safeDistance * 1.3
+                this.safeDistance
             ) {
 
                 return false;
 
             }
-
 
         }
 
@@ -476,6 +666,7 @@ this.reset(
         return true;
 
     }
+
 
 
 
@@ -490,6 +681,7 @@ this.reset(
                 500,
                 this.canvas.width * 0.5
             );
+
 
 
         const roadX =
@@ -520,27 +712,31 @@ this.reset(
 
 
 
+
     render(ctx) {
 
 
-        CarRenderer.draw(ctx, {
+        CarRenderer.draw(
+            ctx,
+            {
 
-            x: this.x,
+                x:this.x,
 
-            y: this.y,
+                y:this.y,
 
-            width: this.width,
+                width:this.width,
 
-            height: this.height,
+                height:this.height,
 
-            color: this.vehicle.color,
+                color:this.vehicle.color,
 
-            state: this.state
+                state:this.state
 
-        });
-
+            }
+        );
 
     }
+
 
 }
 
@@ -549,4 +745,6 @@ this.reset(
 window.TrafficCar = TrafficCar;
 
 
-console.log("✅ TrafficCar Loaded Successfully");
+console.log(
+    "✅ TrafficCar v2.0 Loaded Successfully"
+);
