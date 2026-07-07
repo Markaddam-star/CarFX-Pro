@@ -166,16 +166,24 @@ class PlayerCar {
 
 
 
-        if (input.left()) {
+       if (input.left()) {
 
-            nextLane = 0;
+    nextLane =
+        Math.max(
+            0,
+            this.targetLane - 1
+        );
 
-        }
-        else if (input.right()) {
+}
+else if (input.right()) {
 
-            nextLane = 2;
+    nextLane =
+        Math.min(
+            2,
+            this.targetLane + 1
+        );
 
-        }
+}
 
 
 
