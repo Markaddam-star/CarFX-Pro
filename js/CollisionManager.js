@@ -21,26 +21,25 @@ class CollisionManager {
     if (!this.player || !this.trafficManager)
         return true;
 
-    for (const car of this.trafficManager.cars) {
+   for (const car of this.trafficManager.cars) {
 
-        // Ignore cars changing lanes
-        if (Math.round(car.targetLane ?? car.lane) !== targetLane)
-            continue;
+    if (Math.round(car.targetLane ?? car.lane) !== targetLane)
+        continue;
 
-        const gap =
-            Math.abs(car.y - this.player.y);
+    const gap = Math.abs(car.y - this.player.y);
 
-        // Dynamic safe distance
-        const safeDistance =
-            (car.height + this.player.height) / 2 + 35;
+    console.log(
+        "Lane:", targetLane,
+        "PlayerY:", this.player.y,
+        "CarY:", car.y,
+        "Gap:", gap
+    );
 
-        if (gap < safeDistance)
-            return false;
+    const safeDistance =
+        (car.height + this.player.height) / 2 + 35;
 
-    }
-
-    return true;
-
+    if (gap < safeDistance)
+        return false;
 }
 
 window.CollisionManager = CollisionManager;
