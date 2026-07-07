@@ -1,8 +1,8 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * Car Renderer v2.1
- * Procedural Vehicle Visual System
+ * Car Renderer v2.2
+ * GTA Style Procedural Vehicle Visual System
  * ============================================================
  */
 
@@ -41,30 +41,20 @@ class CarRenderer {
         // =========================
 
         ctx.fillStyle =
-            "rgba(0,0,0,.28)";
+            "rgba(0,0,0,.35)";
 
 
         ctx.beginPath();
 
-
         ctx.ellipse(
-
             x + width / 2,
-
-            y + height * 0.82,
-
-            width * 0.45,
-
-            height * 0.12,
-
+            y + height * .84,
+            width * .46,
+            height * .13,
             0,
-
             0,
-
             Math.PI * 2
-
         );
-
 
         ctx.fill();
 
@@ -73,82 +63,26 @@ class CarRenderer {
 
 
         // =========================
-        // VEHICLE BODY
+        // BODY TYPE
         // =========================
 
         switch(type) {
 
 
-            case "suv":
-
-                this.drawSUV(
-                    ctx,
-                    x,
-                    y,
-                    width,
-                    height,
-                    color
-                );
-
-                break;
-
-
-
             case "sports":
 
                 this.drawSports(
-                    ctx,
-                    x,
-                    y,
-                    width,
-                    height,
-                    color,
-                    spoiler
+                    ctx,x,y,width,height,color,spoiler
                 );
 
                 break;
 
 
 
-            case "hatchback":
+            case "suv":
 
-                this.drawHatchback(
-                    ctx,
-                    x,
-                    y,
-                    width,
-                    height,
-                    color
-                );
-
-                break;
-
-
-
-            case "taxi":
-
-                this.drawTaxi(
-                    ctx,
-                    x,
-                    y,
-                    width,
-                    height,
-                    color
-                );
-
-                break;
-
-
-
-            case "pickup":
-
-                this.drawPickup(
-                    ctx,
-                    x,
-                    y,
-                    width,
-                    height,
-                    color
+                this.drawSUV(
+                    ctx,x,y,width,height,color
                 );
 
                 break;
@@ -158,12 +92,37 @@ class CarRenderer {
             case "van":
 
                 this.drawVan(
-                    ctx,
-                    x,
-                    y,
-                    width,
-                    height,
-                    color
+                    ctx,x,y,width,height,color
+                );
+
+                break;
+
+
+
+            case "pickup":
+
+                this.drawPickup(
+                    ctx,x,y,width,height,color
+                );
+
+                break;
+
+
+
+            case "taxi":
+
+                this.drawTaxi(
+                    ctx,x,y,width,height,color
+                );
+
+                break;
+
+
+
+            case "hatchback":
+
+                this.drawHatchback(
+                    ctx,x,y,width,height,color
                 );
 
                 break;
@@ -172,20 +131,11 @@ class CarRenderer {
 
             default:
 
-
                 this.drawSedan(
-                    ctx,
-                    x,
-                    y,
-                    width,
-                    height,
-                    color
+                    ctx,x,y,width,height,color
                 );
 
         }
-
-
-
 
 
 
@@ -199,9 +149,9 @@ class CarRenderer {
             x,
             y,
             width,
-            height
+            height,
+            type
         );
-
 
 
 
@@ -222,30 +172,28 @@ class CarRenderer {
 
 
 
-
         // =========================
         // LIGHTS
         // =========================
 
-        if(headlights) {
-
+        if(headlights){
 
             ctx.fillStyle =
-                "#fff4a3";
+                "#fff2a0";
 
 
             ctx.fillRect(
-                x + width*.2,
-                y + 3,
-                8,
+                x+width*.18,
+                y+4,
+                9,
                 4
             );
 
 
             ctx.fillRect(
-                x + width*.65,
-                y + 3,
-                8,
+                x+width*.65,
+                y+4,
+                9,
                 4
             );
 
@@ -253,9 +201,7 @@ class CarRenderer {
 
 
 
-        // brake effect
-
-        if(state === "brake") {
+        if(state==="brake"){
 
 
             ctx.fillStyle =
@@ -263,19 +209,20 @@ class CarRenderer {
 
 
             ctx.fillRect(
-                x + width*.2,
-                y + height - 6,
-                8,
+                x+width*.18,
+                y+height-7,
+                9,
                 5
             );
 
 
             ctx.fillRect(
-                x + width*.65,
-                y + height - 6,
-                8,
+                x+width*.65,
+                y+height-7,
+                9,
                 5
             );
+
 
         }
 
@@ -291,146 +238,7 @@ class CarRenderer {
 
 
 
-    static drawSedan(
-        ctx,
-        x,
-        y,
-        w,
-        h,
-        color
-    ) {
-
-
-        this.body(
-            ctx,
-            x,
-            y,
-            w,
-            h,
-            color,
-            .18
-        );
-
-    }
-
-
-
-
-
-
-
-    static drawSUV(
-        ctx,
-        x,
-        y,
-        w,
-        h,
-        color
-    ) {
-
-
-        this.body(
-            ctx,
-            x,
-            y,
-            w,
-            h,
-            color,
-            .12
-        );
-
-
-    }
-
-
-
-
-
-
-
-    static drawSports(
-        ctx,
-        x,
-        y,
-        w,
-        h,
-        color,
-        spoiler
-    ) {
-
-
-        this.body(
-            ctx,
-            x,
-            y,
-            w,
-            h,
-            color,
-            .25
-        );
-
-
-        if(spoiler) {
-
-
-            ctx.fillStyle =
-                "#111";
-
-
-            ctx.fillRect(
-                x-4,
-                y+h*.18,
-                w+8,
-                4
-            );
-
-        }
-
-
-    }
-
-
-
-
-
-
-
-    static drawHatchback(
-        ctx,
-        x,
-        y,
-        w,
-        h,
-        color
-    ) {
-
-
-        this.body(
-            ctx,
-            x,
-            y,
-            w,
-            h,
-            color,
-            .2
-        );
-
-    }
-
-
-
-
-
-
-
-    static drawTaxi(
-        ctx,
-        x,
-        y,
-        w,
-        h,
-        color
-    ) {
+    static drawSedan(ctx,x,y,w,h,color){
 
 
         this.body(
@@ -445,14 +253,109 @@ class CarRenderer {
 
 
         ctx.fillStyle =
-            "#222";
+            "rgba(0,0,0,.15)";
 
 
         ctx.fillRect(
-            x+w*.35,
-            y-5,
-            w*.3,
-            6
+            x+8,
+            y+h*.65,
+            w-16,
+            8
+        );
+
+
+    }
+
+
+
+
+
+
+
+    static drawSUV(ctx,x,y,w,h,color){
+
+
+        this.body(
+            ctx,
+            x,
+            y,
+            w,
+            h,
+            color,
+            .12
+        );
+
+
+        ctx.fillStyle =
+            "rgba(0,0,0,.18)";
+
+
+        ctx.fillRect(
+            x+6,
+            y+h*.65,
+            w-12,
+            10
+        );
+
+
+    }
+
+
+
+
+
+
+
+    static drawSports(ctx,x,y,w,h,color,spoiler){
+
+
+        this.body(
+            ctx,
+            x,
+            y,
+            w,
+            h,
+            color,
+            .25
+        );
+
+
+        if(spoiler){
+
+
+            ctx.fillStyle =
+                "#111";
+
+
+            ctx.fillRect(
+                x-6,
+                y+h*.18,
+                w+12,
+                5
+            );
+
+        }
+
+
+    }
+
+
+
+
+
+
+
+    static drawHatchback(ctx,x,y,w,h,color){
+
+
+        this.body(
+            ctx,
+            x,
+            y,
+            w,
+            h,
+            color,
+            .20
         );
 
     }
@@ -463,14 +366,73 @@ class CarRenderer {
 
 
 
-    static drawPickup(
-        ctx,
-        x,
-        y,
-        w,
-        h,
-        color
-    ) {
+    static drawTaxi(ctx,x,y,w,h,color){
+
+
+        this.body(
+            ctx,
+            x,
+            y,
+            w,
+            h,
+            "#f5c542",
+            .18
+        );
+
+
+        // taxi stripe
+
+        ctx.fillStyle =
+            "#111";
+
+
+        ctx.fillRect(
+            x,
+            y+h*.45,
+            w,
+            6
+        );
+
+
+
+        // taxi roof sign
+
+        ctx.fillStyle =
+            "#222";
+
+
+        ctx.fillRect(
+            x+w*.32,
+            y-8,
+            w*.36,
+            8
+        );
+
+
+        ctx.fillStyle =
+            "#fff";
+
+
+        ctx.font =
+            "bold 7px Arial";
+
+
+        ctx.fillText(
+            "TAXI",
+            x+w*.35,
+            y-2
+        );
+
+
+    }
+
+
+
+
+
+
+
+    static drawPickup(ctx,x,y,w,h,color){
 
 
         this.body(
@@ -485,7 +447,7 @@ class CarRenderer {
 
 
         ctx.fillStyle =
-            "rgba(0,0,0,.2)";
+            "rgba(0,0,0,.25)";
 
 
         ctx.fillRect(
@@ -495,6 +457,7 @@ class CarRenderer {
             h*.25
         );
 
+
     }
 
 
@@ -503,14 +466,7 @@ class CarRenderer {
 
 
 
-    static drawVan(
-        ctx,
-        x,
-        y,
-        w,
-        h,
-        color
-    ) {
+    static drawVan(ctx,x,y,w,h,color){
 
 
         this.body(
@@ -520,8 +476,21 @@ class CarRenderer {
             w,
             h,
             color,
-            .1
+            .10
         );
+
+
+        ctx.fillStyle =
+            "rgba(0,0,0,.18)";
+
+
+        ctx.fillRect(
+            x+8,
+            y+h*.55,
+            w-16,
+            14
+        );
+
 
     }
 
@@ -531,15 +500,7 @@ class CarRenderer {
 
 
 
-    static body(
-        ctx,
-        x,
-        y,
-        w,
-        h,
-        color,
-        radius
-    ) {
+    static body(ctx,x,y,w,h,color,radius){
 
 
         this.roundRect(
@@ -558,6 +519,7 @@ class CarRenderer {
 
         ctx.fill();
 
+
     }
 
 
@@ -566,25 +528,19 @@ class CarRenderer {
 
 
 
-    static drawWindows(
-        ctx,
-        x,
-        y,
-        w,
-        h
-    ) {
+    static drawWindows(ctx,x,y,w,h,type){
 
 
         ctx.fillStyle =
-            "#20252b";
+            "#18242d";
 
 
         this.roundRect(
             ctx,
-            x+w*.2,
-            y+h*.22,
-            w*.6,
-            h*.35,
+            x+w*.20,
+            y+h*.20,
+            w*.60,
+            h*.32,
             6
         );
 
@@ -592,16 +548,18 @@ class CarRenderer {
         ctx.fill();
 
 
+
         ctx.fillStyle =
-            "#7fcfff";
+            "rgba(130,210,255,.65)";
 
 
         ctx.fillRect(
             x+w*.25,
-            y+h*.28,
-            w*.5,
-            h*.08
+            y+h*.27,
+            w*.45,
+            8
         );
+
 
     }
 
@@ -611,14 +569,7 @@ class CarRenderer {
 
 
 
-    static drawWheels(
-        ctx,
-        x,
-        y,
-        w,
-        h,
-        size
-    ) {
+    static drawWheels(ctx,x,y,w,h,size){
 
 
         ctx.fillStyle =
@@ -627,7 +578,7 @@ class CarRenderer {
 
         ctx.fillRect(
             x-3,
-            y+18,
+            y+20,
             size,
             18
         );
@@ -635,7 +586,7 @@ class CarRenderer {
 
         ctx.fillRect(
             x+w-4,
-            y+18,
+            y+20,
             size,
             18
         );
@@ -643,7 +594,7 @@ class CarRenderer {
 
         ctx.fillRect(
             x-3,
-            y+h-36,
+            y+h-38,
             size,
             18
         );
@@ -651,10 +602,11 @@ class CarRenderer {
 
         ctx.fillRect(
             x+w-4,
-            y+h-36,
+            y+h-38,
             size,
             18
         );
+
 
     }
 
@@ -664,14 +616,7 @@ class CarRenderer {
 
 
 
-    static roundRect(
-        ctx,
-        x,
-        y,
-        w,
-        h,
-        r
-    ) {
+    static roundRect(ctx,x,y,w,h,r){
 
 
         ctx.beginPath();
@@ -732,5 +677,5 @@ window.CarRenderer = CarRenderer;
 
 
 console.log(
-    "✅ CarRenderer v2.1 Loaded Successfully"
+    "✅ CarRenderer v2.2 Loaded Successfully"
 );
