@@ -201,7 +201,7 @@ class CarFXEngine {
         this.policeManager?.render(this.ctx);
         this.roadblockManager?.render(this.ctx);
 
-        this.player?.render(this.ctx);
+        this.player?.draw(this.ctx);
 
         this.ctx.restore();
 
