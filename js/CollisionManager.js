@@ -1,7 +1,8 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * CollisionManager.js - PLAYER + TRAFFIC COLLISION v2.0
+ * CollisionManager.js
+ * PLAYER VS TRAFFIC COLLISION v1.2
  * ============================================================
  */
 
@@ -12,118 +13,86 @@ class CollisionManager {
         this.player = player;
         this.trafficManager = trafficManager;
 
-        this.hitCooldown = 0;
+        this.hitDistance = 20;
 
     }
 
 
     update(dt) {
 
-        if (!this.player || !this.trafficManager)
+
+        if(
+            !this.player ||
+            !this.trafficManager
+        )
             return;
 
 
-        if (this.hitCooldown > 0) {
 
-            this.hitCooldown -= dt;
-            return;
-
-        }
+        for(const car of this.trafficManager.cars){
 
 
-        for (const car of this.trafficManager.cars) {
+
+            const dx =
+                Math.abs(
+                    (car.x + car.width / 2) -
+                    (this.player.x + this.player.width / 2)
+                );
 
 
-            if (this.checkCollision(
-                this.player,
-                car
-            )) {
+            const dy =
+                Math.abs(
+                    (car.y + car.height / 2) -
+                    (this.player.y + this.player.height / 2)
+                );
 
 
-                console.log("💥 PLAYER HIT TRAFFIC");
+
+            const collisionX =
+                dx <
+                (car.width + this.player.width) / 2;
+
+
+            const collisionY =
+                dy <
+                (car.height + this.player.height) / 2;
+
+
+
+            if(
+                collisionX &&
+                collisionY
+            ){
+
+                console.log(
+                    "💥 PLAYER HIT BY TRAFFIC"
+                );
 
 
                 // stop traffic car
 
-                car.speed = 0;
+                car.speed *= 0.3;
 
 
-                // push traffic backwards
+                // push back
 
                 car.y -= 40;
 
 
-                // slow player
 
-                if (this.player.speed !== undefined) {
+                // player damage later
 
-                    this.player.speed *= 0.3;
+                this.player.hit = true;
 
-                }
-
-
-                this.hitCooldown = 0.5;
-
-
-                break;
 
             }
 
         }
 
-    }
-
-
-
-    checkCollision(a,b) {
-
-
-        return (
-
-            a.x < b.x + b.width &&
-
-            a.x + a.width > b.x &&
-
-            a.y < b.y + b.height &&
-
-            a.y + a.height > b.y
-
-        );
-
 
     }
 
 
-
-    canEnterLane(targetLane) {
-
-
-        for (const car of this.trafficManager.cars) {
-
-
-            if (
-                Math.round(car.lane) !== targetLane
-            )
-                continue;
-
-
-
-            const gap =
-                Math.abs(
-                    car.y - this.player.y
-                );
-
-
-            if (gap < 250)
-                return false;
-
-
-        }
-
-
-        return true;
-
-    }
 
 }
 
