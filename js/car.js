@@ -9,9 +9,12 @@ class PlayerCar {
 
     constructor(canvas) {
 
-        this.canvas = canvas;
 
-        this.vehicle = VehicleFactory.player();
+    alert("NEW PlayerCar Loaded");
+
+    this.canvas = canvas;
+
+      this.vehicle = VehicleFactory.player();
 
         this.width = this.vehicle.width;
         this.height = this.vehicle.height;
@@ -238,32 +241,24 @@ if (
 
     }
 
+draw(ctx) {
 
+    CarRenderer.draw(ctx, {
 
+        x: this.x,
+        y: this.y,
+        width: this.width,
+        height: this.height,
+        color: this.vehicle.color
 
-
-    render(ctx) {
-
-
-        CarRenderer.draw(ctx, {
-
-            x:this.x,
-
-            y:this.y,
-
-            width:this.width,
-
-            height:this.height,
-
-            color:this.vehicle.color
-
-        });
-
-
-    }
+    });
 
 }
 
-
+}
 
 window.PlayerCar = PlayerCar;
+
+
+
+
