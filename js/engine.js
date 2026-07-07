@@ -174,7 +174,7 @@ class CarFXEngine {
         if (this.player) {
 
             this.cameraTargetY =
-                this.player.y - this.canvas.height * 0.65;
+                this.player.y - this.canvas.height * 0.55;
 
             this.cameraY += (this.cameraTargetY - this.cameraY) * 0.10;
 
