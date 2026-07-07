@@ -9,8 +9,8 @@
     // ENGINE
     // =========================
 
-    window.carfxEngine = new CarFXEngine();
-    window.carfxEngine.init();
+    window.carFXEngine = new CarFXEngine();
+    window.carFXEngine.init();
 
     let running = true;
 
@@ -68,45 +68,48 @@
         <h3 style="margin-top:0;">🚗 CarFX Pro</h3>
 
         <button id="carfx-playpause"
-        style="width:100%;padding:10px;margin-bottom:10px;">
-        Pause Animation
+            style="width:100%;padding:10px;margin-bottom:10px;">
+            Pause Animation
         </button>
 
         <button id="carfx-close"
-        style="width:100%;padding:10px;">
-        Close
+            style="width:100%;padding:10px;">
+            Close
         </button>
     `;
 
     document.body.appendChild(panel);
 
     // =========================
-    // OPEN PANEL
+    // OPEN / CLOSE PANEL
     // =========================
 
     toggle.addEventListener("click", () => {
 
         panel.style.display =
             panel.style.display === "none"
-            ? "block"
-            : "none";
+                ? "block"
+                : "none";
 
     });
 
     // =========================
-    // WAIT DOM
+    // BUTTON EVENTS
     // =========================
 
     setTimeout(() => {
 
-        const playBtn = document.getElementById("carfx-playpause");
-        const closeBtn = document.getElementById("carfx-close");
+        const playBtn =
+            document.getElementById("carfx-playpause");
+
+        const closeBtn =
+            document.getElementById("carfx-close");
 
         playBtn.onclick = () => {
 
             if (running) {
 
-                window.carfxEngine.stop();
+                window.carFXEngine.stop();
 
                 playBtn.innerText = "Play Animation";
 
@@ -116,7 +119,7 @@
 
             } else {
 
-                window.carfxEngine.start();
+                window.carFXEngine.start();
 
                 playBtn.innerText = "Pause Animation";
 
