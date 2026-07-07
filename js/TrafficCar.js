@@ -50,8 +50,7 @@ class TrafficCar {
 
         // SAFETY
 
-        this.safeDistance = 160;
-
+        this.safeDistance = 240;
         this.laneChangeCooldown = 0;
 
 
@@ -193,33 +192,32 @@ class TrafficCar {
 
 
 
-            if (
-                this.isLaneSafe(
-                    currentLane - 1,
-                    cars
-                )
-            ) {
-
-                possible.push(
-                    currentLane - 1
-                );
-
-            }
+         const playerLane =
+    player
+    ? Math.round(player.lane)
+    : -1;
 
 
 
-            if (
-                this.isLaneSafe(
-                    currentLane + 1,
-                    cars
-                )
-            ) {
+if (
+    this.isLaneSafe(currentLane - 1, cars) &&
+    currentLane - 1 !== playerLane
+) {
 
-                possible.push(
-                    currentLane + 1
-                );
+    possible.push(currentLane - 1);
 
-            }
+}
+
+
+
+if (
+    this.isLaneSafe(currentLane + 1, cars) &&
+    currentLane + 1 !== playerLane
+) {
+
+    possible.push(currentLane + 1);
+
+}
 
 
 
@@ -273,7 +271,7 @@ class TrafficCar {
                 this.lane
             )
             *
-            6
+            3
             *
             dt;
 
@@ -364,8 +362,10 @@ class TrafficCar {
             this.canvas.height + 400
         ) {
 
-           this.reset(this.lane, -300);
-
+this.reset(
+    Math.floor(Math.random() * 3),
+    -800 - Math.random() * 500
+);
         }
 
 
