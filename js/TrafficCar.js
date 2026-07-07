@@ -1,9 +1,10 @@
-console.log("🔥 TrafficCar v2.0 START");
+console.log("🔥 TrafficCar v2.1 START");
 
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * TrafficCar.js - GTA SMART AI TRAFFIC SYSTEM v2.0
+ * TrafficCar.js - SMART AI TRAFFIC SYSTEM v2.1
+ * Vehicle Visual Integration
  * ============================================================
  */
 
@@ -23,8 +24,7 @@ class TrafficCar {
         // DRIVER PERSONALITY
         // =========================
 
-        this.personality =
-            Math.random();
+        this.personality = Math.random();
 
 
         if (this.personality > 0.7) {
@@ -52,8 +52,11 @@ class TrafficCar {
         this.state = "cruise";
 
 
-        this.lane = 1;
+        // =========================
+        // LANES
+        // =========================
 
+        this.lane = 1;
         this.targetLane = 1;
 
 
@@ -63,13 +66,11 @@ class TrafficCar {
         // =========================
 
         this.speed = 200;
-
         this.targetSpeed = 200;
 
         this.maxSpeed = 300;
 
         this.acceleration = 80;
-
         this.brakePower = 450;
 
 
@@ -122,7 +123,6 @@ class TrafficCar {
 
 
 
-
         this.x =
             this.getLaneX(
                 this.lane
@@ -137,7 +137,7 @@ class TrafficCar {
 
 
 
-        this.setupVehicleSpeed();
+        this.setupVehicleStats();
 
 
         this.state = "cruise";
@@ -149,53 +149,30 @@ class TrafficCar {
 
 
 
-    setupVehicleSpeed() {
+
+    setupVehicleStats() {
 
 
-        if (
-            this.vehicle.speedClass === "fast"
-        ) {
+        this.maxSpeed =
+            this.vehicle.maxSpeed || 300;
 
 
-            this.speed =
-                280;
+        this.acceleration =
+            this.vehicle.acceleration || 80;
 
 
-            this.maxSpeed =
-                380;
+        this.brakePower =
+            this.vehicle.braking || 450;
 
 
-        }
-        else if (
-            this.vehicle.speedClass === "slow"
-        ) {
 
-
-            this.speed =
-                120;
-
-
-            this.maxSpeed =
-                220;
-
-
-        }
-        else {
-
-
-            this.speed =
-                190;
-
-
-            this.maxSpeed =
-                300;
-
-
-        }
+        this.speed =
+            this.maxSpeed * 0.65;
 
 
         this.targetSpeed =
             this.speed;
+
 
     }
 
@@ -215,6 +192,9 @@ class TrafficCar {
         this.laneChangeCooldown -= dt;
 
 
+        let danger = false;
+
+
 
         const front =
             this.getFrontCar(
@@ -223,21 +203,15 @@ class TrafficCar {
 
 
 
-        let danger = false;
-
-
-
         // =========================
-        // FOLLOW SYSTEM
+        // FRONT TRAFFIC
         // =========================
-
 
         if (front) {
 
 
             const gap =
-                front.y -
-                this.y;
+                front.y - this.y;
 
 
 
@@ -248,7 +222,6 @@ class TrafficCar {
 
                 danger = true;
 
-
                 this.state =
                     "follow";
 
@@ -257,10 +230,10 @@ class TrafficCar {
                     front.speed;
 
 
-
             }
 
         }
+
 
 
 
@@ -271,40 +244,39 @@ class TrafficCar {
         // PLAYER AWARENESS
         // =========================
 
-
         if (player) {
 
 
-            const sameLane =
+            if (
                 Math.round(player.lane)
                 ===
-                Math.round(this.lane);
-
-
-
-            const distance =
-                player.y -
-                this.y;
-
-
-
-            if (
-                sameLane &&
-                distance > 0 &&
-                distance < this.safeDistance * 2
+                Math.round(this.lane)
             ) {
 
 
-                danger = true;
+                const distance =
+                    player.y - this.y;
 
 
-                this.state =
-                    "yield";
+
+                if (
+                    distance > 0 &&
+                    distance <
+                    this.safeDistance * 2
+                ) {
 
 
-                this.targetSpeed =
-                    player.speed * 0.7;
+                    danger = true;
 
+                    this.state =
+                        "yield";
+
+
+                    this.targetSpeed =
+                        player.speed * 0.7;
+
+
+                }
 
             }
 
@@ -315,10 +287,10 @@ class TrafficCar {
 
 
 
-        // =========================
-        // OVERTAKE
-        // =========================
 
+        // =========================
+        // LANE CHANGE
+        // =========================
 
         if (
             danger &&
@@ -326,7 +298,7 @@ class TrafficCar {
         ) {
 
 
-            const lane =
+            const newLane =
                 this.findSafeLane(
                     cars,
                     player
@@ -335,12 +307,12 @@ class TrafficCar {
 
 
             if (
-                lane !== this.lane
+                newLane !== this.lane
             ) {
 
 
                 this.targetLane =
-                    lane;
+                    newLane;
 
 
                 this.state =
@@ -358,8 +330,8 @@ class TrafficCar {
                 this.targetSpeed =
                     0;
 
-
             }
+
 
 
             this.laneChangeCooldown =
@@ -372,26 +344,25 @@ class TrafficCar {
 
 
 
-
         // =========================
-        // RECOVER
+        // FREE ROAD
         // =========================
-
 
         if (!danger) {
 
 
             this.state =
-                "recover";
+                "cruise";
 
 
             this.targetSpeed =
                 this.maxSpeed *
                 (
-                    0.7 +
+                    0.65 +
                     this.personality *
-                    0.3
+                    0.25
                 );
+
 
         }
 
@@ -399,8 +370,10 @@ class TrafficCar {
 
 
 
+
+
         // =========================
-        // SPEED SMOOTHING
+        // SPEED CONTROL
         // =========================
 
 
@@ -413,6 +386,7 @@ class TrafficCar {
             this.speed +=
                 this.acceleration *
                 dt;
+
 
         }
         else {
@@ -441,7 +415,7 @@ class TrafficCar {
 
 
         // =========================
-        // LANE MOVE
+        // LANE SMOOTHING
         // =========================
 
 
@@ -465,19 +439,36 @@ class TrafficCar {
 
 
 
-
-        // =========================
-        // DRIVE
-        // =========================
-
-
         this.y +=
             this.speed *
             dt;
 
 
 
+        // =========================
+        // RESPAWN
+        // =========================
+
+        if (
+            this.y >
+            this.canvas.height + 500
+        ) {
+
+
+            this.reset(
+                Math.floor(
+                    Math.random() * 3
+                ),
+                -700
+            );
+
+
+        }
+
+
     }
+
+
 
 
 
@@ -489,8 +480,7 @@ class TrafficCar {
 
         let closest = null;
 
-        let distance =
-            Infinity;
+        let distance = Infinity;
 
 
 
@@ -516,8 +506,7 @@ class TrafficCar {
 
 
             const d =
-                car.y -
-                this.y;
+                car.y - this.y;
 
 
 
@@ -525,7 +514,6 @@ class TrafficCar {
                 d > 0 &&
                 d < distance
             ) {
-
 
                 distance = d;
 
@@ -536,10 +524,10 @@ class TrafficCar {
         }
 
 
-
         return closest;
 
     }
+
 
 
 
@@ -552,7 +540,7 @@ class TrafficCar {
     ) {
 
 
-        const possible = [];
+        const options = [];
 
 
 
@@ -572,7 +560,6 @@ class TrafficCar {
 
 
 
-
             if (
                 player &&
                 lane ===
@@ -589,27 +576,29 @@ class TrafficCar {
                 )
             ) {
 
-                possible.push(
+                options.push(
                     lane
                 );
 
             }
 
+
         }
 
 
 
+
         if (
-            possible.length === 0
+            options.length === 0
         )
             return this.lane;
 
 
 
-        return possible[
+        return options[
             Math.floor(
                 Math.random() *
-                possible.length
+                options.length
             )
         ];
 
@@ -660,6 +649,7 @@ class TrafficCar {
 
             }
 
+
         }
 
 
@@ -683,14 +673,11 @@ class TrafficCar {
             );
 
 
-
         const roadX =
             (
                 this.canvas.width -
                 roadWidth
-            )
-            /
-            2;
+            ) / 2;
 
 
 
@@ -704,6 +691,7 @@ class TrafficCar {
             lane * laneW +
             (laneW - this.width) / 2
         );
+
 
     }
 
@@ -720,20 +708,31 @@ class TrafficCar {
             ctx,
             {
 
-                x:this.x,
+                x: this.x,
 
-                y:this.y,
+                y: this.y,
 
-                width:this.width,
+                width: this.width,
 
-                height:this.height,
+                height: this.height,
 
-                color:this.vehicle.color,
+                color: this.vehicle.color,
 
-                state:this.state
+                type: this.vehicle.type,
+
+                roofStyle: this.vehicle.roofStyle,
+
+                spoiler: this.vehicle.spoiler,
+
+                headlights: this.vehicle.headlights,
+
+                wheelSize: this.vehicle.wheelSize,
+
+                state: this.state
 
             }
         );
+
 
     }
 
@@ -746,5 +745,5 @@ window.TrafficCar = TrafficCar;
 
 
 console.log(
-    "✅ TrafficCar v2.0 Loaded Successfully"
+    "✅ TrafficCar v2.1 Loaded Successfully"
 );
