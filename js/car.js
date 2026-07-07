@@ -72,10 +72,8 @@ class PlayerCar {
 
 
 
-        this.y =
-            this.canvas.height -
-            this.height -
-            30;
+       this.y =
+    600;
 
 
     }
