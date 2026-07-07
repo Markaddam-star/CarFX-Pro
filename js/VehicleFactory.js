@@ -8,17 +8,23 @@
 
 class VehicleFactory {
 
-    static TYPES = [
+   static TYPES = [
 
-        { type: "sedan", width: 60, height: 118 },
-        { type: "suv", width: 68, height: 126 },
-        { type: "sports", width: 58, height: 112 },
-        { type: "hatchback", width: 56, height: 108 },
-        { type: "taxi", width: 60, height: 118 },
-        { type: "pickup", width: 66, height: 124 },
-        { type: "van", width: 70, height: 132 }
+    { type: "sedan", width: 60, height: 118, speed: "normal" },
 
-    ];
+    { type: "suv", width: 68, height: 126, speed: "slow" },
+
+    { type: "sports", width: 58, height: 112, speed: "fast" },
+
+    { type: "hatchback", width: 56, height: 108, speed: "normal" },
+
+    { type: "taxi", width: 60, height: 118, speed: "normal" },
+
+    { type: "pickup", width: 66, height: 124, speed: "slow" },
+
+    { type: "van", width: 70, height: 132, speed: "slow" }
+
+];
 
     static COLORS = [
 
@@ -51,6 +57,7 @@ class VehicleFactory {
         const base =
             this.TYPES[
                 Math.floor(Math.random() * this.TYPES.length)
+            
             ];
 
         return {
@@ -60,6 +67,8 @@ class VehicleFactory {
             width: base.width,
 
             height: base.height,
+
+            speedClass: base.speed,
 
             color:
                 this.COLORS[
