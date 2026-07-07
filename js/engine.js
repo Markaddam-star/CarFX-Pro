@@ -27,6 +27,7 @@ class CarFXEngine {
         this.policeManager = null;
         this.wantedSystem = null;
         this.roadblockManager = null;
+        this.collisionManager = null;
 
         // camera
         this.cameraY = 0;
@@ -63,7 +64,12 @@ class CarFXEngine {
         this.trafficManager = window.TrafficManager
             ? new TrafficManager(this.canvas, this.player)
             : null;
-
+        this.collisionManager = window.CollisionManager
+            ? new CollisionManager(
+            this.player,
+            this.trafficManager
+    )
+    : null;
         this.policeManager = window.PoliceManager
             ? new PoliceManager(this.canvas, this.player, this.wantedSystem)
             : null;
@@ -149,6 +155,7 @@ class CarFXEngine {
         this.player?.update(dt);
 
         this.trafficManager?.update(dt);
+        this.collisionManager?.update?.(dt);
 
         // =========================
         // GTA SYSTEMS
