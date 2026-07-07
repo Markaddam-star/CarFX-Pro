@@ -282,7 +282,7 @@ this.x +=
 
 
 
-
+    }
 
     draw(ctx) {
 
