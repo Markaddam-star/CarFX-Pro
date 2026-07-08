@@ -155,7 +155,7 @@ class ParticleSystem {
 
                     type:"smoke",
 
-                    layer:"back",
+                    layer:"front",
 
                     size:
                     8+
