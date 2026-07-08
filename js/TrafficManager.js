@@ -179,38 +179,24 @@ class TrafficManager {
 
         for (const car of this.cars) {
 
-            if (
-                car.y <
-                -this.viewportPadding
-            ) {
+    car.update(
+        dt,
+        this.cars,
+        this.player
+    );
 
-                this.visibleCars.push(car);
+    this.handleRespawn(car);
 
-            }
-            else if (
+    if (
+        car.y >= -this.viewportPadding &&
+        car.y <= this.canvas.height + this.viewportPadding
+    ) {
 
-                car.y <
-                this.canvas.height +
-                this.viewportPadding
+        this.visibleCars.push(car);
 
-            ) {
+    }
 
-                this.visibleCars.push(car);
-
-            }
-
-
-            car.update(
-                dt,
-                this.cars,
-                this.player
-            );
-
-            this.handleRespawn(
-                car
-            );
-
-        }
+}
 
 
         this.spawnTimer -= dt;
