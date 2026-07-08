@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * PlayerCar.js - PLAYER CONTROL SYSTEM v2.1
+ * PlayerCar.js - PLAYER CONTROL SYSTEM v2.2
  * ============================================================
  *
  * Features
@@ -11,472 +11,610 @@
  * ✔ Steering tilt
  * ✔ Suspension bounce
  * ✔ Brake light state
- * ✔ HUD hooks
+ * ✔ RPM system
  * ✔ Audio hooks
- * ✔ Particle hooks
- * ✔ Camera hooks
+ * ✔ HUD hooks
+ * ✔ Cinematic particle FX v2.0
+ * ✔ Tire smoke
+ * ✔ Brake dust
+ * ✔ Drift smoke
  * ============================================================
  */
 
+
 class PlayerCar {
 
-    constructor(canvas) {
 
-        this.canvas = canvas;
+constructor(canvas, particles){
 
-        this.vehicle = VehicleFactory.player();
 
-        this.width = this.vehicle.width;
-        this.height = this.vehicle.height;
+    this.canvas = canvas;
 
-        // -----------------------------
-        // Lane System
-        // -----------------------------
+    this.particles = particles;
 
-        this.lane = 1;
-        this.targetLane = 1;
 
-        this.x = 0;
-        this.targetX = 0;
+    this.vehicle =
+        VehicleFactory.player();
 
-        this.laneSmooth = 8;
 
-        // -----------------------------
-        // Physics
-        // -----------------------------
 
-        this.speed = 0;
+    this.width =
+        this.vehicle.width;
 
-        this.maxSpeed = this.vehicle.maxSpeed;
 
-        this.acceleration = this.vehicle.acceleration;
+    this.height =
+        this.vehicle.height;
 
-        this.brakePower = this.vehicle.braking;
 
-        this.friction = 8;
-        // -----------------------------
-        // Visual State
-        // -----------------------------
 
-        this.steer = 0;
+    // Lane
 
-        this.targetSteer = 0;
+    this.lane = 1;
 
-        this.bodyBounce = 0;
+    this.targetLane = 1;
 
-        this.braking = false;
 
-        this.handbrakeActive = false;
+    this.x = 0;
 
-      this.engineRPM = 0;
+    this.targetX = 0;
 
-this.rpm = 800;
 
-this.throttle = 0;
+    this.laneSmooth = 8;
 
-this.lastSpeed = 0;
 
-this.speedDelta = 0;
 
-        // future systems
+    // Physics
 
-        this.cameraZoom = 1;
+    this.speed = 0;
 
-        this.motionBlur = 0;
+    this.maxSpeed =
+        this.vehicle.maxSpeed;
 
-        this.resize();
-    }
 
-    resize() {
+    this.acceleration =
+        this.vehicle.acceleration;
 
-        const roadWidth =
-            Math.min(
-                500,
-                this.canvas.width * .5
-            );
 
-        const roadX =
-            (
-                this.canvas.width -
-                roadWidth
-            ) / 2;
+    this.brakePower =
+        this.vehicle.braking;
 
-        const laneWidth =
-            roadWidth / 3;
 
-        this.x =
-            roadX +
-            this.lane * laneWidth +
-            (laneWidth - this.width) / 2;
+    this.friction = 8;
 
-        this.targetX = this.x;
 
-        this.y =
-            this.canvas.height -
-            this.height -
-            40;
-    }
 
-    update(dt) {
+    // Visual
 
-        const input =
-            window.carFXEngine?.input;
+    this.steer = 0;
 
-       if (!input)
-    return;
+    this.targetSteer = 0;
 
-dt = Math.min(dt, 0.05);
 
-        // ==================================
-        // ACCELERATION
-        // ==================================
+    this.bodyBounce = 0;
 
-        if (input.accelerate()) {
-
-            this.speed +=
-                this.acceleration * dt;
-
-        } else {
-
-    this.speed -=
-        this.friction * Math.min(dt, 0.05);
-
-    if (this.speed < 0) {
-        this.speed = 0;
-    }
-
-}
-
-        // ==================================
-        // BRAKING
-        // ==================================
-
-        this.braking = false;
-
-        if (input.brake()) {
-
-            this.speed -=
-    this.brakePower * Math.min(dt, 0.05);
-
-            this.braking = true;
-
-        }
-
-        // ==================================
-        // HANDBRAKE
-        // ==================================
-
-        this.handbrakeActive =
-            input.handbrake();
-
-        if (this.handbrakeActive) {
-
-           this.speed -=
-    this.brakePower * 0.65 * Math.min(dt, 0.05);
-
-        }
-
-        // ==================================
-        // LIMITS
-        // ==================================
-         
-        
-
-        this.speed =
-            Math.max(
-                0,
-                Math.min(
-                    this.speed,
-                    this.maxSpeed
-                )
-            );
-
-            this.speed = Number(
-    this.speed.toFixed(2)
-);
-
-      // ==================================
-// ENGINE RPM SYSTEM v2.1
-// ==================================
-
-let previousSpeed = this.lastSpeed;
-
-
-// speed change
-
-this.speedDelta =
-    this.speed - previousSpeed;
-
-
-// throttle detection
-
-if(this.speedDelta > 0){
-
-    this.throttle =
-        Math.min(
-            this.speedDelta * 20,
-            1
-        );
-
-}
-else{
-
-    this.throttle *= 0.9;
-
-}
-
-
-// brake detection
-
-if(this.speed < previousSpeed){
-
-    this.braking = true;
-
-}
-else{
 
     this.braking = false;
 
+
+    this.handbrakeActive = false;
+
+
+
+    // Engine
+
+    this.rpm = 800;
+
+    this.engineRPM = 0;
+
+    this.throttle = 0;
+
+
+    this.lastSpeed = 0;
+
+    this.speedDelta = 0;
+
+
+
+    // FX
+
+    this.particleTimer = 0;
+
+
+
+    this.cameraZoom = 1;
+
+    this.motionBlur = 0;
+
+
+
+    this.resize();
+
+
+
 }
 
 
-// save speed
-
-this.lastSpeed = this.speed;
 
 
-// RPM calculation
 
-let speedRatio =
-    this.speed / this.maxSpeed;
+resize(){
 
 
-let targetRPM =
-    800 +
-    (speedRatio * 5000) +
-    (this.throttle * 2500);
-
-
-this.rpm +=
-(
-    targetRPM -
-    this.rpm
-)
-* 0.08;
-
-// normalized RPM hook
-
-this.engineRPM =
-    this.rpm / 8000;
-
-        // ==================================
-        // LANE CHANGE
-        // ==================================
-
-        let wantedLane =
-            this.targetLane;
-
-        if (input.leftPressed()) {
-
-            wantedLane =
-                Math.max(
-                    0,
-                    this.targetLane - 1
-                );
-
-        }
-        else if (input.rightPressed()) {
-
-            wantedLane =
-                Math.min(
-                    2,
-                    this.targetLane + 1
-                );
-
-        }
-
-        const collision =
-            window.carFXEngine?.collisionManager;
-
-        if (
-            !collision ||
-            collision.canEnterLane(wantedLane)
-        ) {
-
-            this.targetLane =
-                wantedLane;
-
-        }
-
-        this.lane +=
-            (
-                this.targetLane -
-                this.lane
-            ) *
-            this.laneSmooth *
-            dt;
-
-        if (
-            Math.abs(
-                this.targetLane -
-                this.lane
-            ) < 0.01
-        ) {
-
-            this.lane =
-                this.targetLane;
-
-        }
-
-        // ==================================
-        // ROAD CALCULATION
-        // ==================================
-
-        const roadWidth =
-            Math.min(
-                500,
-                this.canvas.width * 0.5
-            );
-
-        const roadX =
-            (
-                this.canvas.width -
-                roadWidth
-            ) / 2;
-
-        const laneWidth =
-            roadWidth / 3;
-
-        this.targetX =
-            roadX +
-            this.lane * laneWidth +
-            (laneWidth - this.width) / 2;
-
-        this.x +=
-            (
-                this.targetX -
-                this.x
-            ) *
-            10 *
-            dt;
-
-        // ==================================
-        // STEERING TILT
-        // ==================================
-
-        this.targetSteer =
-            (this.targetLane - this.lane) * 18;
-
-        this.steer +=
-            (
-                this.targetSteer -
-                this.steer
-            ) *
-            8 *
-            dt;
-
-        // ==================================
-        // BODY BOUNCE
-        // ==================================
-
-        this.bodyBounce =
-            Math.sin(
-                performance.now() * 0.012
-            ) *
-            (
-                this.speed /
-                this.maxSpeed
-            ) *
-            2;
-
-        // ==================================
-        // CAMERA HOOK
-        // ==================================
-
-        this.cameraZoom =
-            1 +
-            (
-                this.speed /
-                this.maxSpeed
-            ) *
-            0.08;
-
-        // ==================================
-        // MOTION BLUR HOOK
-        // ==================================
-
-        this.motionBlur =
-            this.speed /
-            this.maxSpeed;
-      // ==================================
-// PARTICLE EFFECTS v1.0
-// ==================================
-
-const particles =
-    window.carFXEngine?.particles;
-
-
-if(particles){
-
-
-    // acceleration smoke
-
-    if(this.throttle > 0.4){
-
-        particles.smoke(
-
-            this.x + this.width / 2,
-
-            this.y + this.height
-
+    const roadWidth =
+        Math.min(
+            500,
+            this.canvas.width * .5
         );
+
+
+    const roadX =
+        (
+            this.canvas.width -
+            roadWidth
+        ) / 2;
+
+
+    const laneWidth =
+        roadWidth / 3;
+
+
+
+    this.x =
+        roadX +
+        this.lane * laneWidth +
+        (laneWidth - this.width) / 2;
+
+
+
+    this.targetX = this.x;
+
+
+
+    this.y =
+        this.canvas.height -
+        this.height -
+        40;
+
+}
+
+
+
+
+
+update(dt){
+
+
+    const input =
+        window.carFXEngine?.input;
+
+
+    if(!input)
+        return;
+
+
+
+    dt =
+        Math.min(
+            dt,
+            0.05
+        );
+
+
+
+    // ACCELERATION
+
+
+    if(input.accelerate()){
+
+
+        this.speed +=
+            this.acceleration * dt;
+
+
+    }
+    else{
+
+
+        this.speed -=
+            this.friction * dt;
+
+
+        if(this.speed < 0)
+            this.speed = 0;
 
     }
 
 
 
-    // braking dust
 
-    if(this.braking){
 
-        particles.smoke(
+    // BRAKE
 
-            this.x + 10,
 
-            this.y + this.height
+    this.braking = false;
 
-        );
+
+    if(input.brake()){
+
+
+        this.speed -=
+            this.brakePower * dt;
+
+
+        this.braking = true;
 
     }
 
 
 
-    // handbrake skid
+
+
+    // HANDBRAKE
+
+
+    this.handbrakeActive =
+        input.handbrake();
+
+
 
     if(this.handbrakeActive){
 
-        particles.smoke(
 
-            this.x + this.width / 2,
+        this.speed -=
+            this.brakePower *
+            0.65 *
+            dt;
 
-            this.y + this.height
 
+    }
+
+
+
+
+
+    this.speed =
+        Math.max(
+            0,
+            Math.min(
+                this.speed,
+                this.maxSpeed
+            )
         );
+
+
+
+
+
+    // RPM
+
+
+    this.speedDelta =
+        this.speed -
+        this.lastSpeed;
+
+
+
+    if(this.speedDelta > 0){
+
+
+        this.throttle =
+            Math.min(
+                this.speedDelta * 20,
+                1
+            );
+
+
+    }
+    else{
+
+
+        this.throttle *= .9;
+
+    }
+
+
+
+    this.lastSpeed =
+        this.speed;
+
+
+
+    let ratio =
+        this.speed /
+        this.maxSpeed;
+
+
+
+    let targetRPM =
+        800 +
+        ratio * 5000 +
+        this.throttle * 2500;
+
+
+
+    this.rpm +=
+    (
+        targetRPM -
+        this.rpm
+    ) * .08;
+
+
+
+    this.engineRPM =
+        this.rpm / 8000;
+
+
+
+
+
+    // LANE SYSTEM
+
+
+    let wantedLane =
+        this.targetLane;
+
+
+
+    if(input.leftPressed()){
+
+
+        wantedLane =
+            Math.max(
+                0,
+                this.targetLane - 1
+            );
+
+    }
+    else if(input.rightPressed()){
+
+
+        wantedLane =
+            Math.min(
+                2,
+                this.targetLane + 1
+            );
+
+    }
+
+
+
+    const collision =
+        window.carFXEngine?.collisionManager;
+
+
+
+    if(
+        !collision ||
+        collision.canEnterLane(wantedLane)
+    ){
+
+        this.targetLane =
+            wantedLane;
+
+    }
+
+
+
+    this.lane +=
+    (
+        this.targetLane -
+        this.lane
+    )
+    *
+    this.laneSmooth *
+    dt;
+
+
+
+
+
+    // ROAD POSITION
+
+
+    const roadWidth =
+        Math.min(
+            500,
+            this.canvas.width*.5
+        );
+
+
+    const roadX =
+    (
+        this.canvas.width -
+        roadWidth
+    ) / 2;
+
+
+    const laneWidth =
+        roadWidth/3;
+
+
+
+    this.targetX =
+        roadX +
+        this.lane *
+        laneWidth +
+        (laneWidth-this.width)/2;
+
+
+
+    this.x +=
+    (
+        this.targetX -
+        this.x
+    )
+    *
+    10 *
+    dt;
+
+
+
+
+
+    // STEERING
+
+
+    this.targetSteer =
+        (
+            this.targetLane -
+            this.lane
+        )
+        *
+        18;
+
+
+
+    this.steer +=
+    (
+        this.targetSteer -
+        this.steer
+    )
+    *
+    8 *
+    dt;
+
+
+
+
+
+    // BOUNCE
+
+
+    this.bodyBounce =
+        Math.sin(
+            performance.now()*0.012
+        )
+        *
+        ratio *
+        2;
+
+
+
+
+    this.cameraZoom =
+        1 +
+        ratio*.08;
+
+
+
+    this.motionBlur =
+        ratio;
+
+
+
+
+    // =========================
+    // PARTICLE FX v2.0
+    // =========================
+
+
+    this.particleTimer -= dt;
+
+
+
+    if(
+        this.particles &&
+        this.particleTimer <= 0
+    ){
+
+
+        this.particleTimer =
+            0.08;
+
+
+
+        const rearX =
+            this.x +
+            this.width/2;
+
+
+        const rearY =
+            this.y +
+            this.height;
+
+
+
+        if(this.throttle > .4){
+
+
+            this.particles.smoke(
+                rearX,
+                rearY,
+                1
+            );
+
+        }
+
+
+
+        if(this.speed >
+            this.maxSpeed*.65
+        ){
+
+
+            this.particles.dust(
+                rearX,
+                rearY
+            );
+
+        }
+
+
+
+        if(this.braking){
+
+
+            this.particles.tireSmoke(
+                rearX-15,
+                rearY
+            );
+
+
+            this.particles.tireSmoke(
+                rearX+15,
+                rearY
+            );
+
+        }
+
+
+
+        if(this.handbrakeActive){
+
+
+            this.particles.tireSmoke(
+                rearX,
+                rearY
+            );
+
+        }
 
     }
 
 
 }
-    }
 
-  draw(ctx) {
+
+
+
+
+draw(ctx){
+
 
     ctx.save();
 
+
+
     ctx.translate(
-        this.x + this.width / 2,
-        this.y + this.height / 2 + this.bodyBounce
+        this.x +
+        this.width/2,
+
+        this.y +
+        this.height/2 +
+        this.bodyBounce
     );
+
+
 
     ctx.rotate(
         this.steer *
@@ -485,61 +623,87 @@ if(particles){
     );
 
 
-    CarRenderer.draw(ctx, {
 
-        x: -this.width / 2,
+    CarRenderer.draw(
+        ctx,
+        {
 
-        y: -this.height / 2,
+        x:
+        -this.width/2,
 
-        width: this.width,
+        y:
+        -this.height/2,
 
-        height: this.height,
+        width:
+        this.width,
 
-        color: this.vehicle.color,
+        height:
+        this.height,
 
-        type: this.vehicle.type,
+        color:
+        this.vehicle.color,
 
-        spoiler: this.vehicle.spoiler,
+        type:
+        this.vehicle.type,
 
-        wheelSize: this.vehicle.wheelSize,
+        spoiler:
+        this.vehicle.spoiler,
 
-        headlights: this.vehicle.headlights,
+        wheelSize:
+        this.vehicle.wheelSize,
+
+        headlights:
+        this.vehicle.headlights,
 
         state:
-            this.braking
-            ? "brake"
-            : "cruise"
+        this.braking
+        ?
+        "brake"
+        :
+        "cruise"
 
-    });
+        }
+    );
+
 
 
     ctx.restore();
 
+
 }
 
 
-// ===============================
-// ENGINE DATA FOR AUDIO
-// ===============================
+
+
 
 getEngineData(){
 
+
     return {
 
-        speed: this.speed,
+        speed:this.speed,
 
-        rpm: this.rpm,
+        rpm:this.rpm,
 
-        throttle: this.throttle,
+        throttle:this.throttle,
 
-        braking: this.braking
+        braking:this.braking
 
     };
 
+
 }
+
+
 }
-window.PlayerCar = PlayerCar;
+
+
+
+window.PlayerCar =
+PlayerCar;
+
+
 
 console.log(
-    "✅ PlayerCar v2.1 Loaded Successfully"
+"✅ PlayerCar v2.2 Loaded Successfully"
 );
