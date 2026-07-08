@@ -14,6 +14,7 @@ class CarFXEngine {
         this.ctx = null;
         this.hud = null;
         this.audio = null;
+        this.particles = null;
         this.running = false;
         this.lastTime = 0;
 
@@ -55,6 +56,22 @@ if(window.AudioManager){
 
     console.log(
         "🔊 AudioManager Connected"
+    );
+
+}
+
+
+// =========================
+// PARTICLE SYSTEM
+// =========================
+
+if(window.ParticleSystem){
+
+    this.particles =
+        new ParticleSystem(this.canvas);
+
+    console.log(
+        "💨 ParticleSystem Connected"
     );
 
 }
@@ -243,6 +260,7 @@ this.policeManager = null;
         this.background?.update(dt);
         this.road?.update(dt);
         this.player?.update(dt);
+        this.particles?.update(dt);
 // =========================
 // AUDIO UPDATE
 // =========================
@@ -308,6 +326,8 @@ if(
         this.roadblockManager?.render(this.ctx);
 
         this.player?.draw(this.ctx);
+
+        this.particles?.render(this.ctx);
 
         this.ctx.restore();
 
