@@ -12,7 +12,7 @@ class CarFXEngine {
 
         this.canvas = null;
         this.ctx = null;
-
+        this.hud = null;
         this.running = false;
         this.lastTime = 0;
 
@@ -36,57 +36,82 @@ class CarFXEngine {
         this.loop = this.loop.bind(this);
     }
 
-    init() {
+   init() {
 
-        console.log("🚗 CarFX GTA Engine Started");
+    console.log("🚗 CarFX GTA Engine Started");
 
-        this.createCanvas();
+    this.createCanvas();
 
-        this.input = new InputManager();
+    this.input = new InputManager();
 
-        // =========================
-        // WORLD SETUP
-        // =========================
+    // =========================
+    // WORLD SETUP
+    // =========================
 
-        this.background = window.Background ? new Background(this.canvas) : null;
-        this.road = window.Road ? new Road(this.canvas) : null;
+    this.background = window.Background
+        ? new Background(this.canvas)
+        : null;
 
-        this.player = window.PlayerCar ? new PlayerCar(this.canvas) : null;
+    this.road = window.Road
+        ? new Road(this.canvas)
+        : null;
 
-        // =========================
-        // SYSTEMS (ORDER MATTERS)
-        // =========================
+    this.player = window.PlayerCar
+        ? new PlayerCar(this.canvas)
+        : null;
 
-        this.wantedSystem = window.WantedSystem
-            ? new WantedSystem()
-            : null;
+    // =========================
+    // HUD
+    // =========================
 
-        this.trafficManager = window.TrafficManager
-            ? new TrafficManager(this.canvas, this.player)
-            : null;
-        this.collisionManager = window.CollisionManager
-            ? new CollisionManager(
+    this.hud = window.HUD
+        ? new HUD(this.player)
+        : null;
+
+    // =========================
+    // SYSTEMS (ORDER MATTERS)
+    // =========================
+
+    this.wantedSystem = window.WantedSystem
+        ? new WantedSystem()
+        : null;
+
+    this.trafficManager = window.TrafficManager
+        ? new TrafficManager(this.canvas, this.player)
+        : null;
+
+    this.collisionManager = window.CollisionManager
+        ? new CollisionManager(
             this.player,
             this.trafficManager
-    )
-    : null;
-        this.policeManager = window.PoliceManager
-            ? new PoliceManager(this.canvas, this.player, this.wantedSystem)
-            : null;
+        )
+        : null;
 
-        this.roadblockManager = window.RoadblockManager
-            ? new RoadblockManager(this.canvas, this.player, this.wantedSystem)
-            : null;
+    this.policeManager = window.PoliceManager
+        ? new PoliceManager(
+            this.canvas,
+            this.player,
+            this.wantedSystem
+        )
+        : null;
 
-        // =========================
-        // START LOOP
-        // =========================
+    this.roadblockManager = window.RoadblockManager
+        ? new RoadblockManager(
+            this.canvas,
+            this.player,
+            this.wantedSystem
+        )
+        : null;
 
-        this.running = true;
-        this.lastTime = performance.now();
+    // =========================
+    // START LOOP
+    // =========================
 
-        requestAnimationFrame(this.loop);
-    }
+    this.running = true;
+    this.lastTime = performance.now();
+
+    requestAnimationFrame(this.loop);
+}
 
     createCanvas() {
 
@@ -180,6 +205,8 @@ class CarFXEngine {
 
             if (this.cameraY < 0) this.cameraY = 0;
         }
+
+        this.hud?.update(dt);
     }
 
     render() {
@@ -221,6 +248,11 @@ class CarFXEngine {
 
         this.ctx.fillStyle = fog;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // =========================
+// HUD
+// =========================
+
+this.hud?.render(this.ctx);
     }
 }
 
