@@ -54,8 +54,10 @@
   "js/PoliceManager.js",
 
   "js/RoadblockManager.js",
+  
+   "js/HUD.js",
 
-  "js/engine.js",
+   "js/engine.js",
 
   "content.js"
 ],
