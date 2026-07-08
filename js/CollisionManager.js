@@ -2,20 +2,20 @@
  * ============================================================
  * CarFX Pro Ultimate
  * CollisionManager.js v1.5
- * GTA CRASH SYSTEM
+ *
+ * GTA Crash Physics System
  * ============================================================
  *
  * Features:
- * ✔ Player vs Traffic collision
- * ✔ High speed impact detection
- * ✔ First frame protection
- * ✔ Previous position tracking
- * ✔ Impact force
+ * ✔ Player collision
+ * ✔ Traffic collision
+ * ✔ Damage reaction
+ * ✔ Knockback
+ * ✔ Sparks
+ * ✔ Smoke
  * ✔ Crash cooldown
- * ✔ Sparks FX
- * ✔ Debris FX
- * ✔ Knockback reaction
- * ✔ Wanted hook ready
+ * ✔ GTA style impact
+ *
  * ============================================================
  */
 
@@ -26,7 +26,7 @@ class CollisionManager {
     constructor(
         player,
         trafficManager,
-        particles = null
+        particles
     ){
 
 
@@ -43,27 +43,7 @@ class CollisionManager {
 
 
 
-        this.cooldown =
-            0;
-
-
-
-        this.hitDistance =
-            20;
-
-
-
-        // =========================
-        // FAST MOVEMENT TRACKING
-        // =========================
-
-        this.prevPlayer = {
-
-            x:null,
-
-            y:null
-
-        };
+        this.cooldown = 0;
 
 
 
@@ -71,11 +51,7 @@ class CollisionManager {
             "💥 CollisionManager v1.5 Loaded"
         );
 
-
     }
-
-
-
 
 
 
@@ -88,7 +64,7 @@ class CollisionManager {
             !this.player ||
             !this.trafficManager
         )
-        return;
+            return;
 
 
 
@@ -117,7 +93,7 @@ class CollisionManager {
 
 
                     this.cooldown =
-                        0.5;
+                        0.6;
 
 
                 }
@@ -129,25 +105,7 @@ class CollisionManager {
         }
 
 
-
-        // =========================
-        // SAVE PLAYER POSITION
-        // =========================
-
-
-        this.prevPlayer.x =
-            this.player.x;
-
-
-        this.prevPlayer.y =
-            this.player.y;
-
-
-
     }
-
-
-
 
 
 
@@ -162,193 +120,112 @@ class CollisionManager {
 
 
 
+        if(
+            !car ||
+            !player
+        )
+            return false;
+
+
+
+
+        const playerX =
+            player.x +
+            player.width / 2;
+
+
+        const playerY =
+            player.y +
+            player.height / 2;
+
+
+
+
+        const carX =
+            car.x +
+            car.width / 2;
+
+
+        const carY =
+            car.y +
+            car.height / 2;
+
+
+
+
+
         const dx =
             Math.abs(
-
-                (
-                    car.x +
-                    car.width / 2
-                )
-
-                -
-
-                (
-                    player.x +
-                    player.width / 2
-                )
-
+                playerX -
+                carX
             );
 
 
 
         const dy =
             Math.abs(
-
-                (
-                    car.y +
-                    car.height / 2
-                )
-
-                -
-
-                (
-                    player.y +
-                    player.height / 2
-                )
-
+                playerY -
+                carY
             );
 
 
 
 
-        const padding = 25;
+
+        // GTA STYLE HITBOX
 
 
-
-
-        // =========================
-        // NORMAL COLLISION
-        // =========================
-
-
-        const normalHit =
-
-        (
-
-            dx <
+        const hitWidth =
 
             (
-                car.width +
-                player.width
-            ) / 2 + padding
+                player.width +
+                car.width
+            )
+            *
+            0.55;
 
 
 
-            &&
-
-
-
-            dy <
+        const hitHeight =
 
             (
-                car.height +
-                player.height
-            ) / 2 + padding
-
-        );
-
-
+                player.height +
+                car.height
+            )
+            *
+            0.55;
 
 
 
 
 
-        // =========================
-        // FIRST FRAME PROTECTION
-        // =========================
+        const hit =
+
+            dx < hitWidth &&
+            dy < hitHeight;
 
 
-        if(
-            this.prevPlayer.y === null
-        ){
 
-            return normalHit;
+
+
+        if(hit){
+
+
+            console.log(
+                "🚗 TRAFFIC HIT",
+                car
+            );
+
 
         }
 
 
 
 
-
-
-
-        // =========================
-        // HIGH SPEED CROSSING
-        // =========================
-
-
-        const playerMove =
-
-            Math.abs(
-
-                this.prevPlayer.y -
-                player.y
-
-            );
-
-
-
-
-        const speedGap =
-
-            Math.abs(
-
-                player.speed -
-                car.speed
-
-            );
-
-
-
-
-
-        const fastHit =
-
-        (
-
-            playerMove > 50
-
-
-
-            &&
-
-
-
-            speedGap > 40
-
-
-
-            &&
-
-
-
-            Math.abs(
-                car.y -
-                player.y
-            )
-            <
-            140
-
-
-
-            &&
-
-
-
-            dx <
-
-            (
-                car.width +
-                player.width
-            )
-
-        );
-
-
-
-
-
-
-        return (
-
-            normalHit ||
-            fastHit
-
-        );
+        return hit;
 
 
     }
-
 
 
 
@@ -371,7 +248,6 @@ class CollisionManager {
 
 
 
-
         const impact =
 
             Math.abs(
@@ -383,15 +259,9 @@ class CollisionManager {
 
 
 
-
         // =========================
-        // PLAYER REACTION
+        // PLAYER DAMAGE
         // =========================
-
-
-        player.hit =
-            true;
-
 
 
         player.speed *=
@@ -406,15 +276,14 @@ class CollisionManager {
 
 
 
-
-
         // =========================
         // PLAYER KNOCKBACK
         // =========================
 
 
         if(
-            player.x < car.x
+            player.x <
+            car.x
         ){
 
             player.x -= 45;
@@ -425,10 +294,6 @@ class CollisionManager {
             player.x += 45;
 
         }
-
-
-
-
 
 
 
@@ -456,53 +321,13 @@ class CollisionManager {
 
 
         }
-        else{
-
-
-            car.speed *=
-                0.3;
-
-
-            car.y -=
-                50;
-
-
-        }
-
-
-
-
 
 
 
 
 
         // =========================
-        // FX POSITION
-        // =========================
-
-
-        const x =
-
-            player.x +
-            player.width / 2;
-
-
-
-        const y =
-
-            player.y +
-            player.height / 2;
-
-
-
-
-
-
-
-
-        // =========================
-        // PARTICLES
+        // CRASH FX
         // =========================
 
 
@@ -511,9 +336,29 @@ class CollisionManager {
         ){
 
 
+            const x =
+                car.x +
+                car.width / 2;
+
+
+
+            const y =
+                car.y +
+                car.height / 2;
+
+
+
             this.particles.sparks?.(
                 x,
                 y
+            );
+
+
+
+            this.particles.smoke?.(
+                x,
+                y,
+                2
             );
 
 
@@ -524,44 +369,6 @@ class CollisionManager {
             );
 
 
-
-            this.particles.smoke?.(
-                x,
-                y,
-                1.5
-            );
-
-
-        }
-
-
-
-
-
-
-
-
-        // =========================
-        // WANTED SYSTEM HOOK
-        // =========================
-
-
-        const engine =
-            window.carFXEngine;
-
-
-
-        if(
-            engine &&
-            engine.wantedSystem
-        ){
-
-
-            engine.wantedSystem.addCrime?.(
-                "traffic_collision"
-            );
-
-
         }
 
 
@@ -569,11 +376,67 @@ class CollisionManager {
     }
 
 
+
+
+
+
+    // Used by PlayerCar lane change
+
+
+    canEnterLane(lane){
+
+
+        if(
+            !this.trafficManager
+        )
+            return true;
+
+
+
+        for(
+            const car of
+            this.trafficManager.cars
+        ){
+
+
+            if(
+                Math.round(car.lane)
+                !== lane
+            )
+                continue;
+
+
+
+            const distance =
+
+                Math.abs(
+                    car.y -
+                    this.player.y
+                );
+
+
+
+            if(
+                distance < 180
+            ){
+
+                return false;
+
+            }
+
+
+        }
+
+
+
+        return true;
+
+
+    }
+
+
+
 }
-
-
-
-
 
 
 
