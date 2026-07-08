@@ -53,8 +53,7 @@ class PlayerCar {
 
         this.brakePower = this.vehicle.braking;
 
-        this.friction = 110;
-
+        this.friction = 35;
         // -----------------------------
         // Visual State
         // -----------------------------
