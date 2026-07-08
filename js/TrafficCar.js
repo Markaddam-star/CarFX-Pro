@@ -1,5 +1,4 @@
-console.log("🔥 TrafficCar v2.2 START");
-
+console.log("🔥 TrafficCar v2.3 START");
 /**
  * ============================================================
  * CarFX Pro Ultimate
@@ -184,7 +183,11 @@ this.shake = 0;
 
     }
 
-// =====================================
+
+
+    update(dt, cars = [], player = null) {
+
+        // =====================================
 // CRASH RECOVERY
 // =====================================
 
@@ -216,9 +219,7 @@ if(this.crashed){
     }
 
 }
-
-    update(dt, cars = [], player = null) {
-
+        
         this.reactionTimer -= dt;
 
         this.laneChangeCooldown -= dt;
