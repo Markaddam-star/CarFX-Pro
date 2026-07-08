@@ -39,7 +39,11 @@ class PoliceCar {
 
     update(dt, player, policeCars = []) {
 
-        if (!this.target) return;
+    if (this.destroyed)
+        return;
+
+    if (!this.target)
+        return;
 
         const dx = this.target.x - this.x;
         const dy = this.target.y - this.y;
@@ -70,17 +74,21 @@ class PoliceCar {
             this.y += dirY * this.speed * dt;
         }
 
-        // =========================
-        // 3. PIT SYSTEM
-        // =========================
+       // =========================
+// PIT SYSTEM
+// =========================
 
-        this.pitCooldown -= dt;
+this.pitCooldown -= dt;
 
-        if (dist < 180 && this.pitCooldown <= 0) {
+if (
+    dist < 180 &&
+    this.pitCooldown <= 0
+) {
 
-            this.tryPIT();
-            this.pitCooldown = 4;
-        }
+    this.tryPIT();
+
+    this.pitCooldown = 4;
+}
 
         // =========================
         // 4. CATCH PLAYER
@@ -97,14 +105,17 @@ class PoliceCar {
         this.avoidPolice(policeCars);
     }
 
-    tryPIT() {
+   tryPIT() {
 
-        console.log("🚓 PIT MANEUVER!");
+    console.log("🚓 PIT MANEUVER!");
 
-        if (this.target) {
-            this.target.speed *= 0.6;
-        }
+    if (this.target) {
+
+        this.target.speed *= 0.85;
+
     }
+
+}
 
     avoidPolice(policeCars) {
 
@@ -126,15 +137,23 @@ class PoliceCar {
 
     catchPlayer() {
 
-        console.log("🚓 PLAYER CAUGHT!");
+    if (this.destroyed)
+        return;
 
-        this.destroyed = true;
 
-        if (this.target) {
-            this.target.speed *= 0.3;
-        }
+    console.log("🚓 PLAYER CAUGHT!");
+
+
+    this.destroyed = true;
+
+
+    if (this.target) {
+
+        this.target.speed *= 0.5;
+
     }
 
+}
     render(ctx) {
 
         ctx.save();
