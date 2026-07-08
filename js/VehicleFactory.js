@@ -407,64 +407,51 @@ class VehicleFactory {
     // PLAYER VEHICLE
     // =========================================================
 
-    static player() {
+  static player() {
+
+    return {
+
+        type: "sports",
+
+        width: 62,
+
+        height: 118,
+
+        color: "#ff6d00",
 
 
-        return {
+        // GTA STYLE PERFORMANCE
+
+        maxSpeed: 180,
+
+        acceleration: 55,
+
+        braking: 140,
 
 
-            type: "sports",
+        weight: 1200,
 
 
-            width: 62,
+        handling: "sharp",
 
 
-            height: 118,
+        aiStyle:
+            "player",
 
 
-            color: "#ff6d00",
+        roofStyle: 2,
 
+        wheelSize: 10,
 
+        spoiler: true,
 
-            maxSpeed: 500,
+        headlights: true,
 
+        brakeLights: false
 
-            acceleration: 260,
+    };
 
-
-            braking: 500,
-
-
-            weight: 1200,
-
-
-            handling: "sharp",
-
-
-
-            aiStyle:
-                "player",
-
-
-
-            roofStyle: 2,
-
-
-            wheelSize: 10,
-
-
-            spoiler: true,
-
-
-            headlights: true,
-
-
-            brakeLights: false
-
-        };
-
-
-    }
+}
 
 
 }
