@@ -182,15 +182,43 @@ this.policeManager = null;
     }
 
     start() {
-        if (this.running) return;
-        this.running = true;
-        this.lastTime = performance.now();
-        requestAnimationFrame(this.loop);
+
+    if (this.running) return;
+
+
+    this.running = true;
+
+
+    if(this.audio){
+
+        this.audio.resume();
+
     }
 
-    stop() {
-        this.running = false;
+
+    this.lastTime = performance.now();
+
+    requestAnimationFrame(this.loop);
+
+}
+
+   stop() {
+
+    this.running = false;
+
+
+    if(this.audio){
+
+        this.audio.pause();
+
     }
+
+
+    console.log(
+        "🚗 CarFX Engine Stopped"
+    );
+
+}
 
     loop(time) {
 
