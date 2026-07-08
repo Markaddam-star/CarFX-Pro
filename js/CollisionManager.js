@@ -1,12 +1,14 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * CollisionManager.js v1.3
+ * CollisionManager.js v1.4
  * GTA CRASH SYSTEM
  * ============================================================
  *
  * Features:
  * ✔ Player vs Traffic collision
+ * ✔ High speed impact detection
+ * ✔ Previous position tracking
  * ✔ Impact force
  * ✔ Crash cooldown
  * ✔ Sparks FX
@@ -50,12 +52,28 @@ class CollisionManager {
 
 
 
+        // =========================
+        // FAST MOVEMENT TRACKING
+        // =========================
+
+        this.prevPlayer = {
+
+            x:0,
+
+            y:0
+
+        };
+
+
+
         console.log(
-            "💥 CollisionManager v1.3 Loaded"
+            "💥 CollisionManager v1.4 Loaded"
         );
 
 
     }
+
+
 
 
 
@@ -109,7 +127,22 @@ class CollisionManager {
         }
 
 
+
+        // save current position
+        // for next frame
+
+        this.prevPlayer.x =
+            this.player.x;
+
+
+        this.prevPlayer.y =
+            this.player.y;
+
+
+
     }
+
+
 
 
 
@@ -162,26 +195,95 @@ class CollisionManager {
 
 
 
-        return (
+        const padding = 18;
+
+
+
+        // normal collision
+
+        const normalHit =
+
+        (
 
             dx <
             (
                 car.width +
                 player.width
-            ) / 2
+            ) / 2 + padding
+
 
             &&
+
 
             dy <
             (
                 car.height +
                 player.height
-            ) / 2
+            ) / 2 + padding
+
+        );
+
+
+
+
+
+        // high speed crossing check
+
+        const playerMove =
+
+            Math.abs(
+
+                this.prevPlayer.y -
+                player.y
+
+            );
+
+
+
+        const fastHit =
+
+        (
+
+            playerMove > 60
+
+
+            &&
+
+
+            Math.abs(
+                car.y -
+                player.y
+            )
+            <
+            120
+
+
+            &&
+
+
+            dx <
+            (
+                car.width +
+                player.width
+            )
+
+        );
+
+
+
+
+
+        return (
+
+            normalHit ||
+            fastHit
 
         );
 
 
     }
+
+
 
 
 
@@ -213,8 +315,9 @@ class CollisionManager {
 
 
 
+
         // =========================
-        // PLAYER STATE
+        // PLAYER REACTION
         // =========================
 
 
@@ -225,6 +328,34 @@ class CollisionManager {
 
         player.speed *=
             0.45;
+
+
+
+        player.motionBlur =
+            0;
+
+
+
+
+
+        // =========================
+        // KNOCKBACK
+        // =========================
+
+
+        if(
+            player.x < car.x
+        ){
+
+            player.x -= 35;
+
+        }
+        else{
+
+            player.x += 35;
+
+        }
+
 
 
 
@@ -289,6 +420,7 @@ class CollisionManager {
 
 
 
+
         // =========================
         // PARTICLES
         // =========================
@@ -327,8 +459,10 @@ class CollisionManager {
 
 
 
+
+
         // =========================
-        // WANTED HOOK
+        // WANTED SYSTEM HOOK
         // =========================
 
 
@@ -352,6 +486,7 @@ class CollisionManager {
 
 
 
+
     }
 
 
@@ -367,5 +502,5 @@ CollisionManager;
 
 
 console.log(
-    "✅ CollisionManager v1.3 Ready"
+    "✅ CollisionManager v1.4 Ready"
 );
