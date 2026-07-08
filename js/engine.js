@@ -587,6 +587,10 @@ class CarFXEngine {
 
         // VEHICLES
 
+this.player?.draw(
+            this.ctx
+        );
+
         this.trafficManager?.render(
             this.ctx
         );
@@ -605,9 +609,7 @@ class CarFXEngine {
 
 
 
-        this.player?.draw(
-            this.ctx
-        );
+        
 
 
 
