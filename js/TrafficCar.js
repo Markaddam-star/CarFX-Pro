@@ -51,7 +51,12 @@ class TrafficCar {
 
         this.state = "cruise";
 
+// =========================
+// VISUAL STATE
+// =========================
 
+this.braking = false;
+        
         // =========================
         // LANES
         // =========================
@@ -377,38 +382,48 @@ class TrafficCar {
         // =========================
 
 
-        if (
-            this.speed <
-            this.targetSpeed
-        ) {
+     // =========================
+// SPEED CONTROL
+// =========================
+
+if (
+    this.speed <
+    this.targetSpeed
+) {
 
 
-            this.speed +=
-                this.acceleration *
-                dt;
+    this.speed +=
+        this.acceleration *
+        dt;
 
 
-        }
-        else {
+    this.braking = false;
 
 
-            this.speed -=
-                this.brakePower *
-                dt;
-
-        }
+}
+else {
 
 
+    this.speed -=
+        this.brakePower *
+        dt;
 
-        this.speed =
-            Math.max(
-                0,
-                Math.min(
-                    this.speed,
-                    this.maxSpeed
-                )
-            );
 
+    this.braking = true;
+
+
+}
+
+
+
+this.speed =
+    Math.max(
+        0,
+        Math.min(
+            this.speed,
+            this.maxSpeed
+        )
+    );
 
 
 
@@ -444,7 +459,38 @@ class TrafficCar {
             dt;
 
 
+// =========================
+// AI PARTICLE EFFECTS
+// =========================
 
+const particles =
+    window.carFXEngine?.particles;
+
+if (particles) {
+
+    // Tire dust at high speed
+
+    if (this.speed > 220) {
+
+        particles.dust(
+            this.x + this.width / 2,
+            this.y + this.height
+        );
+
+    }
+
+    // Brake dust
+
+    if (this.braking) {
+
+        particles.dust(
+            this.x + 10,
+            this.y + this.height
+        );
+
+    }
+
+}
         // =========================
         // RESPAWN
         // =========================
