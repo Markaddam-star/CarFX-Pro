@@ -13,6 +13,7 @@ class CarFXEngine {
         this.canvas = null;
         this.ctx = null;
         this.hud = null;
+        this.audio = null;
         this.running = false;
         this.lastTime = 0;
 
@@ -43,6 +44,18 @@ class CarFXEngine {
     this.createCanvas();
 
     this.input = new InputManager();
+
+           // 🔊 AUDIO SYSTEM
+
+    if(window.AudioManager){
+
+        this.audio = new AudioManager();
+
+        console.log(
+            "🔊 AudioManager Connected"
+        );
+
+    }
 
     // =========================
     // WORLD SETUP
