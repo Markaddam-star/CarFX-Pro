@@ -42,6 +42,7 @@ class TrafficCar {
         }
 
         this.personality = r;
+        
 
         // =====================================
         // AI STATE
@@ -60,7 +61,19 @@ class TrafficCar {
 
         this.x = 0;
         this.y = 0;
+        
+// =====================================
+// DAMAGE / CRASH SYSTEM
+// =====================================
 
+this.damage = 0;
+
+this.crashed = false;
+
+this.crashTimer = 0;
+
+this.shake = 0;
+        
         // =====================================
         // MOVEMENT
         // =====================================
@@ -122,6 +135,14 @@ class TrafficCar {
 
         this.braking = false;
 
+        this.damage = 0;
+
+this.crashed = false;
+
+this.crashTimer = 0;
+
+this.shake = 0;
+
     }
 
 
@@ -163,7 +184,38 @@ class TrafficCar {
 
     }
 
+// =====================================
+// CRASH RECOVERY
+// =====================================
 
+if(this.crashed){
+
+    this.crashTimer -= dt;
+
+
+    this.speed *= 0.96;
+
+
+    this.shake =
+        Math.sin(
+            performance.now()*0.05
+        )
+        *
+        3;
+
+
+    if(this.crashTimer <= 0){
+
+        this.crashed = false;
+
+        this.state = "cruise";
+
+        this.targetSpeed =
+            this.maxSpeed * 0.6;
+
+    }
+
+}
 
     update(dt, cars = [], player = null) {
 
@@ -479,7 +531,76 @@ class TrafficCar {
 
     }
 
+// =========================================================
+// CRASH REACTION
+// =========================================================
 
+hit(force = 100){
+
+
+    this.damage +=
+        Math.min(
+            force * 0.01,
+            1
+        );
+
+
+    this.crashed = true;
+
+
+    this.crashTimer =
+        1.2;
+
+
+    this.state =
+        "crash";
+
+
+
+    this.speed *=
+        0.35;
+
+
+
+    this.targetSpeed =
+        this.maxSpeed * 0.4;
+
+
+
+    const particles =
+        window.carFXEngine?.particles;
+
+
+
+    if(particles){
+
+
+        particles.sparks?.(
+
+            this.x +
+            this.width / 2,
+
+            this.y +
+            this.height / 2
+
+        );
+
+
+        particles.smoke?.(
+
+            this.x +
+            this.width / 2,
+
+            this.y +
+            this.height
+
+        );
+
+
+    }
+
+
+}
 
     findSafeLane(
         cars,
@@ -628,9 +749,19 @@ class TrafficCar {
 
             headlights: this.vehicle.headlights,
 
-            state: this.braking
-                ? "brake"
-                : this.state
+            state:
+
+this.crashed
+?
+"crash"
+:
+(
+    this.braking
+    ?
+    "brake"
+    :
+    this.state
+)
 
         });
 
@@ -646,7 +777,7 @@ window.TrafficCar =
 TrafficCar;
 
 console.log(
-    "✅ TrafficCar v2.2 Loaded Successfully"
+    "✅ TrafficCar v2.3 Loaded Successfully"
 );
 
 // =========================
