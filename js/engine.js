@@ -57,6 +57,24 @@ class CarFXEngine {
 
     }
 
+       document.addEventListener("keydown", () => {
+
+    if(
+        this.audio &&
+        this.audio.ctx &&
+        this.audio.ctx.state === "suspended"
+    ){
+
+        this.audio.ctx.resume();
+
+        console.log(
+            "🔊 Audio Unlocked"
+        );
+
+    }
+
+});
+
     // =========================
     // WORLD SETUP
     // =========================
@@ -190,7 +208,21 @@ this.policeManager = null;
         this.background?.update(dt);
         this.road?.update(dt);
         this.player?.update(dt);
+// =========================
+// AUDIO UPDATE
+// =========================
 
+if(
+    this.audio &&
+    this.player
+){
+
+    this.audio.update(
+        dt,
+        this.player.getEngineData()
+    );
+
+}
         this.trafficManager?.update(dt);
         this.collisionManager?.update?.(dt);
 
