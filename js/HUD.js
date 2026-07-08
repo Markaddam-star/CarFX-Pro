@@ -1,8 +1,7 @@
-
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * HUD.js - GTA Style Driving HUD v1.0
+ * HUD.js - GTA Style Driving HUD v1.1
  * ============================================================
  */
 
@@ -12,35 +11,47 @@ class HUD {
 
         this.player = player;
 
+        // Total distance travelled (meters approx.)
         this.distance = 0;
 
     }
 
     update(dt) {
 
-        if (!this.player) return;
+        if (!this.player)
+            return;
 
-        this.distance += this.player.speed * dt;
+        // Ignore if vehicle is stopped
+        if (this.player.speed <= 0)
+            return;
+
+        // Convert game speed into display distance
+        this.distance +=
+            (this.player.speed * dt) * 0.25;
 
     }
 
     render(ctx) {
 
-        if (!this.player) return;
+        if (!this.player)
+            return;
 
         const speed =
             Math.round(this.player.speed);
 
         const gear =
-            speed === 0 ? "P" : "D";
+            speed === 0
+                ? "P"
+                : "D";
+
+        ctx.save();
 
         // =========================
         // PANEL
         // =========================
 
-        ctx.save();
-
-        ctx.fillStyle = "rgba(0,0,0,.45)";
+        ctx.fillStyle =
+            "rgba(0,0,0,.45)";
 
         this.roundRect(
             ctx,
@@ -57,9 +68,11 @@ class HUD {
         // SPEED
         // =========================
 
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle =
+            "#ffffff";
 
-        ctx.font = "bold 38px Arial";
+        ctx.font =
+            "bold 38px Arial";
 
         ctx.fillText(
             speed,
@@ -67,9 +80,11 @@ class HUD {
             ctx.canvas.height - 72
         );
 
-        ctx.font = "16px Arial";
+        ctx.font =
+            "16px Arial";
 
-        ctx.fillStyle = "#bbbbbb";
+        ctx.fillStyle =
+            "#bbbbbb";
 
         ctx.fillText(
             "KM/H",
@@ -81,9 +96,11 @@ class HUD {
         // GEAR
         // =========================
 
-        ctx.fillStyle = "#00ff88";
+        ctx.fillStyle =
+            "#00ff88";
 
-        ctx.font = "bold 18px Arial";
+        ctx.font =
+            "bold 18px Arial";
 
         ctx.fillText(
             "GEAR : " + gear,
@@ -95,13 +112,15 @@ class HUD {
         // DISTANCE
         // =========================
 
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle =
+            "#ffffff";
 
-        ctx.font = "15px Arial";
+        ctx.font =
+            "15px Arial";
 
         ctx.fillText(
             "DIST : " +
-            Math.floor(this.distance) +
+            this.distance.toFixed(1) +
             " m",
             40,
             ctx.canvas.height - 18
@@ -130,4 +149,4 @@ class HUD {
 
 window.HUD = HUD;
 
-console.log("✅ HUD v1.0 Loaded");
+console.log("✅ HUD v1.1 Loaded Successfully");
