@@ -56,7 +56,7 @@
   "js/RoadblockManager.js",
   
    "js/HUD.js",
-
+   "js/AudioManager.js",
    "js/engine.js",
 
   "content.js"
