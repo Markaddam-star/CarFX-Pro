@@ -45,19 +45,24 @@ class CarFXEngine {
 
     this.input = new InputManager();
 
-           // 🔊 AUDIO SYSTEM
+       // 🔊 AUDIO SYSTEM
 
-    if(window.AudioManager){
+if(window.AudioManager){
 
-        this.audio = new AudioManager();
+    this.audio = new AudioManager();
 
-        console.log(
-            "🔊 AudioManager Connected"
-        );
+    this.audio.init();
 
-    }
+    console.log(
+        "🔊 AudioManager Connected"
+    );
 
-       document.addEventListener("keydown", () => {
+}
+
+
+// 🔊 AUDIO UNLOCK
+
+document.addEventListener("keydown", () => {
 
     if(
         this.audio &&
@@ -65,11 +70,13 @@ class CarFXEngine {
         this.audio.ctx.state === "suspended"
     ){
 
-        this.audio.ctx.resume();
+        this.audio.ctx.resume().then(()=>{
 
-        console.log(
-            "🔊 Audio Unlocked"
-        );
+            console.log(
+                "🔊 Audio Context Running"
+            );
+
+        });
 
     }
 
