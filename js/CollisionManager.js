@@ -1,13 +1,14 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * CollisionManager.js v1.4
+ * CollisionManager.js v1.5
  * GTA CRASH SYSTEM
  * ============================================================
  *
  * Features:
  * ✔ Player vs Traffic collision
  * ✔ High speed impact detection
+ * ✔ First frame protection
  * ✔ Previous position tracking
  * ✔ Impact force
  * ✔ Crash cooldown
@@ -58,16 +59,16 @@ class CollisionManager {
 
         this.prevPlayer = {
 
-            x:0,
+            x:null,
 
-            y:0
+            y:null
 
         };
 
 
 
         console.log(
-            "💥 CollisionManager v1.4 Loaded"
+            "💥 CollisionManager v1.5 Loaded"
         );
 
 
@@ -114,8 +115,9 @@ class CollisionManager {
                     this.crash(car);
 
 
+
                     this.cooldown =
-                        0.8;
+                        0.5;
 
 
                 }
@@ -128,8 +130,10 @@ class CollisionManager {
 
 
 
-        // save current position
-        // for next frame
+        // =========================
+        // SAVE PLAYER POSITION
+        // =========================
+
 
         this.prevPlayer.x =
             this.player.x;
@@ -141,6 +145,7 @@ class CollisionManager {
 
 
     }
+
 
 
 
@@ -195,27 +200,36 @@ class CollisionManager {
 
 
 
-        const padding = 18;
+
+        const padding = 25;
 
 
 
-        // normal collision
+
+        // =========================
+        // NORMAL COLLISION
+        // =========================
+
 
         const normalHit =
 
         (
 
             dx <
+
             (
                 car.width +
                 player.width
             ) / 2 + padding
 
 
+
             &&
 
 
+
             dy <
+
             (
                 car.height +
                 player.height
@@ -227,7 +241,31 @@ class CollisionManager {
 
 
 
-        // high speed crossing check
+
+
+        // =========================
+        // FIRST FRAME PROTECTION
+        // =========================
+
+
+        if(
+            this.prevPlayer.y === null
+        ){
+
+            return normalHit;
+
+        }
+
+
+
+
+
+
+
+        // =========================
+        // HIGH SPEED CROSSING
+        // =========================
+
 
         const playerMove =
 
@@ -240,14 +278,38 @@ class CollisionManager {
 
 
 
+
+        const speedGap =
+
+            Math.abs(
+
+                player.speed -
+                car.speed
+
+            );
+
+
+
+
+
         const fastHit =
 
         (
 
-            playerMove > 60
+            playerMove > 50
+
 
 
             &&
+
+
+
+            speedGap > 40
+
+
+
+            &&
+
 
 
             Math.abs(
@@ -255,19 +317,23 @@ class CollisionManager {
                 player.y
             )
             <
-            120
+            140
+
 
 
             &&
 
 
+
             dx <
+
             (
                 car.width +
                 player.width
             )
 
         );
+
 
 
 
@@ -290,6 +356,7 @@ class CollisionManager {
 
 
 
+
     crash(car){
 
 
@@ -301,6 +368,7 @@ class CollisionManager {
 
         const player =
             this.player;
+
 
 
 
@@ -327,7 +395,7 @@ class CollisionManager {
 
 
         player.speed *=
-            0.45;
+            0.35;
 
 
 
@@ -338,8 +406,10 @@ class CollisionManager {
 
 
 
+
+
         // =========================
-        // KNOCKBACK
+        // PLAYER KNOCKBACK
         // =========================
 
 
@@ -347,14 +417,16 @@ class CollisionManager {
             player.x < car.x
         ){
 
-            player.x -= 35;
+            player.x -= 45;
 
         }
         else{
 
-            player.x += 35;
+            player.x += 45;
 
         }
+
+
 
 
 
@@ -374,7 +446,12 @@ class CollisionManager {
 
 
             car.hit(
-                impact
+
+                Math.max(
+                    impact,
+                    120
+                )
+
             );
 
 
@@ -387,10 +464,12 @@ class CollisionManager {
 
 
             car.y -=
-                40;
+                50;
 
 
         }
+
+
 
 
 
@@ -421,6 +500,7 @@ class CollisionManager {
 
 
 
+
         // =========================
         // PARTICLES
         // =========================
@@ -431,21 +511,21 @@ class CollisionManager {
         ){
 
 
-            this.particles.sparks(
+            this.particles.sparks?.(
                 x,
                 y
             );
 
 
 
-            this.particles.debris(
+            this.particles.debris?.(
                 x,
                 y
             );
 
 
 
-            this.particles.smoke(
+            this.particles.smoke?.(
                 x,
                 y,
                 1.5
@@ -486,11 +566,12 @@ class CollisionManager {
 
 
 
-
     }
 
 
 }
+
+
 
 
 
@@ -502,5 +583,5 @@ CollisionManager;
 
 
 console.log(
-    "✅ CollisionManager v1.4 Ready"
+    "✅ CollisionManager v1.5 Ready"
 );
