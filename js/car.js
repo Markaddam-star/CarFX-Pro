@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * PlayerCar.js - PLAYER CONTROL SYSTEM v2.0
+ * PlayerCar.js - PLAYER CONTROL SYSTEM v2.1
  * ============================================================
  *
  * Features
@@ -68,7 +68,15 @@ class PlayerCar {
 
         this.handbrakeActive = false;
 
-        this.engineRPM = 0;
+      this.engineRPM = 0;
+
+this.rpm = 800;
+
+this.throttle = 0;
+
+this.lastSpeed = 0;
+
+this.speedDelta = 0;
 
         // future systems
 
@@ -187,13 +195,79 @@ dt = Math.min(dt, 0.05);
     this.speed.toFixed(2)
 );
 
-        // ==================================
-        // ENGINE RPM
-        // ==================================
+      // ==================================
+// ENGINE RPM SYSTEM v2.1
+// ==================================
 
-        this.engineRPM =
-            this.speed /
-            this.maxSpeed;
+let previousSpeed = this.lastSpeed;
+
+
+// speed change
+
+this.speedDelta =
+    this.speed - previousSpeed;
+
+
+// throttle detection
+
+if(this.speedDelta > 0){
+
+    this.throttle =
+        Math.min(
+            this.speedDelta * 20,
+            1
+        );
+
+}
+else{
+
+    this.throttle *= 0.9;
+
+}
+
+
+// brake detection
+
+if(this.speed < previousSpeed){
+
+    this.braking = true;
+
+}
+else{
+
+    this.braking = false;
+
+}
+
+
+// save speed
+
+this.lastSpeed = this.speed;
+
+
+// RPM calculation
+
+let speedRatio =
+    this.speed / this.maxSpeed;
+
+
+let targetRPM =
+    800 +
+    (speedRatio * 5000) +
+    (this.throttle * 2500);
+
+
+this.rpm +=
+(
+    targetRPM -
+    this.rpm
+)
+* 0.08;
+
+// normalized RPM hook
+
+this.engineRPM =
+    this.rpm / 8000;
 
         // ==================================
         // LANE CHANGE
@@ -337,56 +411,77 @@ dt = Math.min(dt, 0.05);
 
     }
 
-    draw(ctx) {
+  draw(ctx) {
 
-        ctx.save();
+    ctx.save();
 
-        ctx.translate(
-            this.x + this.width / 2,
-            this.y + this.height / 2 + this.bodyBounce
-        );
+    ctx.translate(
+        this.x + this.width / 2,
+        this.y + this.height / 2 + this.bodyBounce
+    );
 
-        ctx.rotate(
-            this.steer *
-            Math.PI /
-            180
-        );
+    ctx.rotate(
+        this.steer *
+        Math.PI /
+        180
+    );
 
-        CarRenderer.draw(ctx, {
 
-            x: -this.width / 2,
+    CarRenderer.draw(ctx, {
 
-            y: -this.height / 2,
+        x: -this.width / 2,
 
-            width: this.width,
+        y: -this.height / 2,
 
-            height: this.height,
+        width: this.width,
 
-            color: this.vehicle.color,
+        height: this.height,
 
-            type: this.vehicle.type,
+        color: this.vehicle.color,
 
-            spoiler: this.vehicle.spoiler,
+        type: this.vehicle.type,
 
-            wheelSize: this.vehicle.wheelSize,
+        spoiler: this.vehicle.spoiler,
 
-            headlights: this.vehicle.headlights,
+        wheelSize: this.vehicle.wheelSize,
 
-            state:
-                this.braking
-                    ? "brake"
-                    : "cruise"
+        headlights: this.vehicle.headlights,
 
-        });
+        state:
+            this.braking
+            ? "brake"
+            : "cruise"
 
-        ctx.restore();
+    });
 
-    }
+
+    ctx.restore();
 
 }
 
+
+// ===============================
+// ENGINE DATA FOR AUDIO
+// ===============================
+
+getEngineData(){
+
+    return {
+
+        speed: this.speed,
+
+        rpm: this.rpm,
+
+        throttle: this.throttle,
+
+        braking: this.braking
+
+    };
+
+}
+}
 window.PlayerCar = PlayerCar;
 
 console.log(
-    "✅ PlayerCar v2.0 Loaded Successfully"
+    "✅ PlayerCar v2.1 Loaded Successfully"
 );
