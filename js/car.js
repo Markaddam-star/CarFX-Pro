@@ -129,7 +129,7 @@ class PlayerCar {
         } else {
 
             this.speed -=
-                this.friction * dt;
+    this.friction * Math.min(dt, 0.05);
 
         }
 
@@ -142,7 +142,7 @@ class PlayerCar {
         if (input.brake()) {
 
             this.speed -=
-                this.brakePower * dt;
+    this.brakePower * Math.min(dt, 0.05);
 
             this.braking = true;
 
@@ -157,8 +157,8 @@ class PlayerCar {
 
         if (this.handbrakeActive) {
 
-            this.speed -=
-                this.brakePower * 0.65 * dt;
+           this.speed -=
+    this.brakePower * 0.65 * Math.min(dt, 0.05);
 
         }
 
