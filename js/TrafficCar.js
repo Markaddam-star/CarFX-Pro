@@ -1,602 +1,439 @@
 console.log("🔥 TrafficCar v2.2 START");
 
-
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * TrafficCar.js - SMART AI TRAFFIC SYSTEM v2.2
- * ============================================================
- *
- * Features
- * ✔ Driver personality AI
- * ✔ Smooth acceleration
- * ✔ Smart braking
- * ✔ Lane changing
- * ✔ Player awareness
- * ✔ Traffic following
- * ✔ Overtake behavior
- * ✔ Panic reaction
- * ✔ Suspension motion
- * ✔ Particle FX hooks
+ * TrafficCar.js v2.2
+ * Smart Traffic AI
  * ============================================================
  */
 
-
 class TrafficCar {
 
+    constructor(canvas) {
 
-constructor(canvas){
+        this.canvas = canvas;
 
+        this.vehicle = VehicleFactory.random();
 
-    this.canvas = canvas;
+        this.width = this.vehicle.width;
+        this.height = this.vehicle.height;
 
+        // =====================================
+        // DRIVER PERSONALITY
+        // =====================================
 
-    this.vehicle =
-        VehicleFactory.random();
+        const r = Math.random();
 
+        if (r > 0.75) {
 
+            this.driverType = "aggressive";
 
-    this.width =
-        this.vehicle.width;
+        }
+        else if (r > 0.35) {
 
+            this.driverType = "normal";
 
-    this.height =
-        this.vehicle.height;
+        }
+        else {
 
-
-
-
-    // =========================
-    // DRIVER AI
-    // =========================
-
-
-    this.personality =
-        Math.random();
-
-
-
-    if(this.personality > .75){
-
-        this.driverType =
-            "aggressive";
-
-    }
-    else if(this.personality > .35){
-
-        this.driverType =
-            "normal";
-
-    }
-    else{
-
-        this.driverType =
-            "cautious";
-
-    }
-
-
-
-
-    // =========================
-    // AI STATE
-    // =========================
-
-
-    this.state =
-        "cruise";
-
-
-    this.braking =
-        false;
-
-
-
-    this.suspension =
-        0;
-
-
-
-
-    // =========================
-    // LANE
-    // =========================
-
-
-    this.lane = 1;
-
-    this.targetLane = 1;
-
-
-
-    this.laneSpeed = 5;
-
-
-
-    // =========================
-    // SPEED
-    // =========================
-
-
-    this.speed = 0;
-
-    this.targetSpeed = 0;
-
-
-
-    this.maxSpeed = 300;
-
-
-    this.acceleration = 80;
-
-
-    this.brakePower = 450;
-
-
-
-    // =========================
-    // AI SAFETY
-    // =========================
-
-
-    this.safeDistance =
-        240;
-
-
-    this.reactionTimer =
-        0;
-
-
-
-    this.laneChangeCooldown =
-        0;
-
-
-
-
-    // =========================
-    // FX
-    // =========================
-
-
-    this.fxTimer =
-        0;
-
-
-
-    this.reset();
-
-}
-
-
-
-
-
-reset(
-    lane=null,
-    y=null
-){
-
-
-    this.vehicle =
-        VehicleFactory.random();
-
-
-
-    this.width =
-        this.vehicle.width;
-
-
-    this.height =
-        this.vehicle.height;
-
-
-
-
-    this.lane =
-        lane !== null
-        ?
-        lane
-        :
-        Math.floor(
-            Math.random()*3
-        );
-
-
-
-    this.targetLane =
-        this.lane;
-
-
-
-    this.x =
-        this.getLaneX(
-            this.lane
-        );
-
-
-
-    this.y =
-        y !== null
-        ?
-        y
-        :
-        -500;
-
-
-
-
-    this.setupStats();
-
-
-
-    this.state =
-        "cruise";
-
-
-    this.braking =
-        false;
-
-
-}
-
-
-
-
-
-
-setupStats(){
-
-
-    this.maxSpeed =
-        this.vehicle.maxSpeed ||
-        300;
-
-
-
-    this.acceleration =
-        this.vehicle.acceleration ||
-        80;
-
-
-
-    this.brakePower =
-        this.vehicle.braking ||
-        450;
-
-
-
-    let personalitySpeed =
-        .55 +
-        this.personality*.35;
-
-
-
-    this.speed =
-        this.maxSpeed *
-        personalitySpeed;
-
-
-
-    this.targetSpeed =
-        this.speed;
-
-
-}
-
-
-
-
-
-
-
-update(
-    dt,
-    cars=[],
-    player=null
-){
-
-
-    dt =
-    Math.min(
-        dt,
-        .05
-    );
-
-
-
-    this.laneChangeCooldown -= dt;
-
-
-    this.reactionTimer -= dt;
-
-
-
-    let danger =
-        false;
-
-
-
-    let front =
-        this.getFrontCar(
-            cars
-        );
-
-
-
-    // =========================
-    // TRAFFIC FOLLOW
-    // =========================
-
-
-    if(front){
-
-
-        let gap =
-            front.y -
-            this.y;
-
-
-
-        if(
-            gap <
-            this.safeDistance
-        ){
-
-
-            danger = true;
-
-
-
-            this.state =
-                "follow";
-
-
-
-            this.targetSpeed =
-                front.speed *
-                .85;
-
+            this.driverType = "cautious";
 
         }
 
+        this.personality = r;
+
+        // =====================================
+        // AI STATE
+        // =====================================
+
+        this.state = "cruise";
+
+        this.braking = false;
+
+        // =====================================
+        // ROAD POSITION
+        // =====================================
+
+        this.lane = 1;
+        this.targetLane = 1;
+
+        this.x = 0;
+        this.y = 0;
+
+        // =====================================
+        // MOVEMENT
+        // =====================================
+
+        this.speed = 180;
+        this.targetSpeed = 180;
+
+        this.maxSpeed = 280;
+
+        this.acceleration = 80;
+        this.brakePower = 420;
+
+        this.safeDistance = 240;
+
+        // =====================================
+        // ANIMATION
+        // =====================================
+
+        this.suspension = 0;
+
+        this.laneSpeed = 4;
+
+        this.fxTimer = 0;
+
+        this.reactionTimer = 0;
+
+        this.laneChangeCooldown = 0;
+
+        this.reset();
 
     }
 
 
 
+    reset(lane = null, y = null) {
+
+        this.vehicle = VehicleFactory.random();
+
+        this.width = this.vehicle.width;
+        this.height = this.vehicle.height;
+
+        this.lane =
+            lane !== null
+                ? lane
+                : Math.floor(Math.random() * 3);
+
+        this.targetLane = this.lane;
+
+        this.setupVehicleStats();
+
+        this.x = this.getLaneX(this.lane);
+
+        this.y =
+            y !== null
+                ? y
+                : -600;
+
+        this.state = "cruise";
+
+        this.braking = false;
+
+    }
 
 
-    // =========================
-    // PLAYER DETECTION
-    // =========================
+
+    setupVehicleStats() {
+
+        this.maxSpeed =
+            this.vehicle.maxSpeed || 300;
+
+        this.acceleration =
+            this.vehicle.acceleration || 80;
+
+        this.brakePower =
+            this.vehicle.braking || 420;
+
+        let modifier = 1;
+
+        switch (this.driverType) {
+
+            case "aggressive":
+
+                modifier = 1.15;
+                break;
+
+            case "cautious":
+
+                modifier = 0.85;
+                break;
+
+        }
+
+        this.maxSpeed *= modifier;
+
+        this.speed =
+            this.maxSpeed * 0.65;
+
+        this.targetSpeed =
+            this.speed;
+
+    }
 
 
-    if(player){
 
+    update(dt, cars = [], player = null) {
 
-        if(
-            Math.round(this.lane)
-            ===
-            Math.round(player.lane)
-        ){
+        this.reactionTimer -= dt;
 
+        this.laneChangeCooldown -= dt;
 
-            let distance =
-                player.y -
-                this.y;
+        let danger = false;
 
+        const front =
+            this.getFrontCar(cars);
 
+        // =====================================
+        // FRONT CAR
+        // =====================================
 
-            if(
-                distance > 0 &&
-                distance <
-                this.safeDistance*2
-            ){
+        if (front) {
 
+            const gap =
+                front.y - this.y;
+
+            if (gap > 0 &&
+                gap < this.safeDistance) {
 
                 danger = true;
 
-
-                this.state =
-                    "yield";
-
+                this.state = "follow";
 
                 this.targetSpeed =
-                    player.speed*.65;
-
+                    front.speed;
 
             }
 
         }
 
-    }
-    // =========================
-    // LANE CHANGE DECISION
-    // =========================
+        // =====================================
+        // PLAYER AWARENESS
+        // =====================================
 
-    if (
-        danger &&
-        this.laneChangeCooldown <= 0 &&
-        this.reactionTimer <= 0
-    ) {
+        if (player &&
+            Math.round(player.lane) ===
+            Math.round(this.lane)) {
 
-        const newLane =
-            this.findSafeLane(
-                cars,
-                player
-            );
+            const d =
+                player.y - this.y;
 
-        if (newLane !== this.lane) {
+            if (
+                d > 0 &&
+                d < this.safeDistance * 2
+            ) {
 
-            this.targetLane = newLane;
+                danger = true;
 
-            this.state = "overtake";
+                this.state = "yield";
 
-        } else {
+                this.targetSpeed =
+                    player.speed * 0.75;
 
-            this.state = "panic";
+            }
 
-            this.targetSpeed *= 0.4;
+        }
+                // =====================================
+        // LANE CHANGE DECISION
+        // =====================================
+
+        if (
+            danger &&
+            this.reactionTimer <= 0 &&
+            this.laneChangeCooldown <= 0
+        ) {
+
+            const nextLane =
+                this.findSafeLane(
+                    cars,
+                    player
+                );
+
+            if (nextLane !== this.lane) {
+
+                this.targetLane = nextLane;
+
+                this.state = "overtake";
+
+            }
+            else {
+
+                this.state = "brake";
+
+                this.targetSpeed *= 0.45;
+
+            }
+
+            this.reactionTimer = 0.25;
+
+            this.laneChangeCooldown = 1.5;
 
         }
 
-        this.reactionTimer = 0.25;
-        this.laneChangeCooldown = 1.5;
-
-    }
 
 
+        // =====================================
+        // FREE ROAD
+        // =====================================
 
-    // =========================
-    // FREE ROAD
-    // =========================
+        if (!danger) {
 
-    if (!danger) {
+            this.state = "cruise";
 
-        this.state = "cruise";
+            this.targetSpeed =
+                this.maxSpeed *
+                (
+                    0.60 +
+                    this.personality * 0.35
+                );
 
-        this.targetSpeed =
-            this.maxSpeed *
+        }
+
+
+
+        // =====================================
+        // SPEED CONTROL
+        // =====================================
+
+        if (this.speed < this.targetSpeed) {
+
+            this.speed +=
+                this.acceleration *
+                dt;
+
+            this.braking = false;
+
+        }
+        else {
+
+            this.speed -=
+                this.brakePower *
+                dt;
+
+            this.braking = true;
+
+        }
+
+        this.speed =
+            Math.max(
+                0,
+                Math.min(
+                    this.speed,
+                    this.maxSpeed
+                )
+            );
+
+
+
+        // =====================================
+        // SMOOTH LANE CHANGE
+        // =====================================
+
+        this.lane +=
             (
-                0.60 +
-                this.personality * 0.35
+                this.targetLane -
+                this.lane
+            ) *
+            this.laneSpeed *
+            dt;
+
+        this.x =
+            this.getLaneX(
+                this.lane
             );
 
-    }
 
 
+        // =====================================
+        // SUSPENSION
+        // =====================================
 
-    // =========================
-    // SPEED CONTROL
-    // =========================
-
-    if (this.speed < this.targetSpeed) {
-
-        this.speed +=
-            this.acceleration *
-            dt;
-
-        this.braking = false;
-
-    }
-    else {
-
-        this.speed -=
-            this.brakePower *
-            dt;
-
-        this.braking = true;
-
-    }
-
-    this.speed =
-        Math.max(
-            0,
-            Math.min(
-                this.speed,
+        this.suspension =
+            Math.sin(
+                performance.now() * 0.01 +
+                this.x
+            ) *
+            (
+                this.speed /
                 this.maxSpeed
-            )
-        );
+            ) *
+            2;
 
 
 
-    // =========================
-    // SMOOTH LANE MOVEMENT
-    // =========================
+        // =====================================
+        // MOVE
+        // =====================================
 
-    this.lane +=
-        (
-            this.targetLane -
-            this.lane
-        )
-        *
-        this.laneSpeed *
-        dt;
-
-
-    this.x =
-        this.getLaneX(
-            this.lane
-        );
+        this.y +=
+            this.speed *
+            dt;
 
 
 
-    // =========================
-    // SUSPENSION
-    // =========================
+        // =====================================
+        // PARTICLE EFFECTS
+        // =====================================
 
-    this.suspension =
-        Math.sin(
-            performance.now() * 0.01 +
-            this.x
-        )
-        *
-        (
-            this.speed /
-            this.maxSpeed
-        )
-        *
-        2;
+        this.fxTimer -= dt;
 
-
-
-    // =========================
-    // MOVE
-    // =========================
-
-    this.y +=
-        this.speed *
-        dt;
-
-
-
-    // =========================
-    // PARTICLE FX
-    // =========================
-
-    this.fxTimer -= dt;
-
-    const particles =
-        window.carFXEngine?.particles;
-
-    if (
-        particles &&
-        this.fxTimer <= 0
-    ) {
-
-        this.fxTimer = 0.08;
-
-        const rearX =
-            this.x +
-            this.width / 2;
-
-        const rearY =
-            this.y +
-            this.height;
+        const particles =
+            window.carFXEngine?.particles;
 
         if (
-            this.speed >
-            this.maxSpeed * 0.70
+            particles &&
+            this.fxTimer <= 0
         ) {
 
-            particles.dust(
-                rearX,
-                rearY
-            );
+            this.fxTimer = 0.08;
+
+            const rearX =
+                this.x +
+                this.width / 2;
+
+            const rearY =
+                this.y +
+                this.height;
+
+            if (
+                this.speed >
+                this.maxSpeed * 0.7
+            ) {
+
+                particles.dust?.(
+                    rearX,
+                    rearY
+                );
+
+            }
+
+            if (this.braking) {
+
+                particles.smoke?.(
+                    rearX - 15,
+                    rearY
+                );
+
+                particles.smoke?.(
+                    rearX + 15,
+                    rearY
+                );
+
+            }
 
         }
 
-        if (this.braking) {
 
-            particles.tireSmoke?.(
-                rearX - 15,
-                rearY
-            );
 
-            particles.tireSmoke?.(
-                rearX + 15,
-                rearY
+        // =====================================
+        // RESPAWN
+        // =====================================
+
+        if (
+            this.y >
+            this.canvas.height + 700
+        ) {
+
+            this.reset(
+
+                Math.floor(
+                    Math.random() * 3
+                ),
+
+                -700
+
             );
 
         }
@@ -605,236 +442,201 @@ update(
 
 
 
-    // =========================
-    // RESPAWN
-    // =========================
+    getFrontCar(cars) {
 
-    if (
-        this.y >
-        this.canvas.height + 600
+        let closest = null;
+
+        let distance = Infinity;
+
+        for (const car of cars) {
+
+            if (car === this)
+                continue;
+
+            if (
+                Math.round(car.lane) !==
+                Math.round(this.lane)
+            )
+                continue;
+
+            const d =
+                car.y - this.y;
+
+            if (
+                d > 0 &&
+                d < distance
+            ) {
+
+                distance = d;
+
+                closest = car;
+
+            }
+
+        }
+
+        return closest;
+
+    }
+
+
+
+    findSafeLane(
+        cars,
+        player
     ) {
 
-        this.reset(
+        const lanes = [];
+
+        for (
+            let lane = 0;
+            lane < 3;
+            lane++
+        ) {
+
+            if (
+                lane ===
+                Math.round(this.lane)
+            )
+                continue;
+
+            if (
+                player &&
+                lane ===
+                Math.round(player.lane)
+            )
+                continue;
+
+            if (
+                this.isLaneSafe(
+                    lane,
+                    cars
+                )
+            ) {
+
+                lanes.push(lane);
+
+            }
+
+        }
+
+        if (
+            lanes.length === 0
+        )
+            return this.lane;
+
+        return lanes[
             Math.floor(
-                Math.random() * 3
-            ),
-            -700
-        );
+                Math.random() *
+                lanes.length
+            )
+        ];
 
     }
-
-}
-
-
-
-
-
-
-getFrontCar(cars) {
-
-    let closest = null;
-
-    let distance = Infinity;
-
-    for (const car of cars) {
-
-        if (car === this)
-            continue;
-
-        if (
-            Math.round(car.lane) !==
-            Math.round(this.lane)
-        )
-            continue;
-
-        const d =
-            car.y - this.y;
-
-        if (
-            d > 0 &&
-            d < distance
-        ) {
-
-            distance = d;
-
-            closest = car;
-
-        }
-
-    }
-
-    return closest;
-
-}
-
-
-
-
-
-findSafeLane(
-    cars,
-    player
-) {
-
-    const lanes = [];
-
-    for (
-        let lane = 0;
-        lane < 3;
-        lane++
+        isLaneSafe(
+        lane,
+        cars
     ) {
 
-        if (
-            lane ===
-            Math.round(this.lane)
-        )
-            continue;
+        for (const car of cars) {
 
-        if (
-            player &&
-            lane ===
-            Math.round(player.lane)
-        )
-            continue;
+            if (car === this)
+                continue;
 
-        if (
-            this.isLaneSafe(
-                lane,
-                cars
+            if (
+                Math.round(car.lane) !== lane
             )
-        ) {
+                continue;
 
-            lanes.push(
-                lane
+            if (
+                Math.abs(
+                    car.y - this.y
+                ) < this.safeDistance
+            ) {
+
+                return false;
+
+            }
+
+        }
+
+        return true;
+
+    }
+
+
+
+    getLaneX(lane) {
+
+        const roadWidth =
+            Math.min(
+                500,
+                this.canvas.width * 0.5
             );
 
-        }
+        const roadX =
+            (
+                this.canvas.width -
+                roadWidth
+            ) / 2;
 
-    }
+        const laneWidth =
+            roadWidth / 3;
 
-    if (
-        lanes.length === 0
-    )
-        return this.lane;
+        return (
 
-    return lanes[
-        Math.floor(
-            Math.random() *
-            lanes.length
-        )
-    ];
+            roadX +
 
-}
+            lane * laneWidth +
 
+            (laneWidth - this.width) / 2
 
-
-
-
-isLaneSafe(
-    lane,
-    cars
-) {
-
-    for (const car of cars) {
-
-        if (car === this)
-            continue;
-
-        if (
-            Math.round(car.lane) !== lane
-        )
-            continue;
-
-        if (
-            Math.abs(
-                car.y - this.y
-            ) <
-            this.safeDistance
-        ) {
-
-            return false;
-
-        }
-
-    }
-
-    return true;
-
-}
-
-
-
-
-
-getLaneX(lane) {
-
-    const roadWidth =
-        Math.min(
-            500,
-            this.canvas.width * 0.5
         );
 
-    const roadX =
-        (
-            this.canvas.width -
-            roadWidth
-        ) / 2;
-
-    const laneWidth =
-        roadWidth / 3;
-
-    return (
-        roadX +
-        lane * laneWidth +
-        (laneWidth - this.width) / 2
-    );
-
-}
+    }
 
 
 
+    render(ctx) {
 
+        ctx.save();
 
-render(ctx) {
+        ctx.translate(
+            0,
+            this.suspension
+        );
 
-    ctx.save();
+        CarRenderer.draw(ctx, {
 
-    ctx.translate(
-        0,
-        this.suspension
-    );
+            x: this.x,
 
-    CarRenderer.draw(ctx, {
+            y: this.y,
 
-        x: this.x,
+            width: this.width,
 
-        y: this.y,
+            height: this.height,
 
-        width: this.width,
+            color: this.vehicle.color,
 
-        height: this.height,
+            type: this.vehicle.type,
 
-        color: this.vehicle.color,
+            roofStyle: this.vehicle.roofStyle,
 
-        type: this.vehicle.type,
+            spoiler: this.vehicle.spoiler,
 
-        roofStyle: this.vehicle.roofStyle,
+            wheelSize: this.vehicle.wheelSize,
 
-        spoiler: this.vehicle.spoiler,
+            headlights: this.vehicle.headlights,
 
-        headlights: this.vehicle.headlights,
+            state: this.braking
+                ? "brake"
+                : this.state
 
-        wheelSize: this.vehicle.wheelSize,
+        });
 
-        state: this.braking
-            ? "brake"
-            : this.state
+        ctx.restore();
 
-    });
-
-    ctx.restore();
-
-}
+    }
 
 }
 
@@ -847,5 +649,6 @@ console.log(
     "✅ TrafficCar v2.2 Loaded Successfully"
 );
 
-
-
+// =========================
+// ✅ END OF FILE
+// =========================
