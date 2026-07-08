@@ -53,7 +53,7 @@ class PlayerCar {
 
         this.brakePower = this.vehicle.braking;
 
-        this.friction = 20;
+        this.friction = 8;
         // -----------------------------
         // Visual State
         // -----------------------------
@@ -114,8 +114,10 @@ class PlayerCar {
         const input =
             window.carFXEngine?.input;
 
-        if (!input)
-            return;
+       if (!input)
+    return;
+
+dt = Math.min(dt, 0.05);
 
         // ==================================
         // ACCELERATION
@@ -128,10 +130,14 @@ class PlayerCar {
 
         } else {
 
-            this.speed -=
-    this.friction * Math.min(dt, 0.05);
+    this.speed -=
+        this.friction * Math.min(dt, 0.05);
 
-        }
+    if (this.speed < 0) {
+        this.speed = 0;
+    }
+
+}
 
         // ==================================
         // BRAKING
@@ -165,6 +171,8 @@ class PlayerCar {
         // ==================================
         // LIMITS
         // ==================================
+         
+        
 
         this.speed =
             Math.max(
@@ -174,6 +182,10 @@ class PlayerCar {
                     this.maxSpeed
                 )
             );
+
+            this.speed = Number(
+    this.speed.toFixed(2)
+);
 
         // ==================================
         // ENGINE RPM
