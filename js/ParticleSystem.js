@@ -1,23 +1,23 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * ParticleSystem.js v1.2
+ * ParticleSystem.js v2.0
  *
- * Cinematic Particle Engine
+ * GTA Cinematic FX Engine
  * ============================================================
  *
  * Features:
  * ✔ Smoke
+ * ✔ Tire smoke
  * ✔ Dust
- * ✔ Skid smoke
  * ✔ Sparks
  * ✔ Debris
  * ✔ Rain
  * ✔ Gravity
  * ✔ Turbulence
  * ✔ Speed effects
+ * ✔ Layer rendering
  * ✔ Fade animation
- * ✔ Future weather ready
  * ============================================================
  */
 
@@ -33,7 +33,7 @@ class ParticleSystem {
         this.particles = [];
 
 
-        this.maxParticles = 1000;
+        this.maxParticles = 1200;
 
 
         this.wind = 0;
@@ -44,9 +44,8 @@ class ParticleSystem {
 
 
         console.log(
-            "💨 ParticleSystem v1.2 Loaded"
+            "💨 ParticleSystem v2.0 Loaded"
         );
-
 
     }
 
@@ -119,6 +118,11 @@ class ParticleSystem {
             null,
 
 
+            layer:
+            options.layer ??
+            "back",
+
+
             rotation:
             Math.random()*Math.PI,
 
@@ -126,12 +130,10 @@ class ParticleSystem {
             spin:
             (Math.random()-0.5)*0.1
 
-
         });
 
 
     }
-
 
 
 
@@ -146,7 +148,6 @@ class ParticleSystem {
             i++
         ){
 
-
             this.emit(
                 x,
                 y,
@@ -154,9 +155,11 @@ class ParticleSystem {
 
                     type:"smoke",
 
+                    layer:"back",
+
                     size:
                     8+
-                    Math.random()*10,
+                    Math.random()*12,
 
 
                     life:
@@ -174,10 +177,56 @@ class ParticleSystem {
 
                     gravity:-0.01
 
-
                 }
             );
 
+        }
+
+    }
+
+
+
+
+
+    tireSmoke(x,y){
+
+
+        for(
+            let i=0;
+            i<3;
+            i++
+        ){
+
+            this.emit(
+                x,
+                y,
+                {
+
+                    type:"smoke",
+
+                    layer:"back",
+
+                    size:
+                    5+
+                    Math.random()*8,
+
+
+                    life:
+                    0.5,
+
+
+                    vx:
+                    (Math.random()-0.5)*2,
+
+
+                    vy:
+                    -Math.random(),
+
+
+                    gravity:-0.02
+
+                }
+            );
 
         }
 
@@ -196,13 +245,14 @@ class ParticleSystem {
             i++
         ){
 
-
             this.emit(
                 x,
                 y,
                 {
 
                     type:"dust",
+
+                    layer:"back",
 
                     size:
                     4+
@@ -222,30 +272,12 @@ class ParticleSystem {
 
                     gravity:0.05
 
-
                 }
             );
 
         }
 
     }
-
-
-
-
-
-    skid(x,y){
-
-
-        this.smoke(
-            x,
-            y,
-            2
-        );
-
-
-    }
-
 
 
 
@@ -260,15 +292,14 @@ class ParticleSystem {
             i++
         ){
 
-
             this.emit(
                 x,
                 y,
                 {
 
-
                     type:"spark",
 
+                    layer:"front",
 
                     size:
                     2+
@@ -292,10 +323,8 @@ class ParticleSystem {
                     color:
                     "#ffd35c"
 
-
                 }
             );
-
 
         }
 
@@ -314,15 +343,14 @@ class ParticleSystem {
             i++
         ){
 
-
             this.emit(
                 x,
                 y,
                 {
 
-
                     type:"debris",
 
+                    layer:"front",
 
                     size:
                     3+
@@ -343,18 +371,14 @@ class ParticleSystem {
                     gravity:0.2,
 
 
-                    color:
-                    "#555"
-
+                    color:"#555"
 
                 }
             );
 
-
         }
 
     }
-
 
 
 
@@ -369,7 +393,6 @@ class ParticleSystem {
             i++
         ){
 
-
             this.emit(
 
                 Math.random()
@@ -382,9 +405,9 @@ class ParticleSystem {
 
                 {
 
-
                     type:"rain",
 
+                    layer:"front",
 
                     size:1,
 
@@ -401,14 +424,11 @@ class ParticleSystem {
                     gravity:0,
 
 
-                    color:
-                    "#9ecfff"
-
+                    color:"#9ecfff"
 
                 }
 
             );
-
 
         }
 
@@ -418,12 +438,11 @@ class ParticleSystem {
 
 
 
-
     update(dt){
 
 
         if(!this.enabled)
-        return;
+            return;
 
 
 
@@ -434,27 +453,20 @@ class ParticleSystem {
         ){
 
 
-            let p =
+            const p =
             this.particles[i];
 
 
 
-            p.x +=
-            p.vx;
+            p.x += p.vx;
+
+            p.y += p.vy;
 
 
-            p.y +=
-            p.vy;
+            p.vy += p.gravity;
 
 
-
-            p.vy +=
-            p.gravity;
-
-
-
-            p.x +=
-            this.wind;
+            p.x += this.wind;
 
 
 
@@ -467,8 +479,7 @@ class ParticleSystem {
 
 
 
-            p.life -=
-            dt;
+            p.life -= dt;
 
 
 
@@ -499,9 +510,7 @@ class ParticleSystem {
 
             }
 
-
         }
-
 
     }
 
@@ -509,22 +518,22 @@ class ParticleSystem {
 
 
 
-
-
-    render(ctx){
-
-
-        if(!this.enabled)
-        return;
-
+    drawParticles(ctx,layer){
 
 
         for(
             const p of this.particles
         ){
 
+            if(
+                p.layer !== layer
+            )
+            continue;
+
+
 
             ctx.save();
+
 
 
             ctx.globalAlpha =
@@ -553,7 +562,6 @@ class ParticleSystem {
                 p.type==="rain"
             ){
 
-
                 ctx.fillRect(
                     p.x,
                     p.y,
@@ -561,11 +569,9 @@ class ParticleSystem {
                     12
                 );
 
-
             }
             else
             {
-
 
                 ctx.beginPath();
 
@@ -581,16 +587,53 @@ class ParticleSystem {
 
                 ctx.fill();
 
-
             }
-
 
 
             ctx.restore();
 
-
         }
 
+
+    }
+
+
+
+
+
+    renderBehind(ctx){
+
+        this.drawParticles(
+            ctx,
+            "back"
+        );
+
+    }
+
+
+
+
+
+    renderFront(ctx){
+
+        this.drawParticles(
+            ctx,
+            "front"
+        );
+
+    }
+
+
+
+
+
+    // backward compatibility
+
+    render(ctx){
+
+        this.renderBehind(ctx);
+
+        this.renderFront(ctx);
 
     }
 
@@ -599,10 +642,12 @@ class ParticleSystem {
 
 
 
+
+
 window.ParticleSystem =
 ParticleSystem;
 
 
 console.log(
-    "✅ ParticleSystem v1.2 Ready"
+    "✅ ParticleSystem v2.0 Ready"
 );
