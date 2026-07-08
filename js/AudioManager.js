@@ -268,6 +268,59 @@ class AudioManager {
 
     }
 
+    // ===============================
+// AUDIO CONTROL
+// ===============================
+
+pause(){
+
+    if(!this.ctx) return;
+
+    this.ctx.suspend();
+
+    console.log(
+        "🔇 Audio Paused"
+    );
+
+}
+
+
+resume(){
+
+    if(!this.ctx) return;
+
+    this.ctx.resume();
+
+    console.log(
+        "🔊 Audio Resumed"
+    );
+
+}
+
+
+stop(){
+
+    if(this.engineOsc){
+
+        this.engineOsc.stop();
+
+        this.engineOsc = null;
+
+    }
+
+    if(this.ctx){
+
+        this.ctx.close();
+
+    }
+
+    this.started = false;
+
+    console.log(
+        "🔇 Audio Stopped"
+    );
+
+}
 
 }
 
