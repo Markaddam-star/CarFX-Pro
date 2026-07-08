@@ -93,12 +93,15 @@ this.shake = 0;
 
         this.suspension = 0;
 
-        this.laneSpeed = 4;
+        this.laneSpeed = 10;
 
         this.fxTimer = 0;
 
         this.reactionTimer = 0;
+        this.playerReactionDistance = 500;
 
+        this.avoidStrength = 1;
+        this.emergencyAvoid = false;
         this.laneChangeCooldown = 0;
 
         this.reset();
@@ -141,6 +144,9 @@ this.crashed = false;
 this.crashTimer = 0;
 
 this.shake = 0;
+
+   
+this.targetLane = this.lane;
 
     }
 
@@ -252,32 +258,79 @@ if(this.crashed){
 
         }
 
-        // =====================================
-        // PLAYER AWARENESS
-        // =====================================
+// =====================================
+// PLAYER AWARENESS
+// =====================================
 
-        if (player &&
-            Math.round(player.lane) ===
-            Math.round(this.lane)) {
+if(player){
 
-            const d =
-                player.y - this.y;
+    const sameLane =
+        Math.round(player.lane) ===
+        Math.round(this.lane);
 
-            if (
-                d > 0 &&
-                d < this.safeDistance * 2
-            ) {
 
-                danger = true;
+    const distance =
+        Math.abs(
+            player.y - this.y
+        );
 
-                this.state = "yield";
 
-                this.targetSpeed =
-                    player.speed * 0.75;
+    const playerClosing =
+        player.speed >
+        this.speed + 40;
 
-            }
+
+
+    if(
+        sameLane &&
+        distance < this.playerReactionDistance
+    ){
+
+        danger = true;
+
+
+        this.emergencyAvoid = true;
+
+
+        this.state =
+            "player_avoid";
+
+
+
+        if(playerClosing){
+
+            this.targetSpeed =
+                Math.max(
+                    20,
+                    this.speed * 0.35
+                );
 
         }
+        else{
+
+            this.targetSpeed =
+                Math.max(
+                    40,
+                    player.speed * 0.55
+                );
+
+        }
+
+
+    }
+
+}
+
+
+
+// emergency reaction
+
+if(this.emergencyAvoid){
+
+    this.reactionTimer = 0;
+
+}
+        
                 // =====================================
         // LANE CHANGE DECISION
         // =====================================
@@ -468,7 +521,7 @@ if(this.crashed){
 
         }
 
-
+this.emergencyAvoid = false;
 
         // =====================================
         // RESPAWN
@@ -561,7 +614,18 @@ hit(force = 100){
     this.speed *=
         0.35;
 
-
+this.targetLane =
+Math.max(
+0,
+Math.min(
+2,
+this.lane +
+(
+Math.random()>0.5
+?1
+:-1
+)
+);
 
     this.targetSpeed =
         this.maxSpeed * 0.4;
@@ -724,9 +788,9 @@ hit(force = 100){
         ctx.save();
 
         ctx.translate(
-            0,
-            this.suspension
-        );
+    this.shake,
+    this.suspension
+);
 
         CarRenderer.draw(ctx, {
 
