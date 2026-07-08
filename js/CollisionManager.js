@@ -1,91 +1,110 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * CollisionManager.js
- * PLAYER VS TRAFFIC COLLISION v1.2
+ * CollisionManager.js v1.3
+ * GTA CRASH SYSTEM
+ * ============================================================
+ *
+ * Features:
+ * ✔ Player vs Traffic collision
+ * ✔ Impact force
+ * ✔ Crash cooldown
+ * ✔ Sparks FX
+ * ✔ Debris FX
+ * ✔ Knockback reaction
+ * ✔ Wanted hook ready
  * ============================================================
  */
 
+
 class CollisionManager {
 
-    constructor(player, trafficManager) {
 
-        this.player = player;
-        this.trafficManager = trafficManager;
+    constructor(
+        player,
+        trafficManager,
+        particles = null
+    ){
 
-        this.hitDistance = 20;
+
+        this.player =
+            player;
+
+
+        this.trafficManager =
+            trafficManager;
+
+
+        this.particles =
+            particles;
+
+
+
+        this.cooldown =
+            0;
+
+
+
+        this.hitDistance =
+            20;
+
+
+
+        console.log(
+            "💥 CollisionManager v1.3 Loaded"
+        );
+
 
     }
 
 
-    update(dt) {
+
+
+
+
+    update(dt){
 
 
         if(
             !this.player ||
             !this.trafficManager
         )
-            return;
+        return;
 
 
 
-        for(const car of this.trafficManager.cars){
+        this.cooldown -= dt;
 
 
 
-            const dx =
-                Math.abs(
-                    (car.x + car.width / 2) -
-                    (this.player.x + this.player.width / 2)
-                );
-
-
-            const dy =
-                Math.abs(
-                    (car.y + car.height / 2) -
-                    (this.player.y + this.player.height / 2)
-                );
-
-
-
-            const collisionX =
-                dx <
-                (car.width + this.player.width) / 2;
-
-
-            const collisionY =
-                dy <
-                (car.height + this.player.height) / 2;
-
+        for(
+            const car of
+            this.trafficManager.cars
+        ){
 
 
             if(
-                collisionX &&
-                collisionY
+                this.checkCollision(car)
             ){
 
-                console.log(
-                    "💥 PLAYER HIT BY TRAFFIC"
-                );
+
+                if(
+                    this.cooldown <= 0
+                ){
 
 
-                // stop traffic car
-
-                car.speed *= 0.3;
+                    this.crash(car);
 
 
-                // push back
-
-                car.y -= 40;
-
+                    this.cooldown =
+                        0.8;
 
 
-                // player damage later
-
-                this.player.hit = true;
+                }
 
 
             }
+
 
         }
 
@@ -94,7 +113,259 @@ class CollisionManager {
 
 
 
+
+
+
+    checkCollision(car){
+
+
+        const player =
+            this.player;
+
+
+
+        const dx =
+            Math.abs(
+
+                (
+                    car.x +
+                    car.width / 2
+                )
+
+                -
+
+                (
+                    player.x +
+                    player.width / 2
+                )
+
+            );
+
+
+
+        const dy =
+            Math.abs(
+
+                (
+                    car.y +
+                    car.height / 2
+                )
+
+                -
+
+                (
+                    player.y +
+                    player.height / 2
+                )
+
+            );
+
+
+
+        return (
+
+            dx <
+            (
+                car.width +
+                player.width
+            ) / 2
+
+            &&
+
+            dy <
+            (
+                car.height +
+                player.height
+            ) / 2
+
+        );
+
+
+    }
+
+
+
+
+
+
+    crash(car){
+
+
+        console.log(
+            "💥 GTA CRASH EVENT"
+        );
+
+
+
+        const player =
+            this.player;
+
+
+
+        const impact =
+
+            Math.abs(
+                player.speed -
+                car.speed
+            );
+
+
+
+
+
+        // =========================
+        // PLAYER STATE
+        // =========================
+
+
+        player.hit =
+            true;
+
+
+
+        player.speed *=
+            0.45;
+
+
+
+
+
+
+        // =========================
+        // TRAFFIC REACTION
+        // =========================
+
+
+        if(
+            typeof car.hit ===
+            "function"
+        ){
+
+
+            car.hit(
+                impact
+            );
+
+
+        }
+        else{
+
+
+            car.speed *=
+                0.3;
+
+
+            car.y -=
+                40;
+
+
+        }
+
+
+
+
+
+
+
+        // =========================
+        // FX POSITION
+        // =========================
+
+
+        const x =
+
+            player.x +
+            player.width / 2;
+
+
+
+        const y =
+
+            player.y +
+            player.height / 2;
+
+
+
+
+
+
+        // =========================
+        // PARTICLES
+        // =========================
+
+
+        if(
+            this.particles
+        ){
+
+
+            this.particles.sparks(
+                x,
+                y
+            );
+
+
+
+            this.particles.debris(
+                x,
+                y
+            );
+
+
+
+            this.particles.smoke(
+                x,
+                y,
+                1.5
+            );
+
+
+        }
+
+
+
+
+
+
+        // =========================
+        // WANTED HOOK
+        // =========================
+
+
+        const engine =
+            window.carFXEngine;
+
+
+
+        if(
+            engine &&
+            engine.wantedSystem
+        ){
+
+
+            engine.wantedSystem.addCrime?.(
+                "traffic_collision"
+            );
+
+
+        }
+
+
+
+    }
+
+
 }
 
 
-window.CollisionManager = CollisionManager;
+
+
+
+window.CollisionManager =
+CollisionManager;
+
+
+
+console.log(
+    "✅ CollisionManager v1.3 Ready"
+);
