@@ -408,7 +408,65 @@ this.engineRPM =
         this.motionBlur =
             this.speed /
             this.maxSpeed;
+      // ==================================
+// PARTICLE EFFECTS v1.0
+// ==================================
 
+const particles =
+    window.carFXEngine?.particles;
+
+
+if(particles){
+
+
+    // acceleration smoke
+
+    if(this.throttle > 0.4){
+
+        particles.smoke(
+
+            this.x + this.width / 2,
+
+            this.y + this.height
+
+        );
+
+    }
+
+
+
+    // braking dust
+
+    if(this.braking){
+
+        particles.smoke(
+
+            this.x + 10,
+
+            this.y + this.height
+
+        );
+
+    }
+
+
+
+    // handbrake skid
+
+    if(this.handbrakeActive){
+
+        particles.smoke(
+
+            this.x + this.width / 2,
+
+            this.y + this.height
+
+        );
+
+    }
+
+
+}
     }
 
   draw(ctx) {
