@@ -422,11 +422,11 @@ class VehicleFactory {
 
         // GTA STYLE PERFORMANCE
 
-        maxSpeed: 180,
+        maxSpeed: 280,
 
-        acceleration: 55,
+acceleration: 85,
 
-        braking: 140,
+braking: 170,
 
 
         weight: 1200,
