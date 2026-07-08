@@ -87,13 +87,12 @@ class CarFXEngine {
         )
         : null;
 
-    this.policeManager = window.PoliceManager
-        ? new PoliceManager(
-            this.canvas,
-            this.player,
-            this.wantedSystem
-        )
-        : null;
+    // =========================
+// POLICE SYSTEM TEMP DISABLED
+// v2.3 Driving Testing
+// =========================
+
+this.policeManager = null;
 
     this.roadblockManager = window.RoadblockManager
         ? new RoadblockManager(
