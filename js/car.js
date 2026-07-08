@@ -1,7 +1,20 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * PlayerCar.js - PLAYER CONTROL SYSTEM v1.1
+ * PlayerCar.js - PLAYER CONTROL SYSTEM v2.0
+ * ============================================================
+ *
+ * Features
+ * ✔ Smooth acceleration
+ * ✔ Progressive braking
+ * ✔ Lane interpolation
+ * ✔ Steering tilt
+ * ✔ Suspension bounce
+ * ✔ Brake light state
+ * ✔ HUD hooks
+ * ✔ Audio hooks
+ * ✔ Particle hooks
+ * ✔ Camera hooks
  * ============================================================
  */
 
@@ -16,134 +29,143 @@ class PlayerCar {
         this.width = this.vehicle.width;
         this.height = this.vehicle.height;
 
-
-        // =========================
-        // LANE SYSTEM
-        // =========================
+        // -----------------------------
+        // Lane System
+        // -----------------------------
 
         this.lane = 1;
         this.targetLane = 1;
-        this.targetX = 0;
-        this.moveSpeed = 10;
 
-        // =========================
-        // MOVEMENT
-        // =========================
+        this.x = 0;
+        this.targetX = 0;
+
+        this.laneSmooth = 8;
+
+        // -----------------------------
+        // Physics
+        // -----------------------------
 
         this.speed = 0;
 
-        this.maxSpeed = 500;
+        this.maxSpeed = this.vehicle.maxSpeed;
 
-        this.acceleration = 260;
+        this.acceleration = this.vehicle.acceleration;
 
-        this.brakePower = 500;
+        this.brakePower = this.vehicle.braking;
 
+        this.friction = 110;
+
+        // -----------------------------
+        // Visual State
+        // -----------------------------
+
+        this.steer = 0;
+
+        this.targetSteer = 0;
+
+        this.bodyBounce = 0;
+
+        this.braking = false;
+
+        this.handbrakeActive = false;
+
+        this.engineRPM = 0;
+
+        // future systems
+
+        this.cameraZoom = 1;
+
+        this.motionBlur = 0;
 
         this.resize();
-
     }
 
+    resize() {
 
+        const roadWidth =
+            Math.min(
+                500,
+                this.canvas.width * .5
+            );
 
-   resize() {
+        const roadX =
+            (
+                this.canvas.width -
+                roadWidth
+            ) / 2;
 
+        const laneWidth =
+            roadWidth / 3;
 
-    const roadWidth =
-        Math.min(
-            500,
-            this.canvas.width * 0.5
-        );
+        this.x =
+            roadX +
+            this.lane * laneWidth +
+            (laneWidth - this.width) / 2;
 
+        this.targetX = this.x;
 
-    const roadX =
-        (
-            this.canvas.width -
-            roadWidth
-        ) / 2;
-
-
-    const laneW =
-        roadWidth / 3;
-
-
-
-    this.x =
-        roadX +
-        this.lane * laneW +
-        (laneW - this.width) / 2;
-
-
-    // smooth lane movement target
-
-    this.targetX =
-        this.x;
-
-
-
-    // PLAYER SCREEN POSITION
-
-    this.y =
-        this.canvas.height -
-        this.height -
-        40;
-
-
-}
-
-
-
-
+        this.y =
+            this.canvas.height -
+            this.height -
+            40;
+    }
 
     update(dt) {
-
 
         const input =
             window.carFXEngine?.input;
 
-
         if (!input)
             return;
 
-
-
-        // =========================
+        // ==================================
         // ACCELERATION
-        // =========================
+        // ==================================
 
         if (input.accelerate()) {
-
 
             this.speed +=
                 this.acceleration * dt;
 
-
-        }
-        else {
-
+        } else {
 
             this.speed -=
-                120 * dt;
-
+                this.friction * dt;
 
         }
 
+        // ==================================
+        // BRAKING
+        // ==================================
 
-
-        // =========================
-        // BRAKE
-        // =========================
+        this.braking = false;
 
         if (input.brake()) {
-
 
             this.speed -=
                 this.brakePower * dt;
 
+            this.braking = true;
 
         }
 
+        // ==================================
+        // HANDBRAKE
+        // ==================================
 
+        this.handbrakeActive =
+            input.handbrake();
 
+        if (this.handbrakeActive) {
+
+            this.speed -=
+                this.brakePower * 0.65 * dt;
+
+        }
+
+        // ==================================
+        // LIMITS
+        // ==================================
 
         this.speed =
             Math.max(
@@ -154,82 +176,66 @@ class PlayerCar {
                 )
             );
 
+        // ==================================
+        // ENGINE RPM
+        // ==================================
 
+        this.engineRPM =
+            this.speed /
+            this.maxSpeed;
 
+        // ==================================
+        // LANE CHANGE
+        // ==================================
 
+        let wantedLane =
+            this.targetLane;
 
-        // =========================
-        // LANE CONTROL
-        // =========================
+        if (input.leftPressed()) {
 
+            wantedLane =
+                Math.max(
+                    0,
+                    this.targetLane - 1
+                );
+
+        }
+        else if (input.rightPressed()) {
+
+            wantedLane =
+                Math.min(
+                    2,
+                    this.targetLane + 1
+                );
+
+        }
 
         const collision =
             window.carFXEngine?.collisionManager;
 
-
-
-        let nextLane =
-            this.targetLane;
-
-
-
-   if (input.leftPressed()) {
-
-    nextLane =
-        Math.max(
-            0,
-            this.targetLane - 1
-        );
-
-}
-else if (input.rightPressed()) {
-
-    nextLane =
-        Math.min(
-            2,
-            this.targetLane + 1
-        );
-
-}
-
-
-
         if (
             !collision ||
-            collision.canEnterLane(nextLane)
+            collision.canEnterLane(wantedLane)
         ) {
 
             this.targetLane =
-                nextLane;
+                wantedLane;
 
         }
-
-
-
-
-        // =========================
-        // SMOOTH LANE CHANGE
-        // =========================
-
 
         this.lane +=
             (
                 this.targetLane -
                 this.lane
-            )
-            *
-            5
-            *
+            ) *
+            this.laneSmooth *
             dt;
-
-
 
         if (
             Math.abs(
-                this.lane -
-                this.targetLane
-            )
-            < 0.01
+                this.targetLane -
+                this.lane
+            ) < 0.01
         ) {
 
             this.lane =
@@ -237,77 +243,139 @@ else if (input.rightPressed()) {
 
         }
 
+        // ==================================
+        // ROAD CALCULATION
+        // ==================================
 
+        const roadWidth =
+            Math.min(
+                500,
+                this.canvas.width * 0.5
+            );
 
+        const roadX =
+            (
+                this.canvas.width -
+                roadWidth
+            ) / 2;
 
-      // =========================
-// SMOOTH X POSITION
-// =========================
+        const laneWidth =
+            roadWidth / 3;
 
-const roadWidth =
-    Math.min(
-        500,
-        this.canvas.width * 0.5
-    );
+        this.targetX =
+            roadX +
+            this.lane * laneWidth +
+            (laneWidth - this.width) / 2;
 
+        this.x +=
+            (
+                this.targetX -
+                this.x
+            ) *
+            10 *
+            dt;
 
-const roadX =
-    (
-        this.canvas.width -
-        roadWidth
-    ) / 2;
+        // ==================================
+        // STEERING TILT
+        // ==================================
 
+        this.targetSteer =
+            (this.targetLane - this.lane) * 18;
 
-const laneW =
-    roadWidth / 3;
+        this.steer +=
+            (
+                this.targetSteer -
+                this.steer
+            ) *
+            8 *
+            dt;
 
+        // ==================================
+        // BODY BOUNCE
+        // ==================================
 
+        this.bodyBounce =
+            Math.sin(
+                performance.now() * 0.012
+            ) *
+            (
+                this.speed /
+                this.maxSpeed
+            ) *
+            2;
 
-this.targetX =
-    roadX +
-    this.lane * laneW +
-    (laneW - this.width) / 2;
+        // ==================================
+        // CAMERA HOOK
+        // ==================================
 
+        this.cameraZoom =
+            1 +
+            (
+                this.speed /
+                this.maxSpeed
+            ) *
+            0.08;
 
+        // ==================================
+        // MOTION BLUR HOOK
+        // ==================================
 
-this.x +=
-    (
-        this.targetX -
-        this.x
-    )
-    *
-    this.moveSpeed
-    *
-    dt;
-
-
+        this.motionBlur =
+            this.speed /
+            this.maxSpeed;
 
     }
 
     draw(ctx) {
 
+        ctx.save();
+
+        ctx.translate(
+            this.x + this.width / 2,
+            this.y + this.height / 2 + this.bodyBounce
+        );
+
+        ctx.rotate(
+            this.steer *
+            Math.PI /
+            180
+        );
 
         CarRenderer.draw(ctx, {
 
+            x: -this.width / 2,
 
-            x: this.x,
-
-            y: this.y,
+            y: -this.height / 2,
 
             width: this.width,
 
             height: this.height,
 
-            color: this.vehicle.color
+            color: this.vehicle.color,
 
+            type: this.vehicle.type,
+
+            spoiler: this.vehicle.spoiler,
+
+            wheelSize: this.vehicle.wheelSize,
+
+            headlights: this.vehicle.headlights,
+
+            state:
+                this.braking
+                    ? "brake"
+                    : "cruise"
 
         });
 
+        ctx.restore();
 
     }
 
 }
 
-
-
 window.PlayerCar = PlayerCar;
+
+console.log(
+    "✅ PlayerCar v2.0 Loaded Successfully"
+);
