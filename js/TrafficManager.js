@@ -247,16 +247,16 @@ class TrafficManager {
 
 
 
-            car.y =
-                (
-                    this.player?.y || 0
-                )
-                -
-                600
-                +
-                (
-                    i * 220
-                );
+           car.y =
+(
+    this.player?.y || 500
+)
+-
+500
++
+(
+    i * 180
+);
 
 
 
@@ -291,13 +291,14 @@ class TrafficManager {
     // ========================================================
 
 
-    update(dt){
+   update(dt){
 
 
+    if(!this.player){
 
-        if(!this.player)
-            return;
+        return;
 
+    }
 
 
         this.visibleCars.length = 0;
