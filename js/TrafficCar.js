@@ -580,7 +580,6 @@ checkTraffic(cars){
 // RANDOM LANE CHANGE
 // ============================================================
 
-
 randomLaneDecision(){
 
 
@@ -594,13 +593,26 @@ randomLaneDecision(){
     ){
 
 
-        this.tryLaneChange();
+        // only some drivers change lane
+
+        let chance =
+            Math.random();
+
+
+
+        if(
+            chance < 0.25
+        ){
+
+            this.tryLaneChange();
+
+        }
 
 
 
         this.laneChangeTimer =
-            200 +
-            Math.random()*300;
+            300 +
+            Math.random()*500;
 
 
     }
@@ -615,33 +627,56 @@ randomLaneDecision(){
 
 
 // ============================================================
-// SELECT NEW LANE
+// SELECT SAFE NEW LANE
 // ============================================================
-
 
 tryLaneChange(){
 
 
-    let newLane =
-        Math.floor(
-            Math.random()*3
+    let possibleLanes = [
+        0,
+        1,
+        2
+    ];
+
+
+    possibleLanes =
+        possibleLanes.filter(
+            lane =>
+            lane !== this.lane
         );
 
 
 
-    if(
-        newLane !== this.lane
+    // shuffle lanes
+
+    possibleLanes.sort(
+        () => Math.random() - 0.5
+    );
+
+
+
+    for(
+        const newLane of possibleLanes
     ){
 
 
-        this.targetLane =
-            newLane;
+        if(
+            this.isLaneSafe(newLane)
+        ){
+
+            this.targetLane =
+                newLane;
+this.state =
+    "changing_lane";
+
+            this.isChangingLane =
+                true;
 
 
+            return;
 
-        this.isChangingLane =
-            true;
-
+        }
 
     }
 
@@ -651,7 +686,68 @@ tryLaneChange(){
 
 
 
+// ============================================================
+// CHECK LANE SAFETY
+// ============================================================
 
+isLaneSafe(targetLane){
+
+
+    if(
+        !window.carFX ||
+        !window.carFX.trafficManager
+    )
+        return true;
+
+
+
+    const cars =
+        window.carFX.trafficManager.visibleCars;
+
+
+
+    for(
+        const car of cars
+    ){
+
+
+        if(
+            car === this
+        )
+            continue;
+
+
+
+        if(
+            car.lane !== targetLane
+        )
+            continue;
+
+
+
+        const distance =
+            Math.abs(
+                car.y - this.y
+            );
+
+
+
+        if(
+            distance < 220
+        ){
+
+            return false;
+
+        }
+
+
+    }
+
+
+
+    return true;
+
+}
 
 
 // ============================================================
