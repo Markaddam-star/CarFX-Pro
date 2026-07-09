@@ -453,34 +453,56 @@ reset(lane, y){
 
 
 
-    keepStable() {
+    keepStable(){
+
+    const roadWidth =
+        Math.min(
+            500,
+            this.canvas.width * 0.5
+        );
 
 
-        const maxAngle = Math.PI * 2;
-
-
-        if(this.angle > maxAngle)
-            this.angle -= maxAngle;
-
-
-        if(this.angle < -maxAngle)
-            this.angle += maxAngle;
+    const roadX =
+        (
+            this.canvas.width -
+            roadWidth
+        ) / 2;
 
 
 
-        if(this.x < 0)
-            this.x = 0;
+    // keep traffic inside road
+
+    if(this.x < roadX)
+        this.x = roadX;
 
 
-        if(this.x >
-           this.canvas.width - this.width)
-            this.x =
-            this.canvas.width - this.width;
+
+    if(
+        this.x >
+        roadX + roadWidth - this.width
+    ){
+
+        this.x =
+        roadX + roadWidth - this.width;
 
     }
 
 
 
+    // rotation limit
+
+    const maxAngle =
+        Math.PI * 2;
+
+
+    if(this.angle > maxAngle)
+        this.angle -= maxAngle;
+
+
+    if(this.angle < -maxAngle)
+        this.angle += maxAngle;
+
+}
 
 
    draw(ctx){
