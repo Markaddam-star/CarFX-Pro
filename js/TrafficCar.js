@@ -896,30 +896,24 @@ render(ctx){
 
         // smoke hook
 
+// smoke hook disabled safely
+
 if(
-    this.smokeTimer > 0 &&
-    window.ParticleSystem &&
-    typeof window.ParticleSystem.emit === "function"
+    this.smokeTimer > 0
 ){
 
-    window.ParticleSystem.emit(
-        this.x,
-        this.y + 40,
-        "smoke"
-    );
+    // smoke system will be connected later
 
 }
 
 
 
-if(ctx){
+ctx.restore();
 
-    ctx.restore();
+} // render close
 
-}
 
-}
-
+} // TrafficCar class close
 
 
 
