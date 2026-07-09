@@ -651,7 +651,12 @@ class TrafficCar {
         this.rotationSpeed =
             0;
 
+this.smokeTimer =
+    0;
 
+
+this.brakeLights =
+    false;
 
         this.crashed =
             false;
@@ -891,7 +896,8 @@ render(ctx){
 
         // smoke hook
 
-  if(
+if(
+    this.smokeTimer > 0 &&
     window.ParticleSystem &&
     typeof window.ParticleSystem.emit === "function"
 ){
