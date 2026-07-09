@@ -1,209 +1,160 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * TrafficManager.js v2.5
+ * TrafficCar.js v2.6
  *
- * GTA STYLE TRAFFIC SYSTEM
+ * GTA STYLE TRAFFIC VEHICLE AI
  *
- * FIX:
- * - Infinite negative Y bug
- * - Player relative spawning
- * - Better traffic visibility
- * - Lane assignment fix
- * - Continuous traffic flow
- * - Crash AI compatible
+ * PART 1 / 3
  *
- * PART 1 / 2
+ * Features:
+ * - Smooth traffic movement
+ * - Player relative AI
+ * - Lane keeping
+ * - Smart braking foundation
+ * - Crash compatible
  * ============================================================
  */
 
+
 console.log(
-    "🚗 TrafficManager v2.5 START"
+    "🚗 TrafficCar v2.6 START"
 );
 
 
 
-class TrafficManager {
+class TrafficCar {
 
 
     constructor(
         canvas,
-        player = null,
-        particles = null
+        x = 0,
+        speed = 2
     ){
 
 
         this.canvas = canvas;
 
-        this.player = player;
 
-        this.particles = particles;
-
+        this.x = x;
 
 
-        // =========================
-        // VEHICLES
-        // =========================
-
-
-        this.cars = [];
-
-        this.visibleCars = [];
-
-
-
-        this.maxCars = 12;
+        this.y = 0;
 
 
 
         // =========================
-        // ROAD
+        // MOVEMENT
         // =========================
 
 
-        this.laneCount = 3;
+        this.speed = speed;
 
 
-        const roadWidth =
-    Math.min(
-        500,
-        canvas.width * 0.5
-    );
+        this.targetSpeed =
+            speed;
 
 
-this.roadX =
-(
-    canvas.width -
-    roadWidth
-) / 2;
+        this.acceleration =
+            0.025;
 
 
-this.laneWidth =
-    roadWidth / 3;
+        this.maxSpeed =
+            5;
 
 
 
-        this.spawnAhead =
-            900;
-
-
-        this.spawnBehind =
-            500;
+        this.lane = 0;
 
 
 
-        this.respawnDistance =
-            1400;
+        this.width = 42;
+
+        this.height = 78;
 
 
 
         // =========================
-        // FLOW
+        // AI STATE
         // =========================
 
 
-        this.spawnTimer = 0;
-
-        this.spawnInterval = 0.8;
-
+        this.state =
+            "cruise";
 
 
-        this.baseSpeed = 2;
+        this.followDistance =
+            160;
+
+
+        this.brakeForce =
+            0;
+
+
+
+        this.panic =
+            false;
+
+
+        this.panicTimer =
+            0;
 
 
 
         // =========================
-        // AI
+        // PHYSICS
         // =========================
 
 
-        this.panicRadius = 350;
+        this.slideX = 0;
 
 
-        this.brakeWaveDistance = 180;
+        this.rotation = 0;
 
 
-
-        this.cacheRefreshTimer = 0;
-
-
-
-        this.buildLaneCache();
+        this.rotationSpeed =
+            0;
 
 
 
-        this.spawnInitialCars();
+        // =========================
+        // EFFECTS
+        // =========================
+
+
+        this.smokeTimer =
+            0;
+
+
+        this.brakeLights =
+            false;
+
+
+
+        this.crashed =
+            false;
+
+
+
+        this.__crashReported =
+            false;
+
+
+
+        // =========================
+        // STYLE
+        // =========================
+
+
+        this.color =
+            this.randomColor();
 
 
 
         console.log(
-            "🚗 TrafficManager v2.5 Loaded:",
-            this.cars.length,
-            "cars"
+            "🚙 TrafficCar v2.6 created"
         );
 
-    }
-
-
-
-
-
-
-
-    // ========================================================
-    // LANE POSITION
-    // ========================================================
-
-
-    getLaneX(lane){
-
-    return (
-
-        this.roadX +
-
-        lane *
-        this.laneWidth
-
-    )
-    +
-    (
-        this.laneWidth / 2
-    )
-    -
-    21;
-
-}
-
-
-
-
-
-
-
-
-    // ========================================================
-    // CREATE CAR
-    // ========================================================
-
-
-    createTrafficCar(){
-
-
-        if(!window.TrafficCar)
-            return null;
-
-
-
-        const car =
-            new TrafficCar(
-                this.canvas,
-                0,
-                this.baseSpeed
-            );
-
-
-        return car;
-
 
     }
 
@@ -213,88 +164,30 @@ this.laneWidth =
 
 
 
-
-    // ========================================================
-    // INITIAL SPAWN
-    // ========================================================
+    randomColor(){
 
 
-    spawnInitialCars(){
+        const colors = [
+
+            "#d32f2f",
+            "#1976d2",
+            "#388e3c",
+            "#eeeeee",
+            "#212121",
+            "#ff9800"
+
+        ];
 
 
-        this.cars.length = 0;
-
-
-
-        for(
-            let i = 0;
-            i < this.maxCars;
-            i++
-        ){
-
-
-            const car =
-                this.createTrafficCar();
-
-
-
-            if(!car)
-                continue;
-
-
-
-            const lane =
-                i %
-                this.laneCount;
-
-
-
-            car.lane =
-                lane;
-
-
-
-            car.x =
-                this.getLaneX(
-                    lane
-                );
-
-
-
-           car.y =
-(
-    this.player?.y || 500
-)
--
-500
-+
-(
-    i * 180
-);
-
-
-
-            car.speed =
-                1.5 +
-                Math.random()*2;
-
-
-
-            this.cars.push(car);
-
-
-        }
-
-
-
-        this.updateLaneCache();
+        return colors[
+            Math.floor(
+                Math.random() *
+                colors.length
+            )
+        ];
 
 
     }
-
-
-
-
 
 
 
@@ -305,476 +198,530 @@ this.laneWidth =
     // ========================================================
 
 
-   update(dt){
-
-
-    if(!this.player){
-
-        return;
-
-    }
-
-
-        this.visibleCars.length = 0;
-
-
-
-        this.cacheRefreshTimer -= dt;
-
-
-
-        if(
-            this.cacheRefreshTimer <= 0
-        ){
-
-            this.cacheRefreshTimer =
-                0.2;
-
-
-            this.updateLaneCache();
-
-        }
-
-
-
-
-
-
-
-        for(
-            const car of this.cars
-        ){
-
-
-
-            car.update(
-                dt,
-                this.cars,
-                this.player
-            );
-
-
-
-
-
-            // KEEP TRAFFIC NEAR PLAYER
-
-            if(
-                car.y >
-                this.player.y +
-                this.respawnDistance
-            ){
-
-                this.respawnCar(car);
-
-            }
-
-
-
-
-            if(
-                car.y <
-                this.player.y -
-                1200
-            ){
-
-                this.respawnCar(car);
-
-            }
-
-
-
-
-
-
-            if(
-
-                car.y >
-                this.player.y - 900
-
-                &&
-
-                car.y <
-                this.player.y + 900
-
-            ){
-
-                this.visibleCars.push(car);
-
-            }
-
-
-
-        }
-
-
-
-
-
-
-        this.spawnTimer -= dt;
-
-
-
-        if(
-            this.spawnTimer <= 0
-        ){
-
-
-            this.spawnTimer =
-                this.spawnInterval;
-
-
-            this.ensureTraffic();
-
-
-        }
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ========================================================
-    // RESPAWN
-    // ========================================================
-
-
-    respawnCar(car){
-
-
-        const lane =
-            Math.floor(
-                Math.random() *
-                this.laneCount
-            );
-
-
-
-        car.reset(
-            this.getLaneX(lane),
-            this.player.y -
-            900 -
-            Math.random()*500
-        );
-
-
-
-        car.lane =
-            lane;
-
-
-
-        car.speed =
-            1.5 +
-            Math.random()*2;
-
-
-    }
-
-
-
-
-
-
-
-    // ========================================================
-    // KEEP TRAFFIC COUNT
-    // ========================================================
-
-
-    ensureTraffic(){
-
-
-        if(
-            this.cars.length >=
-            this.maxCars
-        )
-            return;
-
-
-
-        const car =
-            this.createTrafficCar();
-
-
-
-        if(!car)
-            return;
-
-
-
-        const lane =
-            Math.floor(
-                Math.random() *
-                this.laneCount
-            );
-
-
-
-        car.lane =
-            lane;
-
-
-
-        car.x =
-            this.getLaneX(
-                lane
-            );
-
-
-
-        car.y =
-            this.player.y -
-            1000;
-
-
-
-        this.cars.push(car);
-
-
-
-    }
-    /**
- * ============================================================
- * CarFX Pro Ultimate
- * TrafficManager.js v2.5
- *
- * PART 2 / 2
- * ============================================================
- */
-
-
-
-    // ========================================================
-    // LANE CACHE
-    // ========================================================
-
-
-    buildLaneCache(){
-
-
-        this.laneCache = [];
-
-
-        for(
-            let i = 0;
-            i < this.laneCount;
-            i++
-        ){
-
-            this.laneCache.push([]);
-
-        }
-
-
-    }
-
-
-
-
-
-
-    updateLaneCache(){
-
-
-        this.buildLaneCache();
-
-
-
-        for(
-            const car of this.cars
-        ){
-
-
-            const lane =
-                Math.round(
-                    car.lane || 0
-                );
-
-
-
-            if(
-                this.laneCache[lane]
-            ){
-
-                this.laneCache[lane]
-                .push(car);
-
-            }
-
-
-        }
-
-
-    }
-
-
-
-
-
-
-
-    // ========================================================
-    // CRASH EVENT AI
-    // ========================================================
-
-
-    onCrashEvent(
-        source,
-        power = 1
+    update(
+        dt,
+        cars = [],
+        player = null
     ){
 
 
-
-        if(!source)
-            return;
+        this.handlePanic(dt);
 
 
 
-        console.log(
-            "💥 Traffic Panic Chain v2.5"
+        this.detectTraffic(
+            cars
         );
 
 
 
+        this.applySpeed(dt);
+
+
+
+        this.y +=
+            this.speed;
+
+
+
+        this.x +=
+            this.slideX;
+
+
+
+        this.slideX *=
+            0.92;
+
+
+
+        this.keepLane();
+
+
+
+        this.updateEffects(
+            dt
+        );
+
+
+    }
+        // ========================================================
+    // TRAFFIC DETECTION AI
+    // ========================================================
+
+
+    detectTraffic(cars){
+
+
+        let frontCar = null;
+
+        let closest = Infinity;
+
+
+
         for(
-            const car of this.cars
+            const car of cars
         ){
 
 
             if(
-                car === source
+                car === this
+            )
+                continue;
+
+
+
+            if(
+                car.lane !== this.lane
             )
                 continue;
 
 
 
             const distance =
-                Math.abs(
-                    car.y -
-                    source.y
-                );
+                car.y - this.y;
 
 
 
             if(
-                distance <
-                this.panicRadius
+                distance > 0 &&
+                distance < closest
             ){
 
-
-                car.panic = true;
-
-
-                car.panicTimer =
-                    180;
+                closest =
+                    distance;
 
 
-
-                if(
-                    distance <
-                    this.brakeWaveDistance
-                ){
-
-                    car.brakeForce =
-                        70;
-
-                }
-
-
-
-                const side =
-                    car.x -
-                    source.x;
-
-
-
-                if(
-                    Math.abs(side)
-                    < 80
-                ){
-
-                    car.slideX +=
-                    side > 0
-                    ? 120
-                    : -120;
-
-                }
-
-
+                frontCar =
+                    car;
 
             }
-
 
 
         }
 
 
 
-    }
 
 
-
-
-
-
-
-    // ========================================================
-    // CRASH MONITOR
-    // ========================================================
-
-
-    handleCrashDetection(){
-
-
-        for(
-            const car of this.cars
-        ){
+        if(frontCar){
 
 
             if(
-                car.crashed &&
-                !car.__crashReported
+                closest <
+                this.followDistance
             ){
 
 
-                car.__crashReported =
+                this.state =
+                    "brake";
+
+
+                this.targetSpeed =
+                    Math.max(
+                        0.8,
+                        frontCar.speed -
+                        0.5
+                    );
+
+
+                this.brakeLights =
                     true;
 
 
-
-                this.onCrashEvent(
-                    car,
-                    1
-                );
-
-
             }
+            else{
 
 
+                this.state =
+                    "follow";
 
-            if(
-                !car.crashed
-            ){
 
-                car.__crashReported =
+                this.targetSpeed =
+                    frontCar.speed;
+
+
+                this.brakeLights =
                     false;
+
 
             }
 
 
 
         }
+        else{
+
+
+            this.state =
+                "cruise";
+
+
+            this.targetSpeed =
+                2 +
+                Math.random()*1.5;
+
+
+            this.brakeLights =
+                false;
+
+
+        }
+
 
 
     }
+
+
+
+
+
+
+
+    // ========================================================
+    // SPEED CONTROL
+    // ========================================================
+
+
+    applySpeed(dt){
+
+
+
+        if(
+            this.panic
+        ){
+
+            this.targetSpeed =
+                0.5;
+
+        }
+
+
+
+        if(
+            this.brakeForce > 0
+        ){
+
+
+            this.speed -=
+                this.brakeForce *
+                0.01;
+
+
+            this.brakeForce *=
+                0.90;
+
+
+        }
+
+
+
+
+
+        if(
+            this.speed <
+            this.targetSpeed
+        ){
+
+
+            this.speed +=
+                this.acceleration *
+                dt;
+
+
+        }
+        else if(
+            this.speed >
+            this.targetSpeed
+        ){
+
+
+            this.speed -=
+                this.acceleration *
+                dt;
+
+
+        }
+
+
+
+
+
+        this.speed =
+            Math.max(
+                0.2,
+                Math.min(
+                    this.speed,
+                    this.maxSpeed
+                )
+            );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ========================================================
+    // PANIC AI
+    // ========================================================
+
+
+    handlePanic(dt){
+
+
+
+        if(
+            !this.panic
+        )
+            return;
+
+
+
+        this.panicTimer -=
+            dt;
+
+
+
+        this.rotation +=
+            this.rotationSpeed;
+
+
+
+        this.targetSpeed =
+            0.7;
+
+
+
+        if(
+            this.panicTimer <= 0
+        ){
+
+
+            this.panic =
+                false;
+
+
+            this.rotation =
+                0;
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ========================================================
+    // KEEP LANE
+    // ========================================================
+
+
+    keepLane(){
+
+
+        if(
+            this.crashed
+        )
+            return;
+
+
+
+        const targetX =
+            this.managerLaneX ||
+            this.x;
+
+
+
+        this.x +=
+            (
+                targetX -
+                this.x
+            ) *
+            0.02;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ========================================================
+    // EFFECT UPDATE
+    // ========================================================
+
+
+    updateEffects(dt){
+
+
+        this.smokeTimer -=
+            dt;
+
+
+
+        if(
+            this.brakeLights
+        ){
+
+            this.smokeTimer =
+                5;
+
+        }
+
+
+
+    }
+        // ========================================================
+    // RESET / RESPAWN
+    // ========================================================
+
+
+    reset(
+        x,
+        y
+    ){
+
+
+        this.x = x;
+
+        this.y = y;
+
+
+
+        this.speed =
+            1.5 +
+            Math.random()*2;
+
+
+
+        this.targetSpeed =
+            this.speed;
+
+
+
+        this.state =
+            "cruise";
+
+
+
+        this.panic =
+            false;
+
+
+
+        this.panicTimer =
+            0;
+
+
+
+        this.brakeForce =
+            0;
+
+
+
+        this.slideX =
+            0;
+
+
+
+        this.rotation =
+            0;
+
+
+
+        this.rotationSpeed =
+            0;
+
+
+
+        this.crashed =
+            false;
+
+
+
+        this.__crashReported =
+            false;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ========================================================
+    // CRASH EVENT
+    // ========================================================
+
+
+    crash(
+        force = 1
+    ){
+
+
+        this.crashed =
+            true;
+
+
+
+        this.panic =
+            true;
+
+
+
+        this.panicTimer =
+            120;
+
+
+
+        this.rotationSpeed =
+            (
+                Math.random() > 0.5
+                ? 0.05
+                : -0.05
+            )
+            *
+            force;
+
+
+
+        this.slideX =
+            (
+                Math.random() > 0.5
+                ? 1
+                : -1
+            )
+            *
+            80;
+
+
+
+    }
+
 
 
 
@@ -792,85 +739,151 @@ this.laneWidth =
 
 
 
-        for(
-            const car of this.visibleCars
+        ctx.save();
+
+
+
+        ctx.translate(
+            this.x,
+            this.y
+        );
+
+
+
+        ctx.rotate(
+            this.rotation
+        );
+
+
+
+        // shadow
+
+        ctx.fillStyle =
+            "rgba(0,0,0,0.35)";
+
+
+        ctx.fillRect(
+            -this.width/2 + 4,
+            -this.height/2 + 8,
+            this.width,
+            this.height
+        );
+
+
+
+
+
+        // body
+
+        ctx.fillStyle =
+            this.color;
+
+
+        ctx.fillRect(
+            -this.width/2,
+            -this.height/2,
+            this.width,
+            this.height
+        );
+
+
+
+
+
+        // windows
+
+        ctx.fillStyle =
+            "#111";
+
+
+        ctx.fillRect(
+            -12,
+            -25,
+            24,
+            22
+        );
+
+
+        ctx.fillRect(
+            -12,
+            5,
+            24,
+            18
+        );
+
+
+
+
+
+        // brake lights
+
+        if(
+            this.brakeLights
         ){
 
 
+            ctx.fillStyle =
+                "red";
 
-            car.render(
-                ctx
+
+            ctx.fillRect(
+                -15,
+                32,
+                7,
+                5
             );
 
+
+            ctx.fillRect(
+                8,
+                32,
+                7,
+                5
+            );
 
 
         }
 
 
 
-    }
 
 
 
 
+        // smoke hook
+
+        if(
+            this.smokeTimer > 0
+        ){
 
 
+            if(
+                window.ParticleSystem
+            ){
 
-    // ========================================================
-    // DEBUG
-    // ========================================================
-
-
-    getTrafficCount(){
-
-
-        return this.cars.length;
-
-
-    }
+                window.ParticleSystem.emit(
+                    this.x,
+                    this.y + 40,
+                    "smoke"
+                );
 
 
-
-    getVisibleTrafficCount(){
-
-
-        return this.visibleCars.length;
+            }
 
 
-    }
-
+        }
 
 
 
 
+        ctx.restore();
 
-
-    clearTraffic(){
-
-
-        this.cars.length = 0;
-
-
-        this.visibleCars.length = 0;
 
 
     }
 
 
 
-
-
-
-    respawnAll(){
-
-
-        this.clearTraffic();
-
-
-        this.spawnInitialCars();
-
-
-    }
 
 
 
@@ -879,12 +892,11 @@ this.laneWidth =
 
 
 
-
-window.TrafficManager =
-    TrafficManager;
+window.TrafficCar =
+    TrafficCar;
 
 
 
 console.log(
-    "✅ TrafficManager v2.5 Loaded Successfully"
+    "✅ TrafficCar v2.6 Loaded Successfully"
 );
