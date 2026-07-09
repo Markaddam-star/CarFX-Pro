@@ -68,18 +68,18 @@ constructor(canvas, particles){
     this.speed = 0;
 
     this.maxSpeed =
-    this.vehicle.maxSpeed * 1.8;
+    this.vehicle.maxSpeed * 2.5;
 
 
-  this.acceleration =
-    this.vehicle.acceleration * 1.35;
+this.acceleration =
+    this.vehicle.acceleration * 2.2;
 
 
-    this.brakePower =
-        this.vehicle.braking;
+this.brakePower =
+    this.vehicle.braking;
 
 
-    this.friction = 8;
+this.friction = 5;
 
 
 
