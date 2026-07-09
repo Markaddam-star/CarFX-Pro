@@ -460,14 +460,9 @@ class CarFXEngine {
 
         this.road?.update(dt);
 
-
-        this.player?.update(dt);
-
-
-
         this.trafficManager?.update(dt);
 
-
+         this.player?.update(dt);
 
         this.collisionManager?.update?.(dt);
 
