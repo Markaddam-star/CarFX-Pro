@@ -225,6 +225,28 @@ constructor(
 // DRIVER PERSONALITY
 // ============================================================
 
+
+    this.color =
+        this.randomColor();
+
+
+
+    this.vehicleType =
+        this.randomVehicleType();
+
+
+
+    this.__crashReported =
+        false;
+
+
+
+}
+   
+// ============================================================
+// DRIVER PERSONALITY
+// ============================================================
+
 randomDriver(){
 
     const types = [
@@ -242,22 +264,59 @@ randomDriver(){
     ];
 
 }
-    this.color =
-        this.randomColor();
 
 
+// ============================================================
+// RANDOM COLOR
+// ============================================================
 
-    this.vehicleType =
-        this.randomVehicleType();
+randomColor(){
 
+    const colors = [
+        "#ff3030",
+        "#3080ff",
+        "#ffffff",
+        "#222222",
+        "#ffd000",
+        "#00cc88"
+    ];
 
-
-    this.__crashReported =
-        false;
-
-
+    return colors[
+        Math.floor(
+            Math.random() *
+            colors.length
+        )
+    ];
 
 }
+
+
+// ============================================================
+// RANDOM VEHICLE TYPE
+// ============================================================
+
+randomVehicleType(){
+
+    const types = [
+        "sedan",
+        "sports",
+        "suv",
+        "van",
+        "pickup",
+        "taxi",
+        "hatchback"
+    ];
+
+    return types[
+        Math.floor(
+            Math.random() *
+            types.length
+        )
+    ];
+
+}
+
+
 // ============================================================
 // UPDATE LOOP
 // ============================================================
