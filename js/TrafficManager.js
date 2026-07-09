@@ -64,8 +64,22 @@ class TrafficManager {
         this.laneCount = 3;
 
 
-        this.laneWidth =
-            canvas.width / 3;
+        const roadWidth =
+    Math.min(
+        500,
+        canvas.width * 0.5
+    );
+
+
+this.roadX =
+(
+    canvas.width -
+    roadWidth
+) / 2;
+
+
+this.laneWidth =
+    roadWidth / 3;
 
 
 
@@ -143,22 +157,22 @@ class TrafficManager {
 
     getLaneX(lane){
 
+    return (
 
-        return (
+        this.roadX +
 
-            lane *
-            this.laneWidth
+        lane *
+        this.laneWidth
 
-        )
-        +
-        (
-            this.laneWidth / 2
-        )
-        -
-        21;
+    )
+    +
+    (
+        this.laneWidth / 2
+    )
+    -
+    21;
 
-
-    }
+}
 
 
 
