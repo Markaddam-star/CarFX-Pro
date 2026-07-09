@@ -54,7 +54,60 @@ class TrafficCar {
         this.color = this.randomColor();
     }
 
+// ============================================================
+// RESET VEHICLE STATE
+// ============================================================
 
+reset(lane, y){
+
+    this.x = lane;
+
+    this.y = y;
+
+
+    this.speed =
+        this.baseSpeed;
+
+
+    this.angle = 0;
+
+    this.rotationSpeed = 0;
+
+
+    this.slideX = 0;
+
+    this.slideVelocity = 0;
+
+
+    this.health = 100;
+
+
+    this.damage = false;
+
+    this.destroyed = false;
+
+
+    this.crashed = false;
+
+    this.recovering = false;
+
+
+    this.panic = false;
+
+    this.panicTimer = 0;
+
+
+    this.brakeForce = 0;
+
+
+    this.driverType =
+        this.randomDriver();
+
+
+    this.color =
+        this.randomColor();
+
+}
     randomDriver() {
 
         const types = [
@@ -407,12 +460,11 @@ class TrafficCar {
 
 
 
-    draw(ctx) {
+      draw(ctx) {
 
 
         if(this.destroyed)
             return;
-
 
 
         ctx.save();
@@ -427,7 +479,6 @@ class TrafficCar {
         ctx.rotate(this.angle);
 
 
-
         ctx.fillStyle =
         this.color;
 
@@ -438,7 +489,6 @@ class TrafficCar {
             this.width,
             this.height
         );
-
 
 
         if(this.damage) {
@@ -458,6 +508,19 @@ class TrafficCar {
 
 
         ctx.restore();
+
+    }
+
+
+
+    // ============================================================
+    // RENDER COMPATIBILITY
+    // TrafficManager uses render()
+    // ============================================================
+
+    render(ctx){
+
+        this.draw(ctx);
 
     }
 
