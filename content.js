@@ -41,17 +41,13 @@
 
 
 
-    const engine =
-        new CarFXEngine();
+window.carFXEngine = new CarFXEngine();
 
+window.carFXEngine.init();
 
-
-    window.carFX =
-        engine;
-
-
-
-    engine.init();
+console.log(
+    "🚗 CarFX Engine Instance Created"
+);
 
 
 
