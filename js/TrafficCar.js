@@ -89,7 +89,7 @@ constructor(
 
 
     this.acceleration =
-        0.04;
+0.025;
 
 
 
@@ -320,7 +320,6 @@ update(
 ){
 
 
-
     if(this.destroyed)
         return;
 
@@ -347,16 +346,15 @@ update(
 
 
 
+    // v2.8 RESTORED SMOOTH PHYSICS
 
     this.y +=
-        this.speed *
-        dt;
+        this.speed;
 
 
 
     this.x +=
-        this.slideX *
-        dt;
+        this.slideX;
 
 
 
@@ -366,8 +364,7 @@ update(
 
 
     this.angle +=
-        this.rotationSpeed *
-        dt;
+        this.rotationSpeed;
 
 
 
@@ -377,7 +374,6 @@ update(
 
 
     this.keepStable();
-
 
 
 }
@@ -400,7 +396,6 @@ drive(
 ){
 
 
-
     let targetSpeed =
         this.baseSpeed;
 
@@ -412,36 +407,40 @@ drive(
 
 
     if(this.panic)
-        targetSpeed *= 1.2;
+        targetSpeed *= 1.25;
 
 
 
     if(this.brakeForce > 0){
 
-        targetSpeed *= 0.3;
 
-        this.brakeForce -= dt;
+        targetSpeed *= 0.35;
+
+
+        this.brakeForce -= 1;
+
 
         this.brakeLights = true;
+
 
     }
     else{
 
+
         this.brakeLights = false;
+
 
     }
 
 
 
-
+    // smooth GTA traffic acceleration
 
     this.speed +=
     (
         targetSpeed -
         this.speed
-    ) *
-    0.04;
-
+    ) * 0.04;
 
 
 
@@ -462,7 +461,6 @@ drive(
 
 
 }
-
 
 
 
@@ -804,17 +802,16 @@ crash(
 
 
 
-    this.rotationSpeed =
-        (
-            Math.random() > 0.5
-            ? 1
-            : -1
-        )
-        *
-        (
-            3 +
-            power
-        );
+  this.rotationSpeed =
+(
+ Math.random() > 0.5
+ ? 1
+ : -1
+)
+*
+(
+0.05 * power
+);
 
 
 
@@ -1102,8 +1099,7 @@ window.TrafficCar =
     TrafficCar;
 
 
-
 console.log(
-    "✅ TrafficCar v2.7 Loaded Successfully"
+"✅ TrafficCar v2.8 Loaded Successfully"
 );
 
