@@ -49,6 +49,7 @@ class TrafficCar {
 
         this.brakeForce = 0;
         this.collisionCooldown = 0;
+        this.lane = 0;
 
         this.driverType = this.randomDriver();
 
@@ -103,6 +104,7 @@ reset(lane, y){
     this.brakeForce = 0;
 
 this.collisionCooldown = 0;
+this.__crashReported = false;
 
     this.driverType =
         this.randomDriver();
@@ -172,11 +174,6 @@ this.collisionCooldown = 0;
         if(this.destroyed)
             return;
 
-if(this.collisionCooldown > 0){
-
-    this.collisionCooldown -= dt;
-
-}
 
 
         this.updatePanic(dt);
@@ -339,6 +336,7 @@ if(this.collisionCooldown > 0){
 
 
         this.crashed = true;
+this.collisionCooldown = 1.2;
 
         this.damage = true;
 
