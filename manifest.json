@@ -47,6 +47,9 @@
 
   "js/WantedSystem.js",
 
+  "js/ParticleSystem.js",
+  "js/CollisionManager.js",
+
   "js/TrafficCar.js",
   "js/TrafficManager.js",
 
@@ -54,10 +57,11 @@
   "js/PoliceManager.js",
 
   "js/RoadblockManager.js",
-  
-   "js/HUD.js",
-   "js/AudioManager.js",
-   "js/engine.js",
+
+  "js/HUD.js",
+  "js/AudioManager.js",
+
+  "js/engine.js",
 
   "content.js"
 ],
