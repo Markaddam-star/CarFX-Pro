@@ -465,7 +465,10 @@ this.audio.ctx?.resume?.()
         this.background?.update(dt);
 
 
-        this.road?.update(dt);
+        this.road?.update(
+    dt,
+    this.player?.speed || 0
+);
 
         this.trafficManager?.update(dt);
 
