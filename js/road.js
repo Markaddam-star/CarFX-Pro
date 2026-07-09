@@ -27,11 +27,18 @@ class Road {
         this.x = (this.width - this.roadWidth) / 2;
     }
 
-    update(dt) {
-        this.laneOffset += this.speed * dt;
-        if (this.laneOffset >= 80) this.laneOffset = 0;
-    }
+   update(dt, playerSpeed = 0) {
 
+    const scrollSpeed =
+        this.speed + playerSpeed;
+
+    this.laneOffset +=
+        scrollSpeed * dt;
+
+    if (this.laneOffset >= 80)
+        this.laneOffset %= 80;
+
+}
     getLaneWidth() {
         return this.roadWidth / 3;
     }
