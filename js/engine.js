@@ -462,7 +462,10 @@ this.audio.ctx?.resume?.()
         this.input?.update();
 
 
-        this.background?.update(dt);
+       this.background?.update(
+    dt,
+    this.player?.speed || 0
+);
 
 
         this.road?.update(
