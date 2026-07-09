@@ -852,23 +852,18 @@ class TrafficCar {
 
         // smoke hook
 
-        if(
-            this.smokeTimer > 0
-        ){
+      if(
+    window.ParticleSystem &&
+    typeof window.ParticleSystem.emit === "function"
+){
 
+    window.ParticleSystem.emit(
+        this.x,
+        this.y + 40,
+        "smoke"
+    );
 
-            if(
-                window.ParticleSystem
-            ){
-
-                window.ParticleSystem.emit(
-                    this.x,
-                    this.y + 40,
-                    "smoke"
-                );
-
-
-            }
+}
 
 
         }
