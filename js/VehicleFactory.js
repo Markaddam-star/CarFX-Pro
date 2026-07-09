@@ -403,53 +403,54 @@ class VehicleFactory {
 
 
 
-    // =========================================================
-    // PLAYER VEHICLE
-    // =========================================================
+   // =========================================================
+// PLAYER VEHICLE
+// GTA SUPPORT / PURSUIT CAR v2.2
+// =========================================================
 
-  static player() {
+static.player() {
 
-    return {
+return {
 
-        type: "sports",
+    type: "sports",
 
-        width: 62,
+    width: 62,
 
-        height: 118,
+    height: 118,
 
-        color: "#ff6d00",
-
-
-        // GTA STYLE PERFORMANCE
-
-        maxSpeed: 280,
-
-acceleration: 85,
-
-braking: 170,
+    color: "#ff6d00",
 
 
-        weight: 1200,
+    // GTA STYLE PERFORMANCE
+
+    maxSpeed: 520,
+
+    acceleration: 220,
+
+    braking: 260,
 
 
-        handling: "sharp",
+    weight: 1200,
 
 
-        aiStyle:
-            "player",
+    handling: "sharp",
 
 
-        roofStyle: 2,
+    aiStyle:
+        "player",
 
-        wheelSize: 10,
 
-        spoiler: true,
+    roofStyle: 2,
 
-        headlights: true,
+    wheelSize: 10,
 
-        brakeLights: false
+    spoiler: true,
 
-    };
+    headlights: true,
+
+    brakeLights: false
+
+};
 
 }
 
