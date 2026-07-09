@@ -378,20 +378,11 @@ update(dt){
 
 
 
-    const collision =
-        window.carFXEngine?.collisionManager;
+   // GTA Style:
+// Always allow lane change.
+// CollisionManager will handle crashes.
 
-
-
-    if(
-        !collision ||
-        collision.canEnterLane(wantedLane)
-    ){
-
-        this.targetLane =
-            wantedLane;
-
-    }
+this.targetLane = wantedLane;
 
 
 
