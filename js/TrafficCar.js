@@ -221,7 +221,27 @@ constructor(
         this.randomDriver();
 
 
+// ============================================================
+// DRIVER PERSONALITY
+// ============================================================
 
+randomDriver(){
+
+    const types = [
+        "normal",
+        "aggressive",
+        "careful",
+        "panic"
+    ];
+
+    return types[
+        Math.floor(
+            Math.random() *
+            types.length
+        )
+    ];
+
+}
     this.color =
         this.randomColor();
 
