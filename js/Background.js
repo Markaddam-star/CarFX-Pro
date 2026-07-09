@@ -26,12 +26,20 @@ class Background {
 }
     }
 
-    update(dt) {
+    update(dt, playerSpeed = 0) {
 
-        // 🌆 Parallax movement
-        this.farOffset += this.farSpeed * dt;
-        this.nearOffset += this.nearSpeed * dt;
-    }
+    const ratio =
+        Math.min(
+            playerSpeed / 520,
+            1
+        );
+
+    this.farOffset +=
+        (this.farSpeed + ratio * 20) * dt;
+
+    this.nearOffset +=
+        (this.nearSpeed + ratio * 80) * dt;
+}
 
     render(ctx) {
 
