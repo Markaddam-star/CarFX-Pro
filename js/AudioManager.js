@@ -86,10 +86,22 @@ class AudioManager {
             this.master.connect(this.ctx.destination);
 
 
-            this.engineOsc.start();
+try {
+
+    this.engineOsc.start();
+
+}
+catch(e){
+
+    console.warn(
+        "🔊 Oscillator already started",
+        e
+    );
+
+}
 
 
-            this.started = true;
+this.started = true;
 
 
             console.log("🔊 Audio Engine Started");
