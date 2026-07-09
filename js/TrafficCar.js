@@ -1,31 +1,25 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * TrafficCar.js v2.7
+ * TrafficCar.js v2.9
  *
  * GTA STYLE TRAFFIC VEHICLE AI
  *
- * HYBRID VERSION
+ * BASE:
+ * - TrafficCar v2.8 Stable Physics
  *
- * Based on:
- * - TrafficCar v2.4 Stable Physics
- * - TrafficCar v2.6 AI Improvements
+ * NEW:
+ * - Smooth lane switching
+ * - Lane 1 -> 2 -> 3 movement
+ * - Natural traffic weaving
+ * - No teleport lane jump
  *
- * Part 1 / 3
- *
- * Features:
- * - Smooth dt movement
- * - CarRenderer support
- * - Vehicle types
- * - Damage foundation
- * - Panic foundation
- * - TrafficManager compatible
  * ============================================================
  */
 
 
 console.log(
-    "🚗 TrafficCar v2.7 START"
+    "🚗 TrafficCar v2.9 START"
 );
 
 
@@ -40,7 +34,9 @@ constructor(
 ){
 
 
-    this.canvas = canvas;
+    this.canvas =
+        canvas;
+
 
 
     // =========================
@@ -77,19 +73,15 @@ constructor(
 
 
     this.baseSpeed =
-        speed;
+        speed || 2;
 
 
     this.speed =
-        speed;
+        this.baseSpeed;
 
 
     this.targetSpeed =
-        speed;
-
-
-    this.acceleration =
-0.025;
+        this.speed;
 
 
 
@@ -117,16 +109,37 @@ constructor(
 
 
     // =========================
-    // LANE
+    // LANE SYSTEM
     // =========================
 
 
     this.lane =
-        0;
+        lane;
+
+
+    this.targetLane =
+        lane;
+
 
 
     this.managerLaneX =
         null;
+
+
+
+    this.isChangingLane =
+        false;
+
+
+
+    this.laneChangeSpeed =
+        0.035;
+
+
+
+    this.laneChangeTimer =
+        120 +
+        Math.random()*240;
 
 
 
@@ -141,6 +154,7 @@ constructor(
 
     this.followDistance =
         160;
+
 
 
     this.brakeForce =
@@ -176,6 +190,7 @@ constructor(
 
     this.crashed =
         false;
+
 
 
     this.recovering =
@@ -224,91 +239,6 @@ constructor(
 
 }
 // ============================================================
-// AI + MOVEMENT SYSTEM
-// ============================================================
-
-
-randomDriver(){
-
-
-    const types = [
-        "normal",
-        "aggressive",
-        "careful",
-        "panic"
-    ];
-
-
-    return types[
-        Math.floor(
-            Math.random() *
-            types.length
-        )
-    ];
-
-}
-
-
-
-
-randomColor(){
-
-
-    const colors = [
-
-        "#ff3030",
-        "#3080ff",
-        "#ffffff",
-        "#222222",
-        "#ffd000",
-        "#00cc88"
-
-    ];
-
-
-    return colors[
-        Math.floor(
-            Math.random() *
-            colors.length
-        )
-    ];
-
-}
-
-
-
-
-randomVehicleType(){
-
-
-    const types = [
-
-        "sedan",
-        "sports",
-        "suv",
-        "van",
-        "pickup",
-        "taxi",
-        "hatchback"
-
-    ];
-
-
-    return types[
-        Math.floor(
-            Math.random() *
-            types.length
-        )
-    ];
-
-}
-
-
-
-
-
-
-// ============================================================
 // UPDATE LOOP
 // ============================================================
 
@@ -320,7 +250,9 @@ update(
 ){
 
 
-    if(this.destroyed)
+    if(
+        this.destroyed
+    )
         return;
 
 
@@ -329,24 +261,30 @@ update(
 
 
 
-    if(this.crashed){
+    if(
+        this.crashed
+    ){
 
         this.updateCrash(dt);
 
     }
     else{
 
+
         this.drive(
-            dt,
             traffic,
             player
         );
+
 
     }
 
 
 
-    // v2.8 RESTORED SMOOTH PHYSICS
+    // =========================
+    // SMOOTH MOVEMENT
+    // =========================
+
 
     this.y +=
         this.speed;
@@ -373,11 +311,22 @@ update(
 
 
 
+    // NEW
+    // smooth lane shifting
+
+    this.updateLaneChange();
+
+
+
+    this.randomLaneDecision();
+
+
+
     this.keepStable();
 
 
-}
 
+}
 
 
 
@@ -390,10 +339,10 @@ update(
 
 
 drive(
-    dt,
     traffic,
     player
 ){
+
 
 
     let targetSpeed =
@@ -401,17 +350,23 @@ drive(
 
 
 
-    if(this.damage)
+    if(
+        this.damage
+    )
         targetSpeed *= 0.65;
 
 
 
-    if(this.panic)
+    if(
+        this.panic
+    )
         targetSpeed *= 1.25;
 
 
 
-    if(this.brakeForce > 0){
+    if(
+        this.brakeForce > 0
+    ){
 
 
         targetSpeed *= 0.35;
@@ -420,27 +375,31 @@ drive(
         this.brakeForce -= 1;
 
 
-        this.brakeLights = true;
+        this.brakeLights =
+            true;
 
 
     }
     else{
 
 
-        this.brakeLights = false;
+        this.brakeLights =
+            false;
 
 
     }
 
 
 
-    // smooth GTA traffic acceleration
 
     this.speed +=
     (
         targetSpeed -
         this.speed
-    ) * 0.04;
+    )
+    *
+    0.04;
+
 
 
 
@@ -467,13 +426,13 @@ drive(
 
 
 
+
 // ============================================================
-// TRAFFIC AWARENESS
+// TRAFFIC CHECK
 // ============================================================
 
 
 checkTraffic(cars){
-
 
 
     for(
@@ -488,12 +447,10 @@ checkTraffic(cars){
 
 
 
-
         if(
             car.lane !== this.lane
         )
             continue;
-
 
 
 
@@ -511,7 +468,6 @@ checkTraffic(cars){
 
 
 
-
         if(
             dy > 0 &&
             dy < this.followDistance &&
@@ -523,14 +479,16 @@ checkTraffic(cars){
                 20;
 
 
-
             this.state =
                 "brake";
 
 
+            // try lane change
+
+            this.tryLaneChange();
+
 
         }
-
 
 
     }
@@ -545,6 +503,170 @@ checkTraffic(cars){
 
 
 // ============================================================
+// RANDOM LANE CHANGE
+// ============================================================
+
+
+randomLaneDecision(){
+
+
+    this.laneChangeTimer--;
+
+
+
+    if(
+        this.laneChangeTimer <= 0 &&
+        !this.isChangingLane
+    ){
+
+
+        this.tryLaneChange();
+
+
+
+        this.laneChangeTimer =
+            200 +
+            Math.random()*300;
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+// ============================================================
+// SELECT NEW LANE
+// ============================================================
+
+
+tryLaneChange(){
+
+
+    let newLane =
+        Math.floor(
+            Math.random()*3
+        );
+
+
+
+    if(
+        newLane !== this.lane
+    ){
+
+
+        this.targetLane =
+            newLane;
+
+
+
+        this.isChangingLane =
+            true;
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+// ============================================================
+// SMOOTH LANE MOVEMENT
+// ============================================================
+
+
+updateLaneChange(){
+
+
+    if(
+        !this.isChangingLane
+    )
+        return;
+
+
+
+    const roadWidth =
+        Math.min(
+            500,
+            this.canvas.width * 0.5
+        );
+
+
+
+    const roadX =
+    (
+        this.canvas.width -
+        roadWidth
+    ) / 2;
+
+
+
+    const laneWidth =
+        roadWidth / 3;
+
+
+
+    const targetX =
+        roadX +
+        (
+            this.targetLane *
+            laneWidth
+        )
+        +
+        laneWidth/2
+        -
+        this.width/2;
+
+
+
+    this.x +=
+    (
+        targetX -
+        this.x
+    )
+    *
+    this.laneChangeSpeed;
+
+
+
+
+    if(
+        Math.abs(
+            targetX -
+            this.x
+        )
+        < 2
+    ){
+
+
+        this.x =
+            targetX;
+
+
+        this.lane =
+            this.targetLane;
+
+
+        this.isChangingLane =
+            false;
+
+
+    }
+
+
+
+}
+// ============================================================
 // PLAYER AVOIDANCE
 // ============================================================
 
@@ -552,17 +674,14 @@ checkTraffic(cars){
 avoidPlayer(player){
 
 
-
     const dx =
         this.x -
         player.x;
 
 
-
     const dy =
         this.y -
         player.y;
-
 
 
 
@@ -572,25 +691,19 @@ avoidPlayer(player){
     ){
 
 
-        this.panic = true;
+        this.panic =
+            true;
 
 
 
-        if(dx > 0){
-
+        if(dx > 0)
             this.slideVelocity += 2;
 
-        }
-        else{
-
+        else
             this.slideVelocity -= 2;
-
-        }
-
 
 
     }
-
 
 
 
@@ -612,6 +725,7 @@ avoidPlayer(player){
 
 
 
+
 // ============================================================
 // PANIC SYSTEM
 // ============================================================
@@ -620,29 +734,30 @@ avoidPlayer(player){
 updatePanic(dt){
 
 
-
     if(
         this.panicTimer > 0
     ){
 
-
         this.panicTimer -= dt;
-
 
     }
     else{
 
-
         this.panic = false;
-
 
     }
 
 
-
 }
-    // ============================================================
-// RESET VEHICLE
+
+
+
+
+
+
+
+// ============================================================
+// RESET
 // ============================================================
 
 
@@ -663,11 +778,6 @@ reset(
 
     this.speed =
         this.baseSpeed;
-
-
-
-    this.targetSpeed =
-        this.speed;
 
 
 
@@ -736,23 +846,13 @@ reset(
 
 
 
-    this.smokeTimer =
-        0;
+    this.isChangingLane =
+        false;
 
 
 
-    this.driverType =
-        this.randomDriver();
-
-
-
-    this.color =
-        this.randomColor();
-
-
-
-    this.vehicleType =
-        this.randomVehicleType();
+    this.targetLane =
+        lane;
 
 
 
@@ -765,14 +865,13 @@ reset(
 
 
 // ============================================================
-// CRASH SYSTEM
+// CRASH
 // ============================================================
 
 
 crash(
     power = 1
 ){
-
 
 
     if(
@@ -802,30 +901,31 @@ crash(
 
 
 
-  this.rotationSpeed =
-(
- Math.random() > 0.5
- ? 1
- : -1
-)
-*
-(
-0.05 * power
-);
+    this.rotationSpeed =
+    (
+        Math.random() > 0.5
+        ? 1
+        : -1
+    )
+    *
+    (
+        0.05 *
+        power
+    );
 
 
 
     this.slideX =
-        (
-            Math.random() > 0.5
-            ? 1
-            : -1
-        )
-        *
-        (
-            120 *
-            power
-        );
+    (
+        Math.random() > 0.5
+        ? 1
+        : -1
+    )
+    *
+    (
+        120 *
+        power
+    );
 
 
 
@@ -839,17 +939,6 @@ crash(
 
 
 
-    if(
-        this.health <= 0
-    ){
-
-        this.destroyed =
-            true;
-
-    }
-
-
-
 }
 
 
@@ -858,8 +947,12 @@ crash(
 
 
 
-updateCrash(dt){
+// ============================================================
+// CRASH UPDATE
+// ============================================================
 
+
+updateCrash(dt){
 
 
     this.speed *=
@@ -875,7 +968,7 @@ updateCrash(dt){
     if(
         Math.abs(
             this.rotationSpeed
-        ) < 0.05
+        ) < 0.01
     ){
 
         this.recovering =
@@ -911,8 +1004,8 @@ updateCrash(dt){
 
         }
 
-    }
 
+    }
 
 
 }
@@ -924,12 +1017,11 @@ updateCrash(dt){
 
 
 // ============================================================
-// ROAD LIMITS
+// ROAD LIMIT
 // ============================================================
 
 
 keepStable(){
-
 
 
     const roadWidth =
@@ -941,10 +1033,10 @@ keepStable(){
 
 
     const roadX =
-        (
-            this.canvas.width -
-            roadWidth
-        ) / 2;
+    (
+        this.canvas.width -
+        roadWidth
+    ) / 2;
 
 
 
@@ -961,14 +1053,11 @@ keepStable(){
         roadX +
         roadWidth -
         this.width
-    ){
-
+    )
         this.x =
             roadX +
             roadWidth -
             this.width;
-
-    }
 
 
 
@@ -981,12 +1070,11 @@ keepStable(){
 
 
 // ============================================================
-// RENDER SYSTEM
+// RENDER
 // ============================================================
 
 
 draw(ctx){
-
 
 
     if(
@@ -1002,10 +1090,10 @@ draw(ctx){
 
     ctx.translate(
         this.x +
-        this.width / 2,
+        this.width/2,
 
         this.y +
-        this.height / 2
+        this.height/2
     );
 
 
@@ -1013,7 +1101,6 @@ draw(ctx){
     ctx.rotate(
         this.angle
     );
-
 
 
 
@@ -1027,11 +1114,11 @@ draw(ctx){
             {
 
                 x:
-                -this.width / 2,
+                -this.width/2,
 
 
                 y:
-                -this.height / 2,
+                -this.height/2,
 
 
                 width:
@@ -1051,8 +1138,7 @@ draw(ctx){
                 "sedan",
 
 
-                headlights:
-                true,
+                headlights:true,
 
 
                 state:
@@ -1077,10 +1163,6 @@ draw(ctx){
 
 
 
-
-
-// TrafficManager compatibility
-
 render(ctx){
 
     this.draw(ctx);
@@ -1088,10 +1170,7 @@ render(ctx){
 }
 
 
-
 }
-
-
 
 
 
@@ -1099,7 +1178,7 @@ window.TrafficCar =
     TrafficCar;
 
 
-console.log(
-"✅ TrafficCar v2.8 Loaded Successfully"
-);
 
+console.log(
+    "✅ TrafficCar v2.9 Loaded Successfully"
+);
