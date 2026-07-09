@@ -460,56 +460,71 @@ reset(lane, y){
 
 
 
-      draw(ctx) {
+   draw(ctx){
 
 
-        if(this.destroyed)
-            return;
+    if(this.destroyed)
+        return;
 
 
-        ctx.save();
+
+    ctx.save();
 
 
-        ctx.translate(
-            this.x + this.width / 2,
-            this.y + this.height / 2
+
+    ctx.translate(
+        this.x + this.width / 2,
+        this.y + this.height / 2
+    );
+
+
+    ctx.rotate(this.angle);
+
+
+
+    if(window.CarRenderer){
+
+
+        window.CarRenderer.draw(
+            ctx,
+            {
+
+                x: -this.width / 2,
+
+                y: -this.height / 2,
+
+                width: this.width,
+
+                height: this.height,
+
+                color: this.color,
+
+
+                type:
+                this.vehicleType ||
+                "sedan",
+
+
+                headlights:true,
+
+
+                state:
+                this.brakeForce > 0
+                ? "brake"
+                : "cruise"
+
+            }
         );
 
-
-        ctx.rotate(this.angle);
-
-
-        ctx.fillStyle =
-        this.color;
-
-
-        ctx.fillRect(
-            -this.width / 2,
-            -this.height / 2,
-            this.width,
-            this.height
-        );
-
-
-        if(this.damage) {
-
-            ctx.fillStyle =
-            "rgba(0,0,0,0.35)";
-
-
-            ctx.fillRect(
-                -this.width/2,
-                -this.height/2,
-                this.width,
-                this.height
-            );
-
-        }
-
-
-        ctx.restore();
 
     }
+
+
+
+    ctx.restore();
+
+
+}
 
 
 
