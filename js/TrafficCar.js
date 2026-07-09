@@ -735,28 +735,67 @@ class TrafficCar {
     // ========================================================
 
 
-    render(ctx){
+   // ========================================================
+// RENDER
+// ========================================================
+
+
+render(ctx){
+
+
+    if(!ctx)
+        return;
 
 
 
-        ctx.save();
+    if(
+        !Number.isFinite(this.rotation)
+    ){
+
+        this.rotation = 0;
+
+    }
 
 
 
-        ctx.translate(
-            this.x,
-            this.y
-        );
+    if(
+        !Number.isFinite(this.x)
+    ){
+
+        this.x = 0;
+
+    }
 
 
 
-        ctx.rotate(
-            this.rotation
-        );
+    if(
+        !Number.isFinite(this.y)
+    ){
+
+        this.y = 0;
+
+    }
 
 
 
-        // shadow
+    ctx.save();
+
+
+
+    ctx.translate(
+        this.x,
+        this.y
+    );
+
+
+
+    ctx.rotate(
+        this.rotation
+    );
+
+
+
+    // shadow
 
         ctx.fillStyle =
             "rgba(0,0,0,0.35)";
@@ -852,7 +891,7 @@ class TrafficCar {
 
         // smoke hook
 
-      if(
+  if(
     window.ParticleSystem &&
     typeof window.ParticleSystem.emit === "function"
 ){
@@ -866,21 +905,12 @@ class TrafficCar {
 }
 
 
-        }
 
+if(ctx){
 
+    ctx.restore();
 
-
-        ctx.restore();
-
-
-
-    }
-
-
-
-
-
+}
 
 }
 
