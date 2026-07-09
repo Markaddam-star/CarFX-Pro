@@ -2,13 +2,16 @@
  * ============================================================
  * CarFX Pro Ultimate
  * content.js v2.5
- * Single Engine Instance + Toggle Control
+ *
+ * Single Engine Loader + GTA Toggle System
  * ============================================================
  */
 
+
 (() => {
 
-    if (window.__carfx_loaded__)
+
+    if(window.__carfx_loaded__)
         return;
 
 
@@ -21,9 +24,10 @@
 
 
 
-    // =========================
-    // ENGINE
-    // =========================
+    // ============================================================
+    // ENGINE START
+    // ============================================================
+
 
     if(!window.CarFXEngine){
 
@@ -51,22 +55,28 @@
 
 
 
+    console.log(
+        "🚗 CarFX Engine Instance Created"
+    );
 
-    // =========================
-    // TOGGLE STATE
-    // =========================
+
+
+
+
+    // ============================================================
+    // TOGGLE BUTTON
+    // ============================================================
+
 
     let running = true;
 
 
 
-
-    // =========================
-    // TOGGLE BUTTON
-    // =========================
-
     const toggle =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
 
     toggle.innerHTML =
@@ -126,12 +136,15 @@
 
 
 
-    // =========================
+    // ============================================================
     // CONTROL PANEL
-    // =========================
+    // ============================================================
+
 
     const panel =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
 
@@ -170,25 +183,18 @@
     panel.innerHTML = `
 
         <h3 style="margin-top:0;">
-            🚗 CarFX Pro
+        🚗 CarFX Pro
         </h3>
 
 
         <button id="carfx-playpause"
-        style="
-        width:100%;
-        padding:10px;
-        margin-bottom:10px;
-        ">
+        style="width:100%;padding:10px;margin-bottom:10px;">
         Pause Animation
         </button>
 
 
         <button id="carfx-close"
-        style="
-        width:100%;
-        padding:10px;
-        ">
+        style="width:100%;padding:10px;">
         Close
         </button>
 
@@ -204,20 +210,20 @@
 
 
 
-    // =========================
+    // ============================================================
     // OPEN PANEL
-    // =========================
+    // ============================================================
+
 
     toggle.onclick = () => {
 
 
         panel.style.display =
-
-        panel.style.display === "none"
-
-        ? "block"
-
-        : "none";
+            panel.style.display === "none"
+            ?
+            "block"
+            :
+            "none";
 
 
     };
@@ -226,91 +232,88 @@
 
 
 
-    // =========================
+    // ============================================================
     // BUTTON EVENTS
-    // =========================
-
-    setTimeout(()=>{
+    // ============================================================
 
 
-        const playBtn =
-            document.getElementById(
-                "carfx-playpause"
-            );
+    const playBtn =
+        panel.querySelector(
+            "#carfx-playpause"
+        );
 
 
-        const closeBtn =
-            document.getElementById(
-                "carfx-close"
-            );
+    const closeBtn =
+        panel.querySelector(
+            "#carfx-close"
+        );
 
 
 
-        playBtn.onclick = () => {
+    playBtn.onclick = () => {
 
 
-            if(running){
+        if(running){
 
 
-                window.carFX.stop();
-
-
-                playBtn.innerText =
-                    "Play Animation";
-
-
-                toggle.innerHTML =
-                    "▶";
-
-
-                toggle.style.background =
-                    "#16a34a";
-
-
-            }
-            else{
-
-
-                window.carFX.start();
-
-
-                playBtn.innerText =
-                    "Pause Animation";
-
-
-                toggle.innerHTML =
-                    "⏸";
-
-
-                toggle.style.background =
-                    "#ff0000";
-
-
-            }
+            window.carFX.stop();
 
 
 
-            running =
-                !running;
+            playBtn.innerText =
+                "Play Animation";
 
 
-        };
+            toggle.innerHTML =
+                "▶";
+
+
+            toggle.style.background =
+                "#16a34a";
+
+
+        }
+        else{
+
+
+            window.carFX.start();
+
+
+
+            playBtn.innerText =
+                "Pause Animation";
+
+
+            toggle.innerHTML =
+                "⏸";
+
+
+            toggle.style.background =
+                "#ff0000";
+
+
+        }
+
+
+
+        running =
+            !running;
+
+
+    };
 
 
 
 
 
-        closeBtn.onclick = () => {
-
-            panel.style.display =
-                "none";
-
-        };
+    closeBtn.onclick = () => {
 
 
+        panel.style.display =
+            "none";
 
-    },100);
 
+    };
 
 
 
