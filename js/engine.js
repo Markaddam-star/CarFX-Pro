@@ -135,15 +135,22 @@ class CarFXEngine {
                     this.audio.ctx &&
                     this.audio.ctx.state === "suspended"
                 ){
+this.audio.ctx?.resume?.()
+.then(()=>{
 
-                    this.audio.ctx.resume()
-                    .then(()=>{
+    console.log(
+        "🔊 Audio Context Running"
+    );
 
-                        console.log(
-                            "🔊 Audio Context Running"
-                        );
+})
+.catch(err=>{
 
-                    });
+    console.warn(
+        "🔊 Audio Resume Failed",
+        err
+    );
+
+});
 
                 }
 
@@ -582,13 +589,15 @@ class CarFXEngine {
 
         // VEHICLES
 
-this.player?.draw(
-            this.ctx
-        );
 
-        this.trafficManager?.render(
-            this.ctx
-        );
+this.trafficManager?.render(
+    this.ctx
+);
+
+
+this.player?.draw(
+    this.ctx
+);
 
 
 
