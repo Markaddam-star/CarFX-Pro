@@ -408,7 +408,7 @@ class VehicleFactory {
 // GTA SUPPORT / PURSUIT CAR v2.2
 // =========================================================
 
-static.player() {
+static player() {
 
 return {
 
