@@ -133,7 +133,7 @@ constructor(
 
 
     this.laneChangeSpeed =
-        0.035;
+          0.025;
 
 
 
@@ -559,7 +559,14 @@ checkTraffic(cars){
 
             // try lane change
 
-            this.tryLaneChange();
+     if(
+    this.speed < this.baseSpeed * 0.65 &&
+    !this.isChangingLane
+){
+
+    this.tryLaneChange();
+
+}
 
 
         }
@@ -575,56 +582,18 @@ checkTraffic(cars){
 
 
 
-
 // ============================================================
-// RANDOM LANE CHANGE
+// RANDOM LANE CHANGE AI
 // ============================================================
 
 randomLaneDecision(){
 
+    // Disabled
+    // Cars only change lane when blocked by another vehicle
 
-    this.laneChangeTimer--;
-
-
-
-    if(
-        this.laneChangeTimer <= 0 &&
-        !this.isChangingLane
-    ){
-
-
-        // only some drivers change lane
-
-        let chance =
-            Math.random();
-
-
-
-        if(
-            chance < 0.25
-        ){
-
-            this.tryLaneChange();
-
-        }
-
-
-
-        this.laneChangeTimer =
-            300 +
-            Math.random()*500;
-
-
-    }
-
+    return;
 
 }
-
-
-
-
-
-
 
 // ============================================================
 // SELECT SAFE NEW LANE
@@ -632,32 +601,25 @@ randomLaneDecision(){
 
 tryLaneChange(){
 
+    if(this.isChangingLane)
+        return;
 
-    let possibleLanes = [
-        0,
-        1,
-        2
+
+    let lanes = [
+        this.lane - 1,
+        this.lane + 1
     ];
 
 
-    possibleLanes =
-        possibleLanes.filter(
-            lane =>
-            lane !== this.lane
-        );
-
-
-
-    // shuffle lanes
-
-    possibleLanes.sort(
-        () => Math.random() - 0.5
+    lanes = lanes.filter(
+        lane =>
+        lane >= 0 &&
+        lane <= 2
     );
 
 
-
     for(
-        const newLane of possibleLanes
+        const newLane of lanes
     ){
 
 
@@ -667,8 +629,11 @@ tryLaneChange(){
 
             this.targetLane =
                 newLane;
-this.state =
-    "changing_lane";
+
+
+            this.state =
+                "changing_lane";
+
 
             this.isChangingLane =
                 true;
@@ -718,27 +683,35 @@ isLaneSafe(targetLane){
 
 
 
+        // check current lane
+        // and target lane of cars changing
+
         if(
-            car.lane !== targetLane
+            car.lane !== targetLane &&
+            car.targetLane !== targetLane
         )
             continue;
 
 
 
-        const distance =
+        const distanceY =
             Math.abs(
                 car.y - this.y
             );
 
 
+        const distanceX =
+            Math.abs(
+                car.x - this.x
+            );
 
-        if(
-            distance < 220
-        ){
 
-            return false;
-
-        }
+if(
+    distanceY < 320
+)
+{
+    return false;
+}
 
 
     }
@@ -746,6 +719,7 @@ isLaneSafe(targetLane){
 
 
     return true;
+
 
 }
 
