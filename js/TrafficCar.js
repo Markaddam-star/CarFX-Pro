@@ -1,595 +1,902 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * TrafficCar.js v2.4
- * GTA STYLE DAMAGE + PANIC AI SYSTEM
- * ============================================================
+ * TrafficCar.js v2.6
+ *
+ * GTA STYLE TRAFFIC VEHICLE AI
+ *
+ * PART 1 / 3
  *
  * Features:
- * - Crash spin
- * - Side slide
- * - Panic AI
- * - Better crash recovery
- * - Damaged driving behavior
- *
+ * - Smooth traffic movement
+ * - Player relative AI
+ * - Lane keeping
+ * - Smart braking foundation
+ * - Crash compatible
  * ============================================================
  */
 
+
+console.log(
+    "🚗 TrafficCar v2.6 START"
+);
+
+
+
 class TrafficCar {
 
-    constructor(canvas, lane, speed = 2) {
+
+    constructor(
+        canvas,
+        x = 0,
+        speed = 2
+    ){
+
 
         this.canvas = canvas;
 
-        this.width = 42;
-        this.height = 82;
 
-        this.x = lane;
-        this.y = -150;
+        this.x = x;
 
-        this.baseSpeed = speed;
+
+        this.y = 0;
+
+
+
+        // =========================
+        // MOVEMENT
+        // =========================
+
+
         this.speed = speed;
 
-        this.angle = 0;
-        this.rotationSpeed = 0;
 
-        this.slideX = 0;
-        this.slideVelocity = 0;
+        this.targetSpeed =
+            speed;
 
-        this.health = 100;
 
-        this.damage = false;
-        this.destroyed = false;
+        this.acceleration =
+            0.025;
 
-        this.panic = false;
-        this.panicTimer = 0;
 
-        this.crashed = false;
-        this.recovering = false;
+        this.maxSpeed =
+            5;
 
-        this.brakeForce = 0;
-        this.collisionCooldown = 0;
+
+
         this.lane = 0;
 
-        this.driverType = this.randomDriver();
 
-this.color = this.randomColor();
 
-this.vehicleType = this.randomVehicleType();
+        this.width = 42;
+
+        this.height = 78;
+
+
+
+        // =========================
+        // AI STATE
+        // =========================
+
+
+        this.state =
+            "cruise";
+
+
+        this.followDistance =
+            160;
+
+
+        this.brakeForce =
+            0;
+
+
+
+        this.panic =
+            false;
+
+
+        this.panicTimer =
+            0;
+
+
+
+        // =========================
+        // PHYSICS
+        // =========================
+
+
+        this.slideX = 0;
+
+
+        this.rotation = 0;
+
+
+        this.rotationSpeed =
+            0;
+
+
+
+        // =========================
+        // EFFECTS
+        // =========================
+
+
+        this.smokeTimer =
+            0;
+
+
+        this.brakeLights =
+            false;
+
+
+
+        this.crashed =
+            false;
+
+
+
+        this.__crashReported =
+            false;
+
+
+
+        // =========================
+        // STYLE
+        // =========================
+
+
+        this.color =
+            this.randomColor();
+
+
+
+        console.log(
+            "🚙 TrafficCar v2.6 created"
+        );
+
+
     }
 
-// ============================================================
-// RESET VEHICLE STATE
-// ============================================================
-
-reset(lane, y){
-
-    this.x = lane;
-
-    this.y = y;
 
 
-    this.speed =
-        this.baseSpeed;
 
 
-    this.angle = 0;
-
-    this.rotationSpeed = 0;
 
 
-    this.slideX = 0;
+    randomColor(){
 
-    this.slideVelocity = 0;
-
-
-    this.health = 100;
-
-
-    this.damage = false;
-
-    this.destroyed = false;
-
-
-    this.crashed = false;
-
-    this.recovering = false;
-
-
-    this.panic = false;
-
-    this.panicTimer = 0;
-
-
-    this.brakeForce = 0;
-
-this.collisionCooldown = 0;
-this.__crashReported = false;
-
-    this.driverType =
-        this.randomDriver();
-
-
-    this.color =
-        this.randomColor();
-    this.vehicleType =
-    this.randomVehicleType();
-
-}
-    randomDriver() {
-
-        const types = [
-            "normal",
-            "aggressive",
-            "careful",
-            "panic"
-        ];
-
-        return types[
-            Math.floor(Math.random() * types.length)
-        ];
-    }
-
-
-    randomColor() {
 
         const colors = [
-            "#ff3030",
-            "#3080ff",
-            "#ffffff",
-            "#222222",
-            "#ffd000",
-            "#00cc88"
+
+            "#d32f2f",
+            "#1976d2",
+            "#388e3c",
+            "#eeeeee",
+            "#212121",
+            "#ff9800"
+
         ];
+
 
         return colors[
-            Math.floor(Math.random() * colors.length)
+            Math.floor(
+                Math.random() *
+                colors.length
+            )
         ];
-    }
 
-    randomVehicleType(){
-
-    const types = [
-        "sedan",
-        "sports",
-        "suv",
-        "van",
-        "pickup",
-        "taxi",
-        "hatchback"
-    ];
-
-    return types[
-        Math.floor(
-            Math.random() * types.length
-        )
-    ];
-
-}
-
-
-    update(dt, traffic = [], player = null) {
-
-
-        if(this.destroyed)
-            return;
-
-
-
-        this.updatePanic(dt);
-
-
-        if(this.crashed) {
-
-            this.updateCrash(dt);
-
-        }
-        else {
-
-            this.drive(dt, traffic, player);
-
-        }
-
-
-        this.y += this.speed * dt;
-
-
-        this.x += this.slideX * dt;
-
-
-        this.slideX *= 0.94;
-
-
-        this.angle += this.rotationSpeed * dt;
-
-
-        this.rotationSpeed *= 0.96;
-
-
-        this.keepStable();
 
     }
 
 
 
-    drive(dt, traffic, player) {
 
 
-        let targetSpeed = this.baseSpeed;
+    // ========================================================
+    // UPDATE
+    // ========================================================
 
 
-        if(this.damage)
-            targetSpeed *= 0.65;
+    update(
+        dt,
+        cars = [],
+        player = null
+    ){
 
 
-
-        if(this.panic)
-            targetSpeed *= 1.35;
-
-
-
-        if(this.brakeForce > 0) {
-
-            targetSpeed *= 0.3;
-            this.brakeForce -= dt;
-
-        }
-
-
-        this.speed +=
-        (targetSpeed - this.speed) * 0.04;
+        this.handlePanic(dt);
 
 
 
-        this.checkTraffic(traffic);
+        this.detectTraffic(
+            cars
+        );
 
 
-        if(player)
-            this.avoidPlayer(player);
+
+        this.applySpeed(dt);
+
+
+
+        this.y +=
+            this.speed;
+
+
+
+        this.x +=
+            this.slideX;
+
+
+
+        this.slideX *=
+            0.92;
+
+
+
+        this.keepLane();
+
+
+
+        this.updateEffects(
+            dt
+        );
+
 
     }
+        // ========================================================
+    // TRAFFIC DETECTION AI
+    // ========================================================
+
+
+    detectTraffic(cars){
+
+
+        let frontCar = null;
+
+        let closest = Infinity;
 
 
 
-    checkTraffic(cars) {
+        for(
+            const car of cars
+        ){
 
 
-        for(const car of cars) {
-
-
-            if(car === this)
+            if(
+                car === this
+            )
                 continue;
 
 
 
-            const dx =
-            Math.abs(this.x - car.x);
-
-
-            const dy =
-            Math.abs(this.y - car.y);
+            if(
+                car.lane !== this.lane
+            )
+                continue;
 
 
 
-            if(dx < this.width &&
-               dy < this.height) {
+            const distance =
+                car.y - this.y;
 
 
-                this.panic = true;
-                this.brakeForce = 30;
+
+            if(
+                distance > 0 &&
+                distance < closest
+            ){
+
+                closest =
+                    distance;
+
+
+                frontCar =
+                    car;
+
+            }
+
+
+        }
+
+
+
+
+
+        if(frontCar){
+
+
+            if(
+                closest <
+                this.followDistance
+            ){
+
+
+                this.state =
+                    "brake";
+
+
+                this.targetSpeed =
+                    Math.max(
+                        0.8,
+                        frontCar.speed -
+                        0.5
+                    );
+
+
+                this.brakeLights =
+                    true;
+
+
+            }
+            else{
+
+
+                this.state =
+                    "follow";
+
+
+                this.targetSpeed =
+                    frontCar.speed;
+
+
+                this.brakeLights =
+                    false;
 
 
             }
 
+
+
         }
+        else{
+
+
+            this.state =
+                "cruise";
+
+
+            this.targetSpeed =
+                2 +
+                Math.random()*1.5;
+
+
+            this.brakeLights =
+                false;
+
+
+        }
+
+
 
     }
 
 
 
-    avoidPlayer(player) {
 
 
-        const dx =
-        this.x - player.x;
 
 
-        const dy =
-        this.y - player.y;
+    // ========================================================
+    // SPEED CONTROL
+    // ========================================================
+
+
+    applySpeed(dt){
 
 
 
         if(
-            Math.abs(dx) < 60 &&
-            Math.abs(dy) < 120
-        ) {
+            this.panic
+        ){
 
-
-            this.panic = true;
-
-
-            if(dx > 0)
-                this.slideVelocity += 2;
-
-            else
-                this.slideVelocity -= 2;
+            this.targetSpeed =
+                0.5;
 
         }
 
 
-        this.slideX +=
-        this.slideVelocity * 0.1;
+
+        if(
+            this.brakeForce > 0
+        ){
 
 
-        this.slideVelocity *= 0.9;
+            this.speed -=
+                this.brakeForce *
+                0.01;
+
+
+            this.brakeForce *=
+                0.90;
+
+
+        }
+
+
+
+
+
+        if(
+            this.speed <
+            this.targetSpeed
+        ){
+
+
+            this.speed +=
+                this.acceleration *
+                dt;
+
+
+        }
+        else if(
+            this.speed >
+            this.targetSpeed
+        ){
+
+
+            this.speed -=
+                this.acceleration *
+                dt;
+
+
+        }
+
+
+
+
+
+        this.speed =
+            Math.max(
+                0.2,
+                Math.min(
+                    this.speed,
+                    this.maxSpeed
+                )
+            );
+
+
 
     }
 
 
 
 
-    crash(power = 1) {
 
 
-        if(this.crashed)
+
+
+
+    // ========================================================
+    // PANIC AI
+    // ========================================================
+
+
+    handlePanic(dt){
+
+
+
+        if(
+            !this.panic
+        )
             return;
 
 
-        this.crashed = true;
-this.collisionCooldown = 1.2;
 
-        this.damage = true;
-
-
-        this.health -=
-        power * 40;
+        this.panicTimer -=
+            dt;
 
 
 
-        this.speed *= 0.25;
+        this.rotation +=
+            this.rotationSpeed;
 
 
 
-        this.rotationSpeed =
-        (Math.random() > 0.5 ? 1 : -1)
-        *
-        (3 + power);
+        this.targetSpeed =
+            0.7;
+
+
+
+        if(
+            this.panicTimer <= 0
+        ){
+
+
+            this.panic =
+                false;
+
+
+            this.rotation =
+                0;
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ========================================================
+    // KEEP LANE
+    // ========================================================
+
+
+    keepLane(){
+
+
+        if(
+            this.crashed
+        )
+            return;
+
+
+
+        const targetX =
+            this.managerLaneX ||
+            this.x;
+
+
+
+        this.x +=
+            (
+                targetX -
+                this.x
+            ) *
+            0.02;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ========================================================
+    // EFFECT UPDATE
+    // ========================================================
+
+
+    updateEffects(dt){
+
+
+        this.smokeTimer -=
+            dt;
+
+
+
+        if(
+            this.brakeLights
+        ){
+
+            this.smokeTimer =
+                5;
+
+        }
+
+
+
+    }
+        // ========================================================
+    // RESET / RESPAWN
+    // ========================================================
+
+
+    reset(
+        x,
+        y
+    ){
+
+
+        this.x = x;
+
+        this.y = y;
+
+
+
+        this.speed =
+            1.5 +
+            Math.random()*2;
+
+
+
+        this.targetSpeed =
+            this.speed;
+
+
+
+        this.state =
+            "cruise";
+
+
+
+        this.panic =
+            false;
+
+
+
+        this.panicTimer =
+            0;
+
+
+
+        this.brakeForce =
+            0;
 
 
 
         this.slideX =
-        (Math.random() > 0.5 ? 1 : -1)
-        *
-        (120 * power);
+            0;
 
 
 
-        this.panic = true;
-
-        this.panicTimer = 180;
-
+        this.rotation =
+            0;
 
 
-        if(this.health <= 0) {
 
-            this.destroyed = true;
+        this.rotationSpeed =
+            0;
 
-        }
+
+
+        this.crashed =
+            false;
+
+
+
+        this.__crashReported =
+            false;
+
+
 
     }
 
 
 
 
-    updateCrash(dt) {
-
-
-        this.speed *= 0.97;
-
-
-        this.slideX *= 0.95;
-
-
-        if(Math.abs(this.rotationSpeed) < 0.05) {
-
-            this.recovering = true;
-
-        }
-
-
-        if(this.recovering) {
-
-            this.angle *= 0.94;
-
-
-            if(Math.abs(this.angle) < 0.05) {
-
-                this.angle = 0;
-                this.crashed = false;
-
-            }
-
-        }
-
-    }
 
 
 
 
-    updatePanic(dt) {
+
+    // ========================================================
+    // CRASH EVENT
+    // ========================================================
 
 
-        if(this.panicTimer > 0) {
-
-            this.panicTimer -= dt;
-
-        }
-        else {
-
-            this.panic = false;
-
-        }
-
-    }
-
-
-
-
-    takeDamage(amount) {
-
-
-        this.health -= amount;
-
-
-        this.damage = true;
-
-
-        this.speed *= 0.8;
-
-
-
-        if(this.health <= 0) {
-
-            this.crash(2);
-
-        }
-
-    }
-
-
-
-
-    keepStable(){
-
-    const roadWidth =
-        Math.min(
-            500,
-            this.canvas.width * 0.5
-        );
-
-
-    const roadX =
-        (
-            this.canvas.width -
-            roadWidth
-        ) / 2;
-
-
-
-    // keep traffic inside road
-
-    if(this.x < roadX)
-        this.x = roadX;
-
-
-
-    if(
-        this.x >
-        roadX + roadWidth - this.width
+    crash(
+        force = 1
     ){
 
-        this.x =
-        roadX + roadWidth - this.width;
+
+        this.crashed =
+            true;
+
+
+
+        this.panic =
+            true;
+
+
+
+        this.panicTimer =
+            120;
+
+
+
+        this.rotationSpeed =
+            (
+                Math.random() > 0.5
+                ? 0.05
+                : -0.05
+            )
+            *
+            force;
+
+
+
+        this.slideX =
+            (
+                Math.random() > 0.5
+                ? 1
+                : -1
+            )
+            *
+            80;
+
+
 
     }
 
 
 
-    // rotation limit
-
-    const maxAngle =
-        Math.PI * 2;
-
-
-    if(this.angle > maxAngle)
-        this.angle -= maxAngle;
-
-
-    if(this.angle < -maxAngle)
-        this.angle += maxAngle;
-
-}
-
-
-   draw(ctx){
-
-
-    if(this.destroyed)
-        return;
-
-
-    ctx.save();
-
-
-    ctx.translate(
-        this.x + this.width / 2,
-        this.y + this.height / 2
-    );
-
-
-    ctx.rotate(this.angle);
 
 
 
-    if(window.CarRenderer){
-
-
-        window.CarRenderer.draw(
-            ctx,
-            {
-
-                x: -this.width / 2,
-
-                y: -this.height / 2,
-
-                width: this.width,
-
-                height: this.height,
-
-                color: this.color,
-
-                type:
-                this.vehicleType ||
-                "sedan",
-
-                headlights:true,
-
-                state:
-                this.brakeForce > 0
-                ? "brake"
-                : "cruise"
-
-            }
-        );
-
-
-    }
-
-
-    ctx.restore();
-
-}
 
 
 
-    // ============================================================
-    // RENDER COMPATIBILITY
-    // TrafficManager uses render()
-    // ============================================================
+    // ========================================================
+    // RENDER
+    // ========================================================
+
 
     render(ctx){
 
-        this.draw(ctx);
+
+
+        ctx.save();
+
+
+
+        ctx.translate(
+            this.x,
+            this.y
+        );
+
+
+
+        ctx.rotate(
+            this.rotation
+        );
+
+
+
+        // shadow
+
+        ctx.fillStyle =
+            "rgba(0,0,0,0.35)";
+
+
+        ctx.fillRect(
+            -this.width/2 + 4,
+            -this.height/2 + 8,
+            this.width,
+            this.height
+        );
+
+
+
+
+
+        // body
+
+        ctx.fillStyle =
+            this.color;
+
+
+        ctx.fillRect(
+            -this.width/2,
+            -this.height/2,
+            this.width,
+            this.height
+        );
+
+
+
+
+
+        // windows
+
+        ctx.fillStyle =
+            "#111";
+
+
+        ctx.fillRect(
+            -12,
+            -25,
+            24,
+            22
+        );
+
+
+        ctx.fillRect(
+            -12,
+            5,
+            24,
+            18
+        );
+
+
+
+
+
+        // brake lights
+
+        if(
+            this.brakeLights
+        ){
+
+
+            ctx.fillStyle =
+                "red";
+
+
+            ctx.fillRect(
+                -15,
+                32,
+                7,
+                5
+            );
+
+
+            ctx.fillRect(
+                8,
+                32,
+                7,
+                5
+            );
+
+
+        }
+
+
+
+
+
+
+
+        // smoke hook
+
+        if(
+            this.smokeTimer > 0
+        ){
+
+
+            if(
+                window.ParticleSystem
+            ){
+
+                window.ParticleSystem.emit(
+                    this.x,
+                    this.y + 40,
+                    "smoke"
+                );
+
+
+            }
+
+
+        }
+
+
+
+
+        ctx.restore();
+
+
 
     }
+
+
+
+
+
 
 }
 
 
 
-window.TrafficCar = TrafficCar;
+
+window.TrafficCar =
+    TrafficCar;
+
 
 
 console.log(
-    "🚗 TrafficCar v2.4 Loaded - Crash AI Active"
+    "✅ TrafficCar v2.6 Loaded Successfully"
 );
