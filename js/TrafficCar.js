@@ -51,7 +51,9 @@ class TrafficCar {
 
         this.driverType = this.randomDriver();
 
-        this.color = this.randomColor();
+this.color = this.randomColor();
+
+this.vehicleType = this.randomVehicleType();
     }
 
 // ============================================================
@@ -106,6 +108,8 @@ reset(lane, y){
 
     this.color =
         this.randomColor();
+    this.vehicleType =
+    this.randomVehicleType();
 
 }
     randomDriver() {
@@ -139,6 +143,25 @@ reset(lane, y){
         ];
     }
 
+    randomVehicleType(){
+
+    const types = [
+        "sedan",
+        "sports",
+        "suv",
+        "van",
+        "pickup",
+        "taxi",
+        "hatchback"
+    ];
+
+    return types[
+        Math.floor(
+            Math.random() * types.length
+        )
+    ];
+
+}
 
 
     update(dt, traffic = [], player = null) {
@@ -467,9 +490,7 @@ reset(lane, y){
         return;
 
 
-
     ctx.save();
-
 
 
     ctx.translate(
@@ -499,14 +520,11 @@ reset(lane, y){
 
                 color: this.color,
 
-
                 type:
                 this.vehicleType ||
                 "sedan",
 
-
                 headlights:true,
-
 
                 state:
                 this.brakeForce > 0
@@ -520,9 +538,7 @@ reset(lane, y){
     }
 
 
-
     ctx.restore();
-
 
 }
 
