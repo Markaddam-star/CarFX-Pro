@@ -62,26 +62,26 @@ constructor(canvas, particles){
     this.laneSmooth = 8;
 
 
-
-    // Physics
+// Physics
+// GTA SUPPORT CAR PERFORMANCE v2.3
 
 
 this.speed = 0;
 
 
 this.maxSpeed =
-    this.vehicle.maxSpeed;
+    this.vehicle.maxSpeed * 1.8;
 
 
 this.acceleration =
-    this.vehicle.acceleration;
+    this.vehicle.acceleration * 1.6;
 
 
 this.brakePower =
-    this.vehicle.braking;
+    this.vehicle.braking * 1.15;
 
 
-this.friction = 8;
+this.friction = 6;
 
 
 
