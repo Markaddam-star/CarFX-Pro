@@ -95,7 +95,8 @@ class CollisionManager {
             0;
 
 
-
+this.carCooldown =
+    0.8;
 
         console.log(
             "💥 CollisionManager v2.1 Loaded"
@@ -138,7 +139,11 @@ class CollisionManager {
             this.trafficManager.cars
         ){
 
+if(car.collisionCooldown > 0){
 
+    car.collisionCooldown -= dt;
+
+}
 
             const result =
                 this.detectCollision(
@@ -158,14 +163,14 @@ class CollisionManager {
 
 
 
-            if(
-                this.cooldown > 0
-            ){
+          if(
+    this.cooldown > 0 ||
+    car.collisionCooldown > 0
+){
 
-                continue;
+    continue;
 
-            }
-
+}
 
 
 
@@ -189,7 +194,8 @@ class CollisionManager {
             this.cooldown =
                 this.crashDelay;
 
-
+car.collisionCooldown =
+    this.carCooldown;
 
         }
 
