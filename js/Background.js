@@ -1436,46 +1436,69 @@ drawCityLayer(ctx,w,h,offset,baseHeight,color){
     ctx.save();
 
 
-    // only horizon area
-
-    ctx.globalAlpha = 0.55;
+    ctx.globalAlpha = 0.65;
 
 
-    for(let i=0;i<18;i++){
+    const roadWidth =
+        Math.min(500,w*0.5);
 
-
-        let bw =
-        90+(i%4)*25;
-
-
-        let bh =
-        baseHeight+
-        (i%5)*35;
+    const roadX =
+        (w-roadWidth)/2;
 
 
 
-        let x =
-        (i*180-offset)
-        %
-        (w+300);
+    for(let i=0;i<24;i++){
 
 
-        if(x < -200){
+        let side =
+        i%2===0 ? -1 : 1;
 
-            x += w+300;
+
+
+        let x;
+
+
+        if(side === -1){
+
+            x =
+            roadX -
+            260 -
+            ((i*120-offset)%220);
+
+        }
+        else{
+
+            x =
+            roadX+
+            roadWidth+
+            ((i*120-offset)%220);
 
         }
 
 
 
+
+        let bw =
+        80+(i%4)*25;
+
+
+        let bh =
+        baseHeight+
+        (i%6)*45;
+
+
+
+
         let y =
-        h-bh-260;
+        h-bh-40;
 
 
 
-        // building body
 
-        ctx.fillStyle=color;
+        // building
+
+        ctx.fillStyle =
+        "rgba(55,65,80,0.75)";
 
 
         ctx.fillRect(
@@ -1490,30 +1513,27 @@ drawCityLayer(ctx,w,h,offset,baseHeight,color){
         // windows
 
         ctx.fillStyle =
-        "rgba(255,220,150,0.35)";
+        "rgba(220,220,170,0.18)";
 
 
         for(
             let yy=y+20;
-            yy<y+bh-20;
+            yy<y+bh-15;
             yy+=25
         ){
 
-
             for(
-                let xx=x+15;
-                xx<x+bw-15;
-                xx+=20
+                let xx=x+12;
+                xx<x+bw-10;
+                xx+=18
             ){
-
 
                 ctx.fillRect(
                     xx,
                     yy,
-                    6,
-                    8
+                    5,
+                    7
                 );
-
 
             }
 
