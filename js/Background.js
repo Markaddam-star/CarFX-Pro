@@ -593,7 +593,7 @@ w,
 h,
 this.farOffset,
 180,
-"rgba(20,20,30,0.25)"
+"rgba(120,130,150,0.55)"
 );
 
 
@@ -604,7 +604,7 @@ w,
 h,
 this.nearOffset,
 120,
-"rgba(10,10,20,0.45)"
+"rgba(100,110,130,0.65)"
 );
 
 
@@ -1110,11 +1110,9 @@ Math.max(
 let x =
 tree.side===-1
 ?
-roadX-(45*p)
+roadX - 45
 :
-roadX+roadWidth+(45*p);
-
-
+roadX + roadWidth + 45;
 
 
 let y =
@@ -1213,9 +1211,9 @@ Math.max(
 let x =
 light.side===-1
 ?
-roadX-(25*p)
+roadX - 25
 :
-roadX+roadWidth+(25*p);
+roadX + roadWidth + 25;
 
 
 
@@ -1304,9 +1302,9 @@ Math.max(
 let x =
 item.side===-1
 ?
-roadX-(55*p)
+roadX - 50
 :
-roadX+roadWidth+(55*p);
+roadX + roadWidth + 50;
 
 
 
@@ -1341,62 +1339,108 @@ ctx.fill();
 
 }
 
-
-
-
-
-
-
-
 drawCityLayer(ctx,w,h,offset,baseHeight,color){
 
+    const roadWidth =
+        Math.min(500,w*0.5);
+
+    const roadX =
+        (w-roadWidth)/2;
 
 
-ctx.fillStyle=color;
+    ctx.fillStyle = color;
+
+
+    for(let i=0;i<20;i++){
+
+
+        let side =
+            i%2===0 ? -1 : 1;
+
+
+        let x;
+
+
+        if(side === -1){
+
+            x =
+            (i*130-offset)%300;
+
+            x =
+            roadX - 300 + x;
+
+        }
+        else{
+
+            x =
+            (i*130-offset)%300;
+
+            x =
+            roadX + roadWidth + x;
+
+        }
 
 
 
-for(let i=0;i<25;i++){
+        const bw =
+            80+(i%3)*30;
 
 
-let x =
-(i*160-offset)
-%(w+300);
+        const bh =
+            baseHeight+(i%5)*40;
 
 
 
-if(x<-200){
+        // BUILDING BODY
 
-x+=w+300;
+        ctx.fillStyle=color;
+
+        ctx.fillRect(
+            x,
+            h-bh,
+            bw,
+            bh
+        );
+
+
+
+        // WINDOWS
+
+        ctx.fillStyle =
+        "rgba(255,240,180,0.35)";
+
+
+        for(
+            let yy=h-bh+20;
+            yy<h-20;
+            yy+=25
+        ){
+
+            for(
+                let xx=x+15;
+                xx<x+bw-10;
+                xx+=20
+            ){
+
+                ctx.fillRect(
+                    xx,
+                    yy,
+                    6,
+                    8
+                );
+
+            }
+
+        }
+
+
+    }
 
 }
 
 
 
-let bw =
-70+(i%3)*20;
 
-
-
-let bh =
-baseHeight+(i%5)*45;
-
-
-
-ctx.fillRect(
-x,
-h-bh,
-bw,
-bh
-);
-
-
-
-}
-
-
-
-}
 
 
 
@@ -1404,6 +1448,8 @@ bh
 
 }
 
+
+console.log("Background class loaded");
 
 
 window.Background = Background;
