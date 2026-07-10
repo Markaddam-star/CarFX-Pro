@@ -59,7 +59,11 @@ this.roadSigns = [];
 this.roadNoise = [];
 this.roadWear = [];
 
+// ============================
+// TERRAIN POLISH v2.24
+// ============================
 
+this.grassPatches = [];
 
 this.createRoadsideObjects();
 
@@ -67,7 +71,7 @@ this.createRoadDetails();
 
 this.createRoadSurfaceDetails();
 
-
+this.createTerrainDetails();
 
 if(window.VehicleFactory){
 
@@ -140,7 +144,22 @@ tree.z=2500;
 
 
 
+// 🌱 TERRAIN MOVEMENT
 
+for(const grass of this.grassPatches){
+
+    grass.z -=
+    (this.nearSpeed+
+    playerSpeed*0.12)*dt;
+
+
+    if(grass.z < -300){
+
+        grass.z = 3000;
+
+    }
+
+}
 
 
 
@@ -498,10 +517,26 @@ Math.random()*60
 }
 
 
+createTerrainDetails(){
 
+    for(let i=0;i<80;i++){
 
+        this.grassPatches.push({
 
+            side:
+            i%2===0?-1:1,
 
+            z:
+            i*80+100,
+
+            size:
+            20+Math.random()*35
+
+        });
+
+    }
+
+}
 
 
 
@@ -1052,7 +1087,7 @@ drawRoadsideObjects(ctx,w,h,roadX,roadWidth){
 
 
 
-this.drawDecor(
+this.drawTerrain(
 ctx,
 w,
 h,
@@ -1060,6 +1095,14 @@ roadX,
 roadWidth
 );
 
+
+this.drawDecor(
+ctx,
+w,
+h,
+roadX,
+roadWidth
+);
 
 
 this.drawPalmTrees(
@@ -1071,7 +1114,6 @@ roadWidth
 );
 
 
-
 this.drawStreetLights(
 ctx,
 w,
@@ -1081,12 +1123,62 @@ roadWidth
 );
 
 
-
 }
 
 
 
+drawTerrain(ctx,w,h,roadX,roadWidth){
 
+
+for(const grass of this.grassPatches){
+
+
+let p =
+Math.max(
+0.25,
+1-grass.z/3000
+);
+
+
+
+let x =
+grass.side===-1
+?
+roadX-10
+:
+roadX+roadWidth+10;
+
+
+
+let y =
+h-(grass.z*0.35);
+
+
+
+ctx.fillStyle =
+"rgba(70,130,70,0.35)";
+
+
+
+ctx.beginPath();
+
+
+ctx.arc(
+x,
+y,
+grass.size*p,
+0,
+Math.PI*2
+);
+
+
+ctx.fill();
+
+
+}
+
+
+}
 
 
 
@@ -1110,9 +1202,9 @@ Math.max(
 let x =
 tree.side===-1
 ?
-roadX - 45
+roadX - 25
 :
-roadX + roadWidth + 45;
+roadX + roadWidth + 25;
 
 
 let y =
@@ -1211,9 +1303,9 @@ Math.max(
 let x =
 light.side===-1
 ?
-roadX - 25
+roadX - 15
 :
-roadX + roadWidth + 25;
+roadX + roadWidth + 15;
 
 
 
@@ -1302,9 +1394,9 @@ Math.max(
 let x =
 item.side===-1
 ?
-roadX - 50
+roadX - 20
 :
-roadX + roadWidth + 50;
+roadX + roadWidth + 20;
 
 
 
@@ -1341,86 +1433,79 @@ ctx.fill();
 
 drawCityLayer(ctx,w,h,offset,baseHeight,color){
 
-    const roadWidth =
-        Math.min(500,w*0.5);
-
-    const roadX =
-        (w-roadWidth)/2;
+    ctx.save();
 
 
-    ctx.fillStyle = color;
+    // only horizon area
+
+    ctx.globalAlpha = 0.55;
 
 
-    for(let i=0;i<20;i++){
+    for(let i=0;i<18;i++){
 
 
-        let side =
-            i%2===0 ? -1 : 1;
+        let bw =
+        90+(i%4)*25;
 
 
-        let x;
+        let bh =
+        baseHeight+
+        (i%5)*35;
 
 
-        if(side === -1){
 
-            x =
-            (i*130-offset)%300;
+        let x =
+        (i*180-offset)
+        %
+        (w+300);
 
-            x =
-            roadX - 300 + x;
 
-        }
-        else{
+        if(x < -200){
 
-            x =
-            (i*130-offset)%300;
-
-            x =
-            roadX + roadWidth + x;
+            x += w+300;
 
         }
 
 
 
-        const bw =
-            80+(i%3)*30;
-
-
-        const bh =
-            baseHeight+(i%5)*40;
+        let y =
+        h-bh-260;
 
 
 
-        // BUILDING BODY
+        // building body
 
         ctx.fillStyle=color;
 
+
         ctx.fillRect(
             x,
-            h-bh,
+            y,
             bw,
             bh
         );
 
 
 
-        // WINDOWS
+        // windows
 
         ctx.fillStyle =
-        "rgba(255,240,180,0.35)";
+        "rgba(255,220,150,0.35)";
 
 
         for(
-            let yy=h-bh+20;
-            yy<h-20;
+            let yy=y+20;
+            yy<y+bh-20;
             yy+=25
         ){
 
+
             for(
                 let xx=x+15;
-                xx<x+bw-10;
+                xx<x+bw-15;
                 xx+=20
             ){
+
 
                 ctx.fillRect(
                     xx,
@@ -1429,6 +1514,7 @@ drawCityLayer(ctx,w,h,offset,baseHeight,color){
                     8
                 );
 
+
             }
 
         }
@@ -1436,15 +1522,10 @@ drawCityLayer(ctx,w,h,offset,baseHeight,color){
 
     }
 
+
+    ctx.restore();
+
 }
-
-
-
-
-
-
-
-
 
 }
 
