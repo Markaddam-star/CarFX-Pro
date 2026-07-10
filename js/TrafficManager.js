@@ -367,22 +367,12 @@ update(dt){
 
         // PLAYER SPEED SYNC
 
-        const playerSpeed =
-            this.player.speed || 0;
+       const playerSpeed =
+    this.player.speed || 0;
 
-
-
-        if(
-            playerSpeed > 0
-        ){
-
-
-            car.targetSpeed +=
-                playerSpeed *
-                0.003;
-
-
-        }
+car.targetSpeed =
+    car.baseSpeed +
+    (playerSpeed * 0.003);
 
 
 
