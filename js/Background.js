@@ -1,8 +1,14 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * Background System v2.22
- * GTA Parallax + Road World Details
+ * Background System v2.23
+ *
+ * GTA Parallax + Road World + Environment Polish
+ *
+ * Added:
+ * - Asphalt noise
+ * - Road wear
+ * - Road edge details
  * ============================================================
  */
 
@@ -15,7 +21,9 @@ constructor(canvas){
 this.canvas = canvas;
 
 
+// ============================
 // PARALLAX
+// ============================
 
 this.farOffset = 0;
 this.nearOffset = 0;
@@ -25,7 +33,9 @@ this.nearSpeed = 40;
 
 
 
+// ============================
 // WORLD OBJECTS
+// ============================
 
 this.palms = [];
 this.streetLights = [];
@@ -33,16 +43,29 @@ this.decorations = [];
 
 
 
-// ROAD DETAILS v2.22
+// ============================
+// ROAD DETAILS
+// ============================
 
 this.roadMarks = [];
 this.roadSigns = [];
 
 
 
+// ============================
+// ENVIRONMENT POLISH v2.23
+// ============================
+
+this.roadNoise = [];
+this.roadWear = [];
+
+
+
 this.createRoadsideObjects();
 
 this.createRoadDetails();
+
+this.createRoadSurfaceDetails();
 
 
 
@@ -51,6 +74,7 @@ if(window.VehicleFactory){
 this.vehicleFactory =
 window.VehicleFactory;
 
+
 this.playerVehicle =
 this.vehicleFactory.player();
 
@@ -58,6 +82,8 @@ this.vehicleFactory.player();
 
 
 }
+
+
 
 
 
@@ -76,8 +102,11 @@ playerSpeed/520,
 
 
 
+
+
 this.farOffset +=
 (this.farSpeed+ratio*20)*dt;
+
 
 
 this.nearOffset +=
@@ -87,7 +116,9 @@ this.nearOffset +=
 
 
 
-// 🌴 TREES
+
+
+// 🌴 PALMS
 
 for(const tree of this.palms){
 
@@ -97,20 +128,25 @@ tree.z -=
 playerSpeed*0.15)*dt;
 
 
-if(tree.z < -500){
 
-tree.z = 2500;
+if(tree.z<-500){
+
+tree.z=2500;
+
+}
+
 
 }
 
 
-}
+
 
 
 
 
 
 // 💡 LIGHTS
+
 
 for(const light of this.streetLights){
 
@@ -120,20 +156,25 @@ light.z -=
 playerSpeed*0.12)*dt;
 
 
-if(light.z < -500){
 
-light.z = 2500;
+if(light.z<-500){
 
-}
-
+light.z=2500;
 
 }
 
 
+}
 
 
 
-// DECOR
+
+
+
+
+
+// 🌳 DECOR
+
 
 for(const item of this.decorations){
 
@@ -143,20 +184,25 @@ item.z -=
 playerSpeed*0.1)*dt;
 
 
-if(item.z < -500){
 
-item.z = 2500;
+if(item.z<-500){
 
-}
-
+item.z=2500;
 
 }
 
 
+}
 
 
 
-// 🛣️ ROAD MARKS
+
+
+
+
+
+// 🛣️ LANE MARKS
+
 
 for(const mark of this.roadMarks){
 
@@ -167,20 +213,24 @@ playerSpeed*0.18)*dt;
 
 
 
-if(mark.z < -300){
+if(mark.z<-300){
 
-mark.z = 2800;
+mark.z=2800;
+
+}
+
 
 }
 
 
-}
+
 
 
 
 
 
 // 🪧 SIGNS
+
 
 for(const sign of this.roadSigns){
 
@@ -191,12 +241,9 @@ playerSpeed*0.12)*dt;
 
 
 
-if(sign.z < -300){
+if(sign.z<-300){
 
-sign.z = 3200;
-
-}
-
+sign.z=3200;
 
 }
 
@@ -208,9 +255,36 @@ sign.z = 3200;
 
 
 
+
+
+// 🕳 ROAD WEAR
+
+
+for(const wear of this.roadWear){
+
+
+wear.z -=
+(this.nearSpeed+
+playerSpeed*0.15)*dt;
+
+
+
+if(wear.z<-300){
+
+wear.z=3000;
+
+}
+
+
+}
+
+
+}
 createRoadsideObjects(){
 
 
+
+// 🌴 PALMS
 
 for(let i=0;i<12;i++){
 
@@ -237,6 +311,9 @@ Math.random()*0.3
 
 
 
+
+// 💡 STREET LIGHTS
+
 for(let i=0;i<14;i++){
 
 
@@ -262,6 +339,9 @@ Math.random()*30
 
 
 
+
+// 🌳 DECOR
+
 for(let i=0;i<18;i++){
 
 
@@ -283,8 +363,10 @@ i%3
 }
 
 
-
 }
+
+
+
 
 
 
@@ -295,6 +377,8 @@ createRoadDetails(){
 
 
 
+// LANE MARKS
+
 for(let i=0;i<20;i++){
 
 
@@ -302,7 +386,6 @@ this.roadMarks.push({
 
 z:
 i*180+200
-
 
 });
 
@@ -313,11 +396,13 @@ i*180+200
 
 
 
+
+// SIGNS
+
 for(let i=0;i<10;i++){
 
 
 this.roadSigns.push({
-
 
 side:
 i%2===0?-1:1,
@@ -339,15 +424,106 @@ i%3
 
 
 }
+
+
+
+
+
+
+
+
+
+createRoadSurfaceDetails(){
+
+
+
+// ASPHALT NOISE
+
+
+for(let i=0;i<120;i++){
+
+
+this.roadNoise.push({
+
+
+x:
+Math.random(),
+
+
+z:
+Math.random()*3000,
+
+
+size:
+1+
+Math.random()*3
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+// ROAD WEAR
+
+
+for(let i=0;i<25;i++){
+
+
+this.roadWear.push({
+
+
+z:
+i*250+300,
+
+
+width:
+30+
+Math.random()*60
+
+
+});
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
 render(ctx){
 
 
-const w = this.canvas.width;
-const h = this.canvas.height;
+
+const w =
+this.canvas.width;
+
+
+const h =
+this.canvas.height;
 
 
 
-// 🌤 SKY
+
+
+
+
+// SKY
+
 
 const sky =
 ctx.createLinearGradient(
@@ -356,6 +532,7 @@ ctx.createLinearGradient(
 0,
 h
 );
+
 
 
 sky.addColorStop(
@@ -371,7 +548,7 @@ sky.addColorStop(
 
 
 
-ctx.fillStyle = sky;
+ctx.fillStyle=sky;
 
 
 ctx.fillRect(
@@ -384,9 +561,14 @@ h
 
 
 
-// 🌫 FOG
 
-ctx.fillStyle =
+
+
+
+// FOG
+
+
+ctx.fillStyle=
 "rgba(255,255,255,0.06)";
 
 
@@ -401,7 +583,9 @@ h
 
 
 
-// FAR BUILDINGS
+
+
+// CITY
 
 this.drawCityLayer(
 ctx,
@@ -413,9 +597,6 @@ this.farOffset,
 );
 
 
-
-
-// NEAR BUILDINGS
 
 this.drawCityLayer(
 ctx,
@@ -430,7 +611,11 @@ this.nearOffset,
 
 
 
-// ROAD
+
+
+
+// ROAD SIZE
+
 
 const roadWidth =
 Math.min(
@@ -444,7 +629,11 @@ const roadX =
 
 
 
-// ROAD SURFACE
+
+
+
+// ROAD
+
 
 ctx.fillStyle =
 "#303030";
@@ -461,11 +650,26 @@ h
 
 
 
-// SIDEWALKS
+
+// ASPHALT DETAILS
+
+this.drawRoadSurface(
+ctx,
+w,
+h,
+roadX,
+roadWidth
+);
 
 
-ctx.fillStyle =
-"#8b8b8b";
+
+
+
+
+// SIDEWALK
+
+
+ctx.fillStyle="#8b8b8b";
 
 
 ctx.fillRect(
@@ -487,11 +691,11 @@ h
 
 
 
-// CURBS
+
+// CURB
 
 
-ctx.fillStyle =
-"#cfcfcf";
+ctx.fillStyle="#cfcfcf";
 
 
 ctx.fillRect(
@@ -513,7 +717,8 @@ h
 
 
 
-// 🛣️ ROAD MARKINGS
+
+// ROAD MARKS
 
 this.drawRoadMarks(
 ctx,
@@ -526,7 +731,9 @@ roadWidth
 
 
 
-// 🚧 ROADSIDE WORLD
+
+
+// WORLD
 
 this.drawRoadsideObjects(
 ctx,
@@ -538,7 +745,10 @@ roadWidth
 
 
 
-// 🪧 SIGNS
+
+
+
+// SIGNS
 
 this.drawRoadSigns(
 ctx,
@@ -551,18 +761,140 @@ roadWidth
 
 
 }
+drawRoadSurface(ctx,w,h,roadX,roadWidth){
+
+
+
+// Asphalt noise
+
+for(const n of this.roadNoise){
+
+
+
+let y =
+h -
+(n.z*0.35);
+
+
+
+let x =
+roadX +
+n.x*roadWidth;
+
+
+
+ctx.fillStyle =
+"rgba(255,255,255,0.08)";
+
+
+
+ctx.fillRect(
+
+x,
+
+y,
+
+n.size,
+
+n.size
+
+);
+
+
+}
+
+
+
+
+
+
+// Road wear
+
+this.drawRoadWear(
+ctx,
+w,
+h,
+roadX,
+roadWidth
+);
+
+
+
+
+}
+
+
+
+
+
+drawRoadWear(ctx,w,h,roadX,roadWidth){
+
+
+
+for(const wear of this.roadWear){
+
+
+
+let y =
+h -
+(wear.z*0.35);
+
+
+
+let x =
+roadX+
+roadWidth/2-
+wear.width/2;
+
+
+
+ctx.fillStyle =
+"rgba(0,0,0,0.15)";
+
+
+
+ctx.fillRect(
+
+x,
+
+y,
+
+wear.width,
+
+6
+
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
 drawRoadMarks(ctx,w,h,roadX,roadWidth){
 
 
+
 const center =
-roadX + roadWidth/2;
+roadX+
+roadWidth/2;
 
 
 
 for(const mark of this.roadMarks){
 
 
-let perspective =
+
+let p =
 Math.max(
 0.2,
 1-mark.z/2800
@@ -576,25 +908,20 @@ h -
 
 
 
-let size =
-40*perspective;
-
-
-
 ctx.fillStyle =
-"#e8e8e8";
+"#eeeeee";
 
 
 
 ctx.fillRect(
 
-center-size/2,
+center-20*p,
 
 y,
 
-size,
+40*p,
 
-12*perspective
+10*p
 
 );
 
@@ -603,8 +930,8 @@ size,
 }
 
 
-
 }
+
 
 
 
@@ -620,7 +947,7 @@ for(const sign of this.roadSigns){
 
 
 
-let perspective =
+let p =
 Math.max(
 0.3,
 1-sign.z/3200
@@ -628,36 +955,26 @@ Math.max(
 
 
 
-let x;
+let x =
+sign.side===-1
 
+?
 
+roadX-(55*p)
 
-if(sign.side===-1){
+:
 
-
-x =
-roadX-
-(55*perspective);
-
-
-}
-else{
-
-
-x =
 roadX+
 roadWidth+
-(55*perspective);
+(55*p);
 
 
-}
 
 
 
 let y =
 h -
 (sign.z*0.35);
-
 
 
 
@@ -674,18 +991,15 @@ y
 
 
 ctx.scale(
-perspective,
-perspective
+p,
+p
 );
 
 
 
 
-// pole
 
-
-ctx.fillStyle =
-"#555";
+ctx.fillStyle="#555";
 
 
 ctx.fillRect(
@@ -698,27 +1012,15 @@ ctx.fillRect(
 
 
 
-// board
-
-
-if(sign.type===0){
 
 ctx.fillStyle =
-"#1e88e5";
-
-}
-else if(sign.type===1){
-
-ctx.fillStyle =
-"#d32f2f";
-
-}
-else{
-
-ctx.fillStyle =
+sign.type===0
+?"#1e88e5"
+:
+sign.type===1
+?"#d32f2f"
+:
 "#388e3c";
-
-}
 
 
 
@@ -759,6 +1061,7 @@ roadWidth
 );
 
 
+
 this.drawPalmTrees(
 ctx,
 w,
@@ -766,6 +1069,7 @@ h,
 roadX,
 roadWidth
 );
+
 
 
 this.drawStreetLights(
@@ -805,13 +1109,9 @@ Math.max(
 
 let x =
 tree.side===-1
-
 ?
-
 roadX-(45*p)
-
 :
-
 roadX+roadWidth+(45*p);
 
 
@@ -823,7 +1123,6 @@ h-(tree.z*0.35);
 
 
 ctx.save();
-
 
 
 ctx.translate(
@@ -840,10 +1139,7 @@ tree.scale*p
 
 
 
-
-ctx.fillStyle =
-"#8b5a2b";
-
+ctx.fillStyle="#8b5a2b";
 
 ctx.fillRect(
 -5,
@@ -854,10 +1150,8 @@ ctx.fillRect(
 
 
 
+ctx.fillStyle="#228b22";
 
-
-ctx.fillStyle =
-"#228b22";
 
 
 for(let i=0;i<5;i++){
@@ -891,9 +1185,7 @@ ctx.restore();
 }
 
 
-
 }
-
 
 
 
@@ -920,15 +1212,10 @@ Math.max(
 
 let x =
 light.side===-1
-
 ?
-
 roadX-(25*p)
-
 :
-
 roadX+roadWidth+(25*p);
-
 
 
 
@@ -937,9 +1224,7 @@ h-(light.z*0.35);
 
 
 
-
-ctx.strokeStyle =
-"#333";
+ctx.strokeStyle="#333";
 
 
 ctx.lineWidth =
@@ -970,6 +1255,7 @@ ctx.fillStyle =
 "rgba(255,240,150,0.9)";
 
 
+
 ctx.beginPath();
 
 
@@ -982,6 +1268,7 @@ Math.PI*2
 );
 
 
+
 ctx.fill();
 
 
@@ -989,9 +1276,7 @@ ctx.fill();
 }
 
 
-
 }
-
 
 
 
@@ -1018,15 +1303,10 @@ Math.max(
 
 let x =
 item.side===-1
-
 ?
-
 roadX-(55*p)
-
 :
-
 roadX+roadWidth+(55*p);
-
 
 
 
@@ -1035,29 +1315,7 @@ h-(item.z*0.35);
 
 
 
-
-ctx.save();
-
-
-
-ctx.translate(
-x,
-y
-);
-
-
-
-ctx.scale(
-p,
-p
-);
-
-
-
-
-
-ctx.fillStyle =
-"#2f7d32";
+ctx.fillStyle="#2f7d32";
 
 
 
@@ -1065,19 +1323,15 @@ ctx.beginPath();
 
 
 ctx.arc(
-0,
-0,
-20,
+x,
+y,
+20*p,
 0,
 Math.PI*2
 );
 
 
 ctx.fill();
-
-
-
-ctx.restore();
 
 
 
@@ -1105,7 +1359,6 @@ ctx.fillStyle=color;
 for(let i=0;i<25;i++){
 
 
-
 let x =
 (i*160-offset)
 %(w+300);
@@ -1124,6 +1377,7 @@ let bw =
 70+(i%3)*20;
 
 
+
 let bh =
 baseHeight+(i%5)*45;
 
@@ -1138,50 +1392,11 @@ bh
 
 
 
-ctx.fillStyle =
-"rgba(210,230,255,0.18)";
-
-
-
-for(
-let yy=h-bh+15;
-yy<h-20;
-yy+=20
-){
-
-
-for(
-let xx=x+10;
-xx<x+bw-10;
-xx+=16
-){
-
-
-ctx.fillRect(
-xx,
-yy,
-5,
-7
-);
-
-
-}
-
-
-}
-
-
-
-ctx.fillStyle=color;
-
-
-
 }
 
 
 
 }
-
 
 
 
