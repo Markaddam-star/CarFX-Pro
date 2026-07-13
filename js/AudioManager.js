@@ -31,6 +31,7 @@ class AudioManager {
 
         this.braking = false;
         this.skidding = false;
+        this.engineStarted = false;
 
         this.sounds = {
 
@@ -46,7 +47,10 @@ class AudioManager {
 
     init() {
 
-        if (this.started) return;
+    if (this.started) {
+        console.log("🔊 Audio already running");
+        return;
+    }
 
 
         try {
@@ -86,17 +90,11 @@ class AudioManager {
             this.master.connect(this.ctx.destination);
 
 
-try {
+if(!this.engineStarted){
 
     this.engineOsc.start();
 
-}
-catch(e){
-
-    console.warn(
-        "🔊 Oscillator already started",
-        e
-    );
+    this.engineStarted = true;
 
 }
 
@@ -314,19 +312,31 @@ stop(){
 
     if(this.engineOsc){
 
-        this.engineOsc.stop();
+        try{
+            this.engineOsc.stop();
+        }
+        catch(e){}
 
         this.engineOsc = null;
 
     }
 
+
     if(this.ctx){
 
         this.ctx.close();
 
+        this.ctx = null;
+
     }
 
+
+    this.master = null;
+    this.engineGain = null;
+
+    this.engineStarted = false;
     this.started = false;
+
 
     console.log(
         "🔇 Audio Stopped"
