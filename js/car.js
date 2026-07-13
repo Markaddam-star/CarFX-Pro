@@ -69,19 +69,22 @@ constructor(canvas, particles){
 this.speed = 0;
 
 
-this.maxSpeed =
-    this.vehicle.maxSpeed * 1.8;
+// ===== v3.0.1 Driving Physics =====
 
+this.maxSpeed =
+    this.vehicle.maxSpeed * 2.4;
 
 this.acceleration =
-    this.vehicle.acceleration * 1.6;
-
+    this.vehicle.acceleration * 2.1;
 
 this.brakePower =
-    this.vehicle.braking * 1.15;
+    this.vehicle.braking * 1.35;
 
+// Rolling resistance instead of heavy constant drag
+this.friction = 2.0;
 
-this.friction = 6;
+// Aerodynamic drag
+this.airDrag = 0.12;
 
 
 
@@ -216,9 +219,14 @@ update(dt){
     }
     else{
 
+const drag =
+    this.friction +
+    (this.speed * this.airDrag);
 
-        this.speed -=
-            this.friction * dt;
+this.speed -= drag * dt;
+
+if (this.speed < 0)
+    this.speed = 0;
 
 
         if(this.speed < 0)
