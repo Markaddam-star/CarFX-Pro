@@ -1,3 +1,5 @@
+console.log("✅ content.js loaded");
+
 /**
  * ============================================================
  * CarFX Pro Ultimate
@@ -29,21 +31,30 @@
     // ============================================================
 
 
-    if(!window.CarFXEngine){
-
-        console.error(
-            "❌ CarFXEngine missing"
-        );
-
-        return;
-
-    }
+    console.log(
+    "ENGINE CHECK:",
+    window.CarFXEngine
+);
 
 
+if(!window.CarFXEngine){
 
-window.carFXEngine = new CarFXEngine();
+    console.error(
+        "❌ CarFXEngine missing"
+    );
+
+    return;
+
+}
+
+
+
+window.carFXEngine =
+    new window.CarFXEngine();
+
 
 window.carFXEngine.init();
+
 
 console.log(
     "🚗 CarFX Engine Instance Created"
@@ -51,9 +62,7 @@ console.log(
 
 
 
-    console.log(
-        "🚗 CarFX Engine Instance Created"
-    );
+    
 
 
 
