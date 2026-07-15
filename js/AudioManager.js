@@ -47,6 +47,11 @@ class AudioManager {
 
     init() {
 
+if(this.ctx){
+    console.log("🔊 Audio context already exists");
+    return;
+}
+
     if (this.started) {
         console.log("🔊 Audio already running");
         return;
@@ -90,11 +95,18 @@ class AudioManager {
             this.master.connect(this.ctx.destination);
 
 
-if(!this.engineStarted){
+try{
 
     this.engineOsc.start();
-
     this.engineStarted = true;
+
+}
+catch(e){
+
+    console.warn(
+        "Oscillator already started",
+        e
+    );
 
 }
 
