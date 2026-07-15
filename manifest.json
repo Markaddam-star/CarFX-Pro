@@ -33,38 +33,39 @@
       "matches": [
         "<all_urls>"
       ],
-   
- "js": [
-  "js/VehicleFactory.js",
-  "js/CarRenderer.js",
 
-  "js/Background.js",
-  "js/Road.js",
+      "js": [
+        "js/VehicleFactory.js",
+        "js/CarRenderer.js",
 
-  "js/car.js",
+        "js/Background.js",
+        "js/Road.js",
 
-  "js/InputManager.js",
+        "js/car.js",
 
-  "js/WantedSystem.js",
+        "js/InputManager.js",
 
-  "js/ParticleSystem.js",
-  "js/CollisionManager.js",
+        "js/WantedSystem.js",
 
-  "js/TrafficCar.js",
-  "js/TrafficManager.js",
+        "js/ParticleSystem.js",
+        "js/CollisionManager.js",
 
-  "js/PoliceCar.js",
-  "js/PoliceManager.js",
+        "js/TrafficCar.js",
+        "js/TrafficManager.js",
 
-  "js/RoadblockManager.js",
+        "js/PoliceCar.js",
+        "js/PoliceManager.js",
 
-  "js/HUD.js",
-  "js/AudioManager.js",
+        "js/RoadblockManager.js",
 
-  "js/engine.js",
+        "js/HUD.js",
+        "js/AudioManager.js",
 
-  "content.js"
-],
+        "js/engine.js",
+
+        "content.js"
+      ],
+
       "run_at": "document_idle"
     }
   ]
