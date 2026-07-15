@@ -1,18 +1,38 @@
 /**
  * ============================================================
  * CarFX Pro Ultimate
- * CollisionManager.js v2.1
  *
- * GTA Physics Collision Engine
- * Traffic AI Integration
+ * CollisionManager.js v3.1 CLEAN FINAL
  *
- * PART 1 / 2
+ * GTA STYLE COLLISION SYSTEM
+ *
+ * RESPONSIBILITY:
+ *
+ * ✔ Detect collisions
+ * ✔ Trigger crash events
+ * ✔ Damage events
+ * ✔ Panic reactions
+ * ✔ Crash effects
+ *
+ * DOES NOT:
+ *
+ * ✘ Physics
+ * ✘ Movement
+ * ✘ AI
+ *
+ * Compatible:
+ *
+ * ✔ PlayerCar v2.2
+ * ✔ TrafficCar v3.1
+ * ✔ TrafficManager v3.0
+ * ✔ Engine v2.5
+ *
  * ============================================================
  */
 
 
 console.log(
-    "💥 CollisionManager v2.1 START"
+    "💥 CollisionManager v3.1 CLEAN START"
 );
 
 
@@ -20,182 +40,429 @@ console.log(
 class CollisionManager {
 
 
-    constructor(
-        player,
-        trafficManager,
-        particles
+constructor(
+    player,
+    trafficManager
+){
+
+
+    this.player =
+        player;
+
+
+    this.trafficManager =
+        trafficManager;
+
+
+
+    this.enabled =
+        true;
+
+    this.cooldowns =
+    new Map();
+
+// =====================================
+// GLOBAL COOLDOWN STORAGE
+// =====================================
+
+this.cooldowns =
+    new Map();
+
+
+    this.playerRadius =
+        35;
+
+
+    this.carRadius =
+        30;
+
+
+
+    console.log(
+        "💥 CollisionManager v3.1 READY"
+    );
+
+
+}
+
+
+
+// ============================================================
+// MAIN UPDATE
+// ============================================================
+
+update(dt){
+
+
+    if(
+        !this.enabled
+    )
+        return;
+
+
+
+    this.updateCooldowns(dt);
+
+
+
+    if(
+        !this.player
+    )
+        return;
+
+
+
+    this.checkPlayerTraffic();
+
+
+    this.checkTrafficTraffic();
+
+
+}
+
+
+
+
+
+// ============================================================
+// PLAYER VS TRAFFIC
+// ============================================================
+
+checkPlayerTraffic(){
+
+
+    if(
+        !this.trafficManager
+    )
+        return;
+
+
+
+    const cars =
+        this.trafficManager.getCars();
+
+
+
+    for(
+        const car of cars
     ){
 
 
-        this.player =
-            player;
-
-
-        this.trafficManager =
-            trafficManager;
-
-
-        this.particles =
-            particles;
+        if(
+            !car ||
+            car.destroyed
+        )
+            continue;
 
 
 
-
-        // =========================
-        // PHYSICS SETTINGS
-        // =========================
-
-
-        this.cooldown = 0;
-
-
-        this.restitution =
-            0.35;
+        if(
+            this.hitTest(
+                this.player,
+                car
+            )
+        ){
 
 
-        this.playerMass =
-            1.25;
+            this.triggerCrash(
+                this.player,
+                car,
+                "player"
+            );
 
 
-        this.trafficMass =
-            1.0;
-
-
-        this.maxKnockback =
-            60;
-
-
-        this.minImpactSpeed =
-            25;
-
-
-
-        this.sideMultiplier =
-            1.35;
-
-
-        this.frontMultiplier =
-            1.0;
-
-
-
-        // =========================
-        // CRASH CONTROL
-        // =========================
-
-
-        this.lastCrash = 0;
-
-
-        this.crashDelay =
-            0.18;
-
-
-        this.totalCrashes =
-            0;
-
-
-this.carCooldown =
-    0.8;
-
-        console.log(
-            "💥 CollisionManager v2.1 Loaded"
-        );
+        }
 
 
     }
 
 
+}
 
 
 
 
-    // ========================================================
-    // UPDATE
-    // ========================================================
+
+// ============================================================
+// TRAFFIC VS TRAFFIC
+// ============================================================
+
+checkTrafficTraffic(){
 
 
-    update(dt){
+    if(
+        !this.trafficManager
+    )
+        return;
+
+
+
+    const cars =
+        this.trafficManager.getCars();
+
+
+
+    for(
+        let i=0;
+        i<cars.length;
+        i++
+    ){
+
+
+        const a =
+            cars[i];
 
 
 
         if(
-            !this.player ||
-            !this.trafficManager
-        ){
-
-            return;
-
-        }
-
-
-
-        this.cooldown -= dt;
+            !a ||
+            a.destroyed
+        )
+            continue;
 
 
 
         for(
-            const car of
-            this.trafficManager.cars
+            let j=i+1;
+            j<cars.length;
+            j++
         ){
 
-if(car.collisionCooldown > 0){
 
-    car.collisionCooldown -= dt;
-
-}
-
-            const result =
-                this.detectCollision(
-                    car
-                );
+            const b =
+                cars[j];
 
 
 
             if(
-                !result.hit
+                !b ||
+                b.destroyed
+            )
+                continue;
+
+
+
+            if(
+                this.hitTest(
+                    a,
+                    b
+                )
             ){
 
-                continue;
+
+                
+
 
             }
 
 
+        }
 
 
-          if(
-    this.cooldown > 0 ||
-    car.collisionCooldown > 0
+    }
+
+
+}
+// ============================================================
+// RECTANGLE COLLISION TEST
+// ============================================================
+
+hitTest(
+    a,
+    b
 ){
 
-    continue;
+
+    const aw =
+        a.width || 40;
+
+
+    const ah =
+        a.height || 70;
+
+
+
+    const bw =
+        b.width || 40;
+
+
+    const bh =
+        b.height || 70;
+
+
+
+    return (
+
+        a.x <
+        b.x + bw &&
+
+
+        a.x + aw >
+        b.x &&
+
+
+        a.y <
+        b.y + bh &&
+
+
+        a.y + ah >
+        b.y
+
+    );
+
 
 }
 
 
 
 
-            this.resolveOverlap(
-                car,
-                result
-            );
+
+// ============================================================
+// IMPACT DIRECTION
+// ============================================================
+
+getImpactDirection(
+    a,
+    b
+){
+
+
+    const dx =
+        b.x - a.x;
+
+
+
+    const dy =
+        b.y - a.y;
+
+
+
+    if(
+        Math.abs(dx) >
+        Math.abs(dy)
+    ){
+
+
+        return dx > 0 ?
+        "right" :
+        "left";
+
+
+    }
+
+
+
+    return dy > 0 ?
+    "front" :
+    "rear";
+
+
+}
 
 
 
 
-            this.crash(
-                car,
-                result
-            );
+
+// ============================================================
+// CREATE COLLISION COOLDOWN
+// ============================================================
+
+createCooldown(
+    a,
+    b
+){
+
+    if(!a || !b)
+        return;
+
+
+    if(!a._collisionData)
+        a._collisionData = [];
+
+
+    a._collisionData.push({
+
+        target:b,
+
+        time:0.5
+
+    });
+
+}
 
 
 
 
-            this.cooldown =
-                this.crashDelay;
+// ============================================================
+// GLOBAL COOLDOWN
+// ============================================================
 
-car.collisionCooldown =
-    this.carCooldown;
+setCooldown(
+    a,
+    b
+){
+
+    if(
+        !a ||
+        !b
+    )
+        return;
+
+
+
+    if(
+        !this.cooldowns
+    ){
+
+        this.cooldowns =
+            new Map();
+
+    }
+
+
+
+    const key =
+        a + "_" + b;
+
+
+
+    this.cooldowns.set(
+        key,
+        performance.now()
+    );
+
+
+}
+
+// ============================================================
+// CHECK COOLDOWN
+// ============================================================
+
+isOnCooldown(
+    a,
+    b
+){
+
+
+    if(
+        !a ||
+        !a._collisionData
+    )
+        return false;
+
+
+
+    for(
+        const hit of a._collisionData
+    ){
+
+
+        if(
+            hit.target === b &&
+            hit.time > 0
+        ){
+
+            return true;
 
         }
 
@@ -204,783 +471,632 @@ car.collisionCooldown =
 
 
 
+    return false;
+
+
+}
 
 
 
 
-    // ========================================================
-    // COLLISION DETECTION
-    // ========================================================
+
+// ============================================================
+// UPDATE COOLDOWN TIMER
+// ============================================================
+
+updateCooldowns(dt){
 
 
-    detectCollision(car){
-
-
-
-        const p =
-            this.player;
-
-
-
-        const pLeft =
-            p.x;
-
-
-        const pRight =
-            p.x +
-            p.width;
+    if(
+        !this.trafficManager
+    )
+        return;
 
 
 
-        const pTop =
-            p.y;
-
-
-        const pBottom =
-            p.y +
-            p.height;
+    const cars =
+        this.trafficManager.getCars();
 
 
 
-
-        const cLeft =
-            car.x;
-
-
-        const cRight =
-            car.x +
-            car.width;
-
-
-
-        const cTop =
-            car.y;
-
-
-
-        const cBottom =
-            car.y +
-            car.height;
-
-
-
-
+    for(
+        const car of cars
+    ){
 
 
         if(
+            !car ||
+            !car._collisionData
+        )
+            continue;
 
-            pRight <= cLeft ||
 
-            pLeft >= cRight ||
 
-            pBottom <= cTop ||
+        for(
+            let i =
+            car._collisionData.length-1;
 
-            pTop >= cBottom
+            i>=0;
 
+            i--
         ){
 
-            return {
-                hit:false
-            };
+
+            const hit =
+                car._collisionData[i];
+
+
+
+            hit.time -= dt;
+
+
+
+            if(
+                hit.time <= 0
+            ){
+
+                car._collisionData.splice(
+                    i,
+                    1
+                );
+
+            }
+
 
         }
 
 
+    }
 
 
-
-        const overlapX =
-
-            Math.min(
-                pRight,
-                cRight
-            )
-
-            -
-
-            Math.max(
-                pLeft,
-                cLeft
-            );
+}
 
 
 
 
-        const overlapY =
 
-            Math.min(
-                pBottom,
-                cBottom
-            )
+// ============================================================
+// FINAL CRASH EVENT
+// ============================================================
 
-            -
-
-            Math.max(
-                pTop,
-                cTop
-            );
+triggerCrash(
+    a,
+    b,
+    type="unknown"
+){
 
 
+    if(
+        this.isOnCooldown(
+            a,
+            b
+        )
+    )
+        return;
 
+
+
+    this.createCooldown(
+        a,
+        b
+    );
+
+
+
+    const directionA =
+        this.getImpactDirection(
+            a,
+            b
+        );
+
+
+
+    const directionB =
+        this.getImpactDirection(
+            b,
+            a
+        );
+
+
+
+
+
+    // =========================
+    // CRASH
+    // =========================
+
+    if(
+        a &&
+        a.crash
+    ){
+
+        a.crash(
+            directionA
+        );
+
+    }
+
+
+
+    if(
+        b &&
+        b.crash
+    ){
+
+        b.crash(
+            directionB
+        );
+
+    }
+
+
+
+
+
+    // =========================
+    // DAMAGE
+    // =========================
+
+    if(
+        a &&
+        a.applyDamage
+    ){
+
+        a.applyDamage(
+            25
+        );
+
+    }
+
+
+
+    if(
+        b &&
+        b.applyDamage
+    ){
+
+        b.applyDamage(
+            25
+        );
+
+    }
+
+
+
+
+    // =========================
+    // EFFECTS
+    // =========================
+
+    this.createCrashEffect(a);
+
+
+    this.createCrashEffect(b);
+
+
+
+
+    // =========================
+    // PANIC CHAIN
+    // =========================
+
+    this.triggerCrashChain(
+        a
+    );
+
+
+
+
+    // =========================
+    // MANAGER EVENT
+    // =========================
+
+    if(
+        this.trafficManager &&
+        this.trafficManager.onCrashEvent
+    ){
+
+        this.trafficManager.onCrashEvent(
+            a,
+            b
+        );
+
+    }
+
+
+
+}
+// ============================================================
+// PARTICLE / EFFECT HOOKS
+// ============================================================
+
+createCrashEffect(car){
+
+    if(!car)
+        return;
+
+
+    if(
+        !this.trafficManager ||
+        !this.trafficManager.particles
+    )
+        return;
+
+
+    const particles =
+        this.trafficManager.particles;
+
+
+
+    if(
+        particles.createCrash
+    ){
+
+        particles.createCrash(
+            car.x + car.width/2,
+            car.y + car.height/2
+        );
+
+    }
+
+
+
+    if(
+        particles.smoke
+    ){
+
+        particles.smoke(
+            car.x + car.width/2,
+            car.y + car.height/2
+        );
+
+    }
+
+
+}
+
+
+
+// ============================================================
+// DAMAGE SYSTEM HOOK
+// ============================================================
+
+applyDamage(car, amount){
+
+    if(
+        !car
+    )
+        return;
+
+
+
+    if(
+        typeof car.applyDamage === "function"
+    ){
+
+        car.applyDamage(
+            amount
+        );
+
+    }
+
+
+}
+
+
+
+// ============================================================
+// CRASH EVENT HANDLER
+// ============================================================
+
+triggerCrash(
+    a,
+    b,
+    type="traffic"
+){
+
+
+    if(
+        !a ||
+        !b
+    )
+        return;
+
+
+
+    if(
+        this.isOnCooldown(
+            a,
+            b
+        )
+    )
+        return;
+
+
+
+    this.createCooldown(
+    a,
+    b
+);
+
+
+
+    const direction =
+        this.getImpactDirection(
+            a,
+            b
+        );
+
+
+
+    // =========================
+    // CRASH CALLBACK
+    // =========================
+
+
+    if(
+        typeof a.crash === "function"
+    ){
+
+        a.crash(
+            direction
+        );
+
+    }
+
+
+
+    if(
+        typeof b.crash === "function"
+    ){
+
+        b.crash(
+            direction
+        );
+
+    }
+
+
+
+    // =========================
+    // DAMAGE
+    // =========================
+
+
+    this.applyDamage(
+        a,
+        35
+    );
+
+
+    this.applyDamage(
+        b,
+        35
+    );
+
+
+
+    // =========================
+    // EFFECTS
+    // =========================
+
+
+    this.createCrashEffect(
+        a
+    );
+
+
+    this.createCrashEffect(
+        b
+    );
+
+
+
+    // =========================
+    // PANIC CHAIN
+    // =========================
+
+
+    this.triggerPanicChain(
+        a
+    );
+
+
+    this.triggerPanicChain(
+        b
+    );
+
+
+
+    // =========================
+    // MANAGER EVENT
+    // =========================
+
+
+    if(
+        this.trafficManager &&
+        typeof this.trafficManager.onCrashEvent === "function"
+    ){
+
+        this.trafficManager.onCrashEvent(
+            a,
+            b,
+            type
+        );
+
+    }
+
+
+
+    console.log(
+        "💥 Collision Event",
+        type
+    );
+
+
+}
+
+
+
+
+
+// ============================================================
+// PANIC CHAIN
+// ============================================================
+
+triggerPanicChain(source){
+
+
+    if(
+        !this.trafficManager
+    )
+        return;
+
+
+
+    const cars =
+        this.trafficManager.getCars();
+
+
+
+    for(
+        const car of cars
+    ){
+
+
+        if(
+            !car ||
+            car === source ||
+            car.crashed ||
+            car.destroyed
+        )
+            continue;
 
 
 
         const dx =
-
-            (
-                p.x +
-                p.width/2
-            )
-
-            -
-
-            (
-                car.x +
-                car.width/2
-            );
-
-
+            car.x -
+            source.x;
 
 
 
         const dy =
+            car.y -
+            source.y;
 
-            (
-                p.y +
-                p.height/2
-            )
 
-            -
 
-            (
-                car.y +
-                car.height/2
-            );
-
-
-
-
-
-
-        let normalX = 0;
-
-        let normalY = 0;
-
-
-        let type =
-            "front";
-
-
-
-
-
-        if(
-            overlapX <
-            overlapY
-        ){
-
-
-            normalX =
-                dx > 0
-                ? 1
-                : -1;
-
-
-
-            type =
-                "side";
-
-
-        }
-        else{
-
-
-            normalY =
-                dy > 0
-                ? 1
-                : -1;
-
-
-
-
-            type =
-
-                dy > 0
-                ?
-
-                "rear"
-
-                :
-
-                "front";
-
-
-        }
-
-
-
-
-
-
-        const impact =
-
-            Math.abs(
-
-                this.player.speed -
-
-                car.speed
-
-            );
-
-
-
-
-
-        return {
-
-
-            hit:true,
-
-
-            overlapX,
-
-
-            overlapY,
-
-
-            normalX,
-
-
-            normalY,
-
-
-            impact,
-
-
-            type
-
-
-        };
-}
-            // ========================================================
-    // IMPACT CALCULATION
-    // ========================================================
-
-
-    calculateImpact(result){
-
-
-        let force =
-            Math.max(
-                this.minImpactSpeed,
-                result.impact
+        const distance =
+            Math.sqrt(
+                dx*dx +
+                dy*dy
             );
 
 
 
         if(
-            result.type ===
-            "side"
+            distance < 220 &&
+            typeof car.panic === "function"
         ){
 
-
-            force *=
-                this.sideMultiplier;
-
-
-        }
-        else{
-
-
-            force *=
-                this.frontMultiplier;
-
-
-        }
-
-
-
-        return force;
-
-
-    }
-
-
-
-
-
-
-    // ========================================================
-    // OVERLAP SOLVER
-    // ========================================================
-
-
-    resolveOverlap(
-        car,
-        result
-    ){
-
-
-        if(
-            result.overlapX <
-            result.overlapY
-        ){
-
-
-
-            const move =
-                result.overlapX *
-                0.55;
-
-
-
-            this.player.x +=
-
-                move *
-                result.normalX;
-
-
-
-            car.x -=
-
-                move *
-                result.normalX;
-
-
-
-        }
-        else{
-
-
-            const move =
-
-                result.overlapY *
-                0.5;
-
-
-
-            car.y +=
-                move;
-
-
+            car.panic();
 
         }
 
 
     }
-
-
-
-
-
-
-
-
-    // ========================================================
-    // KNOCKBACK PHYSICS
-    // ========================================================
-
-
-    applyKnockback(
-        car,
-        result,
-        force
-    ){
-
-
-
-        const push =
-
-            Math.min(
-
-                this.maxKnockback,
-
-                force *
-                0.18
-
-            );
-
-
-
-
-        if(
-            result.type ===
-            "side"
-        ){
-
-
-
-            this.player.x +=
-
-                result.normalX *
-                push;
-
-
-
-
-            car.x -=
-
-                result.normalX *
-                push *
-                0.65;
-
-
-
-        }
-        else{
-
-
-            this.player.speed *=
-                0.45;
-
-
-
-
-            car.speed *=
-                0.55;
-
-
-
-
-            car.y +=
-
-                push *
-                0.45;
-
-
-
-        }
-
-
-
-
-        this.player.motionBlur =
-            0;
-
-
-
-    }
-
-
-
-
-
-
-
-    // ========================================================
-    // CRASH FX
-    // ========================================================
-
-
-    spawnCrashFX(
-        x,
-        y,
-        force
-    ){
-
-
-
-        if(
-            !this.particles
-        )
-            return;
-
-
-
-
-
-        const power =
-
-            Math.min(
-
-                5,
-
-                Math.max(
-
-                    1,
-
-                    force / 70
-
-                )
-
-            );
-
-
-
-
-
-        this.particles.sparks?.(
-            x,
-            y
-        );
-
-
-
-        this.particles.smoke?.(
-            x,
-            y,
-            power
-        );
-
-
-
-        this.particles.debris?.(
-            x,
-            y
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-
-    // ========================================================
-    // MAIN CRASH EVENT
-    // ========================================================
-
-
-    crash(
-        car,
-        result
-    ){
-
-
-
-        console.log(
-            "💥 GTA CRASH EVENT",
-            result.type
-        );
-
-
-
-
-
-        const force =
-
-            this.calculateImpact(
-                result
-            );
-
-
-
-
-
-
-        this.applyKnockback(
-            car,
-            result,
-            force
-        );
-
-
-
-
-
-
-        // TrafficCar damage
-
-        if(
-            typeof car.hit ===
-            "function"
-        ){
-
-
-            car.hit(
-                force
-            );
-
-
-        }
-
-
-
-
-
-
-        // TrafficCar v2.4 crash physics
-
-        if(
-            typeof car.crash ===
-            "function"
-        ){
-
-
-            car.crash(
-                force / 50
-            );
-
-
-        }
-
-
-
-
-
-
-
-        // TrafficManager panic chain
-
-        if(
-
-            this.trafficManager &&
-
-            typeof
-            this.trafficManager
-            .onCrashEvent
-            ===
-            "function"
-
-        ){
-
-
-
-            this.trafficManager
-            .onCrashEvent(
-
-                car,
-
-                force / 50
-
-            );
-
-
-
-        }
-
-
-
-
-
-
-
-        this.spawnCrashFX(
-
-            car.x +
-            car.width / 2,
-
-
-            car.y +
-            car.height / 2,
-
-
-            force
-
-
-        );
-
-
-
-
-
-        this.totalCrashes++;
-
-
-
-    }
-
-
-
-
-
-
-
-
-    // ========================================================
-    // LANE SAFETY
-    // ========================================================
-
-
-    canEnterLane(
-        lane
-    ){
-
-
-
-        if(
-            !this.trafficManager
-        )
-            return true;
-
-
-
-
-
-        for(
-            const car of
-            this.trafficManager.cars
-        ){
-
-
-
-            if(
-                Math.round(car.lane)
-                !== lane
-            )
-                continue;
-
-
-
-
-
-            const distance =
-
-                Math.abs(
-
-                    car.y -
-                    this.player.y
-
-                );
-
-
-
-
-
-
-            if(
-
-                distance < 120 &&
-
-                car.speed <
-                this.player.speed + 30
-
-            ){
-
-
-
-                return false;
-
-
-
-            }
-
-
-
-        }
-
-
-
-
-
-        return true;
-
-
-
-    }
-
-
 
 
 }
 
 
 
+// ============================================================
+// RESET
+// ============================================================
 
+reset(){
+
+    if(
+        !this.trafficManager
+    )
+        return;
+
+
+    const cars =
+        this.trafficManager.getCars();
+
+
+    for(
+        const car of cars
+    ){
+
+        if(
+            car &&
+            car.reset
+        ){
+
+            car.reset();
+
+        }
+
+    }
+
+}
+
+
+
+// ============================================================
+// DEBUG
+// ============================================================
+
+debug(){
+
+    return {
+
+        enabled:
+            this.enabled,
+
+
+        cooldowns:
+            this.cooldowns.size,
+
+
+        cars:
+            this.trafficManager ?
+            this.trafficManager.getCars().length :
+            0,
+
+
+        player:
+            !!this.player
+
+
+    };
+
+
+}
+
+
+
+// ============================================================
+// ENABLE / DISABLE
+// ============================================================
+
+setEnabled(state){
+
+    this.enabled =
+        state;
+
+}
+
+
+
+// ============================================================
+// CLASS END
+// ============================================================
+
+}
 
 
 window.CollisionManager =
@@ -988,9 +1104,6 @@ window.CollisionManager =
 
 
 
-
-
 console.log(
-    "✅ CollisionManager v2.1 Ready"
+    "💥 CollisionManager v3.1 FINAL HYBRID LOADED"
 );
-
